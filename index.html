@@ -14,45 +14,57 @@
         <div class="intro-content">
             <div class="breaking-banner">BREAKING NEWS</div>
             <h1 class="main-title">DECISION <span class="highlight">2028</span></h1>
-            <p class="subtitle" id="scenario-text">Loading Scenario...</p>
-            <button class="start-btn" onclick="app.goToScreen('candidate-screen')">START CAMPAIGN</button>
+            <p class="subtitle">The race for the White House begins now.</p>
+            <button class="start-btn" onclick="app.goToScreen('party-screen')">BEGIN CAMPAIGN</button>
+        </div>
+    </section>
+
+    <section id="party-screen" class="screen">
+        <header class="news-header">
+            <div class="logo">DECISION <span class="red-text">2028</span></div>
+            <div class="ticker-wrap">
+                <div class="ticker-move">ELECTION ALERT: Primary season kicks off... Parties scramble to define platforms... Voter turnout expected to reach record highs...</div>
+            </div>
+        </header>
+        <div class="panel-container">
+            <h2 class="section-title">SELECT YOUR PARTY</h2>
+            <div class="cards-row" id="party-cards">
+                </div>
         </div>
     </section>
 
     <section id="candidate-screen" class="screen">
         <header class="news-header">
             <div class="logo">DECISION <span class="red-text">2028</span></div>
-            <div class="ticker-wrap">
-                <div class="ticker-move">
-                    Breaking: Primaries heat up as candidates announce bids... Analysts predict tightest race in decades... Rust belt remains key battleground...
-                </div>
-            </div>
         </header>
-        
         <div class="panel-container">
-            <h2 class="section-title">CHOOSE YOUR NOMINEE</h2>
+            <h2 class="section-title">SELECT PRESIDENTIAL NOMINEE</h2>
             <div class="cards-row" id="candidate-cards">
                 </div>
-            
-            <div id="stance-editor" class="hidden">
-                <div class="stance-box">
-                    <h3>Platform Strategy</h3>
-                    <p>Adjust your starting positions. (Impacts base turnout)</p>
-                    <div class="sliders-grid" id="stance-sliders"></div>
-                    <button class="next-btn" onclick="app.startGame()">ACCEPT NOMINATION</button>
+            <button class="back-btn" onclick="app.goToScreen('party-screen')">&larr; BACK TO PARTIES</button>
+        </div>
+    </section>
+
+    <section id="vp-screen" class="screen">
+        <header class="news-header">
+            <div class="logo">DECISION <span class="red-text">2028</span></div>
+        </header>
+        <div class="panel-container">
+            <h2 class="section-title">SELECT RUNNING MATE</h2>
+            <p class="instruction-text">Your VP choice can deliver a key swing state or boost your funds.</p>
+            <div class="cards-row" id="vp-cards">
                 </div>
-            </div>
         </div>
     </section>
 
     <section id="game-screen" class="screen">
         <header class="hud-header">
             <div class="hud-left">
-                <div class="candidate-badge" id="hud-cand-badge">
-                    <img id="hud-img" src="" alt="">
-                    <div>
-                        <span class="cand-name" id="hud-cand-name">HARRIS</span>
-                        <span class="cand-party">DEMOCRATIC NOMINEE</span>
+                <div class="candidate-badge">
+                    <img id="hud-img" src="" alt="" style="display:none">
+                    <div class="hud-text-col">
+                        <span class="cand-name" id="hud-cand-name">CANDIDATE</span>
+                        <span class="cand-party" id="hud-party-name">NOMINEE</span>
                     </div>
                 </div>
             </div>
@@ -83,7 +95,60 @@
 
         <div class="game-area">
             <div id="map-container">
-                </div>
+                <svg id="us-map-svg" viewBox="0 0 950 600" xmlns="http://www.w3.org/2000/svg">
+                    <path id="HI" d="M 250,550 l 10,5 l -5,10 l -10,-5 z" />
+                    <path id="AK" d="M 50,450 l 100,0 l 20,50 l -100,10 z" />
+                    <path id="FL" d="M 620,380 L 730,390 L 760,490 L 680,480 L 650,400 Z" />
+                    <path id="WA" d="M 130,20 L 210,25 L 205,80 L 135,70 Z" />
+                    <path id="OR" d="M 125,70 L 205,80 L 190,135 L 120,130 Z" />
+                    <path id="CA" d="M 120,130 L 190,135 L 220,250 L 160,280 L 100,180 Z" />
+                    <path id="ID" d="M 210,25 L 250,30 L 240,140 L 205,140 L 205,80 Z" />
+                    <path id="NV" d="M 190,135 L 240,140 L 250,230 L 220,250 Z" />
+                    <path id="UT" d="M 240,140 L 290,145 L 290,210 L 250,210 L 250,230 L 240,140 Z" />
+                    <path id="AZ" d="M 220,250 L 250,230 L 290,235 L 280,330 L 210,310 Z" />
+                    <path id="MT" d="M 250,30 L 400,40 L 390,110 L 240,100 L 240,140 L 250,30 Z" />
+                    <path id="WY" d="M 290,110 L 380,115 L 380,180 L 290,175 Z" />
+                    <path id="CO" d="M 290,175 L 380,180 L 380,245 L 290,240 Z" />
+                    <path id="NM" d="M 290,240 L 370,245 L 370,330 L 280,330 L 290,235 Z" />
+                    <path id="ND" d="M 390,40 L 470,45 L 470,90 L 390,90 Z" />
+                    <path id="SD" d="M 390,90 L 470,90 L 475,140 L 380,140 L 380,115 Z" />
+                    <path id="NE" d="M 380,140 L 475,140 L 480,190 L 380,190 L 380,180 Z" />
+                    <path id="KS" d="M 380,190 L 490,195 L 495,245 L 380,245 L 380,245 Z" />
+                    <path id="OK" d="M 370,245 L 495,245 L 495,290 L 400,290 L 400,260 L 370,260 Z" />
+                    <path id="TX" d="M 370,260 L 400,260 L 400,290 L 510,300 L 520,400 L 440,480 L 380,420 L 330,350 Z" />
+                    <path id="MN" d="M 470,45 L 530,50 L 510,120 L 470,120 Z" />
+                    <path id="IA" d="M 470,120 L 530,120 L 540,160 L 480,160 L 475,140 Z" />
+                    <path id="MO" d="M 480,160 L 560,160 L 560,230 L 500,230 L 495,245 L 490,195 Z" />
+                    <path id="AR" d="M 495,245 L 560,245 L 550,300 L 510,300 L 495,290 Z" />
+                    <path id="LA" d="M 510,300 L 550,300 L 560,350 L 580,380 L 530,390 L 510,340 Z" />
+                    <path id="WI" d="M 530,50 L 580,60 L 580,130 L 530,120 Z" />
+                    <path id="IL" d="M 530,120 L 580,130 L 580,210 L 540,220 L 540,160 Z" />
+                    <path id="MS" d="M 550,300 L 590,300 L 580,380 L 560,350 Z" />
+                    <path id="MI" d="M 580,60 L 650,70 L 640,150 L 580,130 Z" />
+                    <path id="IN" d="M 580,130 L 630,135 L 620,200 L 580,210 Z" />
+                    <path id="KY" d="M 540,220 L 620,200 L 680,210 L 660,250 L 560,230 Z" />
+                    <path id="TN" d="M 560,230 L 660,250 L 640,280 L 550,260 L 560,245 Z" />
+                    <path id="AL" d="M 590,300 L 630,300 L 620,380 L 580,380 Z" />
+                    <path id="OH" d="M 630,135 L 680,130 L 690,190 L 620,200 Z" />
+                    <path id="GA" d="M 630,300 L 680,310 L 680,380 L 620,380 Z" />
+                    <path id="NY" d="M 690,70 L 770,60 L 770,120 L 720,130 L 690,120 Z" />
+                    <path id="PA" d="M 690,120 L 760,125 L 750,170 L 690,160 Z" />
+                    <path id="WV" d="M 660,190 L 710,180 L 720,210 L 680,210 Z" />
+                    <path id="VA" d="M 680,210 L 760,200 L 770,250 L 680,250 L 660,250 Z" />
+                    <path id="NC" d="M 640,280 L 750,260 L 780,300 L 680,310 Z" />
+                    <path id="SC" d="M 680,310 L 780,300 L 760,350 L 680,350 Z" />
+                    <path id="ME" d="M 790,30 L 840,40 L 830,90 L 790,80 Z" />
+                    <path id="NH" d="M 790,60 L 810,65 L 800,105 L 790,100 Z" />
+                    <path id="VT" d="M 770,60 L 790,60 L 790,100 L 770,100 Z" />
+                    <path id="MA" d="M 770,100 L 820,100 L 820,115 L 770,115 Z" />
+                    <path id="RI" d="M 800,115 L 820,115 L 820,125 L 800,125 Z" />
+                    <path id="CT" d="M 770,115 L 800,115 L 800,125 L 770,125 Z" />
+                    <path id="NJ" d="M 760,125 L 775,125 L 775,160 L 760,160 Z" />
+                    <path id="DE" d="M 750,170 L 770,170 L 770,190 L 750,185 Z" />
+                    <path id="MD" d="M 720,170 L 750,170 L 750,200 L 720,190 Z" />
+                    <path id="DC" d="M 750,200 L 760,200 L 760,210 L 750,210 Z" />
+                </svg>
+            </div>
 
             <aside id="sidebar">
                 <div id="state-panel" class="hidden">
@@ -91,7 +156,6 @@
                         <h2 id="sp-name">STATE</h2>
                         <span class="ev-badge" id="sp-ev">0 EV</span>
                     </div>
-
                     <div class="poll-vis">
                         <div class="poll-bar-wrap">
                             <div class="poll-dem" id="poll-dem-bar" style="width:50%"></div>
@@ -104,35 +168,25 @@
                         </div>
                         <div class="poll-moe" id="sp-moe">MOE: ±3.4%</div>
                     </div>
-
                     <div class="action-menu">
                         <h4>CAMPAIGN ACTIONS <span id="action-points">3/3 LEFT</span></h4>
-                        
                         <div class="action-row">
                             <select id="issue-select"></select>
-                            <button class="btn-action" onclick="app.runStateAd()">
-                                STATE AD BLITZ <span class="cost">$500k</span>
-                            </button>
+                            <button class="btn-action" onclick="app.runStateAd()">STATE AD BLITZ <span class="cost">$500k</span></button>
                         </div>
-                        
                         <div class="action-row">
-                            <button class="btn-action purple" onclick="app.runNationalAd()">
-                                NATIONAL AD BUY <span class="cost">$2.5M</span>
-                            </button>
+                            <button class="btn-action purple" onclick="app.runNationalAd()">NATIONAL AD BUY <span class="cost">$2.5M</span></button>
                         </div>
                     </div>
-
                     <div class="issues-list">
                         <h4>TOP ISSUES</h4>
                         <div id="sp-issues-list"></div>
                     </div>
                 </div>
-
                 <div id="empty-msg">
                     <div class="empty-icon">Select a State</div>
-                    <p>View polling data, issue priorities, and launch targeted ad campaigns.</p>
+                    <p>Click the map to view polling and campaign.</p>
                 </div>
-                
                 <div id="log-feed">
                     <h4>CAMPAIGN LOG</h4>
                     <div id="log-content"></div>
@@ -140,19 +194,6 @@
             </aside>
         </div>
     </section>
-
-    <div id="modal-overlay" class="hidden">
-        <div class="modal-box" id="debate-modal">
-            <div class="breaking-banner">SPECIAL REPORT</div>
-            <h2>PRESIDENTIAL DEBATE</h2>
-            <p id="debate-text">The candidates take the stage tonight in Philadelphia...</p>
-            <div class="debate-choices">
-                <button onclick="app.resolveDebate('attack')">ATTACK RECORD (High Risk/Reward)</button>
-                <button onclick="app.resolveDebate('policy')">FOCUS ON POLICY (Safe)</button>
-                <button onclick="app.resolveDebate('gaffe')">STAY SILENT (Avoid Gaffes)</button>
-            </div>
-        </div>
-    </div>
 
     <div id="toast"></div>
     <script src="script.js"></script>
