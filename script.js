@@ -62,7 +62,10 @@ const app = {
 
     init: function() {
         console.log("App Initializing...");
+        // Deep copy state data
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
+        
+        // Add random flavor data
         for(let s in this.data.states) {
             this.data.states[s].moe = (Math.random() * 2 + 2).toFixed(1);
             this.data.states[s].priorities = {};
@@ -108,18 +111,15 @@ const app = {
         const container = document.getElementById('candidate-cards');
         container.innerHTML = "";
         
-        // Filter by party
         const filtered = CANDIDATES.filter(c => c.party === partyKey);
-        
         if(filtered.length === 0) {
-            container.innerHTML = "<p>No candidates available for this party in the demo.</p>";
+            container.innerHTML = "<p>No candidates available.</p>";
             return;
         }
 
         filtered.forEach(c => {
             const el = document.createElement('div');
             el.className = 'card';
-            // Image handling with fallback
             const imgHTML = c.img ? `<img src="${c.img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : "";
             el.innerHTML = `
                 <div class="portrait">
@@ -160,9 +160,10 @@ const app = {
             `;
             el.onclick = () => {
                 this.data.vp = v;
-                // Apply VP Buff immediately
+                // VP Home State Buff
                 if(this.data.states[v.state]) {
-                    this.data.states[v.state].poll += 5; // Home state boost
+                    if(partyKey === 'D') this.data.states[v.state].poll += 5;
+                    else this.data.states[v.state].poll -= 5;
                 }
                 this.startGame();
             };
@@ -177,35 +178,54 @@ const app = {
         });
     },
 
+    /* --- MAIN GAME START --- */
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
         this.goToScreen('game-screen');
         
-        // Setup HUD
+        // --- 1. SET HUD VISUALS ---
         const img = document.getElementById('hud-img');
         if(this.data.candidate.img) {
             img.src = this.data.candidate.img;
             img.style.display = "block";
         }
+        
+        // Party-based Styling
+        const pKey = this.data.selectedParty;
+        const pName = PARTIES[pKey].name;
+        
+        // Set Border Color
+        img.className = `hud-border-${pKey}`; 
+        
+        // Set Text
         document.getElementById('hud-cand-name').innerText = this.data.candidate.name.toUpperCase();
-        document.getElementById('hud-party-name').innerText = PARTIES[this.data.selectedParty].name.toUpperCase() + " NOMINEE";
+        document.getElementById('hud-party-name').innerText = pName.toUpperCase() + " NOMINEE";
         
         this.updateHUD();
+        
+        // Init Map Interactions
         this.initMap();
-        this.log("Campaign started.");
+        
+        this.log(`Campaign started as ${pName} Party.`);
     },
 
-    /* --- MAP & GAMEPLAY --- */
+    /* --- MAP LOGIC --- */
     initMap: function() {
         const svg = document.getElementById('us-map-svg');
+        
         for(let code in this.data.states) {
             let path = document.getElementById(code);
             if(path) {
+                // Click Interaction
                 path.onclick = () => this.clickState(code);
-                path.onmouseenter = () => path.style.opacity = 0.8;
-                path.onmouseleave = () => path.style.opacity = 1;
-                path.style.cursor = "pointer";
-                path.style.transition = "fill 0.3s";
+                
+                // Tooltip Interaction
+                path.onmousemove = (e) => this.showTooltip(e, code);
+                path.onmouseleave = () => this.hideTooltip();
+                
+                // Reset Visuals
+                path.style.fill = "#333"; // Default before coloring
+                path.style.stroke = "#fff";
             }
         }
         this.colorMap();
@@ -218,21 +238,48 @@ const app = {
             if(!p) continue;
 
             let fill;
+            // D = Blue, R = Red
             if(s.poll > 55) fill = "#0056b3";      // Safe Dem
             else if(s.poll > 50) fill = "#4fa1ff"; // Lean Dem
             else if(s.poll > 45) fill = "#ff6b6b"; // Lean Rep
             else fill = "#d32f2f";                 // Safe Rep
             
-            // Tossup Gray (48-52)
+            // Tossup Zone (Gray)
             if(s.poll >= 48 && s.poll <= 52) fill = "#64748b"; 
 
             p.style.fill = fill;
-            p.style.stroke = "white";
-            p.style.strokeWidth = "1";
         }
         this.updateScore();
     },
 
+    /* --- TOOLTIP LOGIC --- */
+    showTooltip: function(e, code) {
+        const tt = document.getElementById('map-tooltip');
+        const s = this.data.states[code];
+        
+        // Calculate Percentages
+        const dPct = s.poll.toFixed(1);
+        const rPct = (100 - s.poll).toFixed(1);
+        
+        // Set Content
+        tt.innerHTML = `
+            <h4>${s.name}</h4>
+            <div class="tip-row"><span style="color:#4fa1ff">DEM</span> <span>${dPct}%</span></div>
+            <div class="tip-row"><span style="color:#ff6b6b">REP</span> <span>${rPct}%</span></div>
+            <div class="tip-row" style="color:#aaa; font-size:0.7rem; margin-top:5px;">${s.ev} Electoral Votes</div>
+        `;
+        
+        // Position
+        tt.style.display = 'block';
+        tt.style.left = (e.clientX + 15) + 'px';
+        tt.style.top = (e.clientY + 15) + 'px';
+    },
+
+    hideTooltip: function() {
+        document.getElementById('map-tooltip').style.display = 'none';
+    },
+
+    /* --- GAMEPLAY --- */
     clickState: function(code) {
         this.data.selectedState = code;
         const s = this.data.states[code];
@@ -244,6 +291,7 @@ const app = {
         document.getElementById('sp-ev').innerText = s.ev + " EV";
         document.getElementById('sp-moe').innerText = `MOE: ±${s.moe}%`;
 
+        // Update Poll Bars
         const dVal = s.poll.toFixed(1);
         const rVal = (100 - s.poll).toFixed(1);
         document.getElementById('poll-dem-bar').style.width = dVal + "%";
@@ -251,6 +299,7 @@ const app = {
         document.getElementById('poll-dem-val').innerText = dVal + "%";
         document.getElementById('poll-rep-val').innerText = rVal + "%";
 
+        // Issues
         const list = document.getElementById('sp-issues-list');
         list.innerHTML = '';
         ISSUES.sort((a,b) => s.priorities[b.id] - s.priorities[a.id]).slice(0,3).forEach(x => {
@@ -266,21 +315,16 @@ const app = {
         this.data.actionsLeft--;
         
         const s = this.data.states[this.data.selectedState];
-        // If selected party is Dem, add to poll. If Rep, subtract.
         const boost = (Math.random() * 1.5) + 0.5;
         
+        // Apply shift based on party
         if(this.data.selectedParty === 'D') s.poll += boost;
         else if(this.data.selectedParty === 'R') s.poll -= boost;
-        else {
-            // Independent logic: Pull towards 50?
-            if(s.poll > 50) s.poll -= boost; else s.poll += boost;
-        }
-
-        // Clamp
+        
         if(s.poll > 100) s.poll = 100;
         if(s.poll < 0) s.poll = 0;
 
-        this.log(`State Ad in ${s.name}: Poll Shifted`);
+        this.log(`Ad Blitz in ${s.name}.`);
         this.updateHUD();
         this.colorMap();
         this.clickState(this.data.selectedState);
@@ -299,7 +343,7 @@ const app = {
             else if(this.data.selectedParty === 'R') this.data.states[code].poll -= boost;
         }
 
-        this.log("National Ad Buy Complete.");
+        this.log("National Ad Campaign Launched.");
         this.updateHUD();
         this.colorMap();
         if(this.data.selectedState) this.clickState(this.data.selectedState);
@@ -309,31 +353,26 @@ const app = {
         this.data.weeks--;
         this.data.actionsLeft = 3;
         
-        // Opponent Logic (Undo player progress)
+        // Opponent Logic
         for(let code in this.data.states) {
-            // Random fluctuations + "Opponent Attack"
-            let attack = 0;
-            // 30% chance opponent targets a state you are winning
-            if(this.data.selectedParty === 'D' && this.data.states[code].poll > 50 && Math.random() > 0.7) {
-                attack = (Math.random() * 1.5);
-                this.data.states[code].poll -= attack;
-            } else if (this.data.selectedParty === 'R' && this.data.states[code].poll < 50 && Math.random() > 0.7) {
-                 attack = (Math.random() * 1.5);
-                 this.data.states[code].poll += attack;
+            // Random Drift
+            let drift = (Math.random() * 1.0) - 0.5; 
+            this.data.states[code].poll += drift;
+            
+            // Explicit Opponent Attack (Undoing your work)
+            // If you are D, Opponent is R (wants poll < 50)
+            if(this.data.selectedParty === 'D' && Math.random() > 0.8) {
+                this.data.states[code].poll -= 1.2; 
+            } else if(this.data.selectedParty === 'R' && Math.random() > 0.8) {
+                this.data.states[code].poll += 1.2;
             }
-        }
-        
-        // Events
-        if(Math.random() > 0.8) {
-             document.getElementById('modal-overlay').classList.remove('hidden');
-             document.getElementById('event-text').innerText = "Breaking News: Opponent scandal shakes up the polls in swing states!";
         }
 
         this.updateHUD();
         this.colorMap();
         if(this.data.selectedState) this.clickState(this.data.selectedState);
-        this.showToast("New Week Started");
-        this.log("Week Advanced. Polls updated.");
+        this.showToast("Week Advanced.");
+        this.log("New polling data released.");
     },
 
     updateHUD: function() {
