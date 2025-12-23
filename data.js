@@ -1,40 +1,45 @@
-const CANDIDATES = {
-    democrats: [
-        { id: "newsom", name: "Gavin Newsom", home: "CA", cash: 1.2, poll_boost: 0.0 },
-        { id: "whitmer", name: "Gretchen Whitmer", home: "MI", cash: 1.0, poll_boost: 1.0 }, // +Polls
-        { id: "harris", name: "Kamala Harris", home: "CA", cash: 1.3, poll_boost: 0.0 }
-    ],
-    republicans: [
-        { id: "vance", name: "JD Vance", home: "OH", cash: 1.3, poll_boost: 0.5 },
-        { id: "desantis", name: "Ron DeSantis", home: "FL", cash: 1.1, poll_boost: 0.8 },
-        { id: "ramaswamy", name: "Vivek Ramaswamy", home: "OH", cash: 1.5, poll_boost: -0.5 }
-    ]
+// data.js
+
+const SCENARIO_TEXT = "The year is 2028. Following a tumultuous four years, the American electorate is more divided than ever. New faces have emerged from the governors' mansions and the halls of Congress, ready to challenge for the highest office. The map is shifting. Will the Rust Belt hold? Will Texas flip? The world is watching.";
+
+const PARTIES = {
+    D: { name: "Democratic Party", color: "#00AEF3", chair: "Jaime Harrison", chair_img: "https://via.placeholder.com/100?text=Chair", desc: "The oldest active political party in the world, emphasizing social equality and environmental protection." },
+    R: { name: "Republican Party", color: "#E81B23", chair: "Michael Whatley", chair_img: "https://via.placeholder.com/100?text=Chair", desc: " The GOP (Grand Old Party) advocates for traditional values, low taxes, and free-market capitalism." },
+    I: { name: "Independent / Third Party", color: "#F2C75C", chair: "N/A", chair_img: "https://via.placeholder.com/100?text=N/A", desc: "Challenging the duopoly with fresh ideas and non-partisan solutions." }
 };
 
-const VPS = [
-    { name: "Wes Moore", home: "MD", type: "D", effect: "Youth Vote (+Cash)" },
-    { name: "Mark Kelly", home: "AZ", type: "D", effect: "Border Hawk (+AZ Polling)" },
-    { name: "Josh Shapiro", home: "PA", type: "D", effect: "Rust Belt King (+PA Polling)" },
-    { name: "Sarah Huckabee", home: "AR", type: "R", effect: "Base Turnout (+South Polling)" },
-    { name: "Tim Scott", home: "SC", type: "R", effect: "Unity Ticket (+Cash)" },
-    { name: "Tulsi Gabbard", home: "HI", type: "R", effect: "Maverick (Wildcard)" }
+// Candidates Database
+// Note: We use 'img' placeholders. You will replace these URLs with real images later.
+const CANDIDATES = [
+    // DEMOCRATS
+    { id: "newsom", name: "Gavin Newsom", party: "D", home: "CA", desc: "The slick California Governor known for aggressive media tactics.", img: "https://via.placeholder.com/150?text=Newsom" },
+    { id: "aoc", name: "Alexandria Ocasio-Cortez", party: "D", home: "NY", desc: "The progressive firebrand rallying the youth vote.", img: "https://via.placeholder.com/150?text=AOC" },
+    { id: "harris", name: "Kamala Harris", party: "D", home: "CA", desc: "The former VP seeking to reclaim the White House.", img: "https://via.placeholder.com/150?text=Harris" },
+    { id: "buttigieg", name: "Pete Buttigieg", party: "D", home: "MI", desc: "The eloquent communicator with strong Midwestern appeal.", img: "https://via.placeholder.com/150?text=Pete" },
+    { id: "beshear", name: "Andy Beshear", party: "D", home: "KY", desc: "A popular red-state Democrat focusing on unity.", img: "https://via.placeholder.com/150?text=Beshear" },
+    { id: "shapiro", name: "Josh Shapiro", party: "D", home: "PA", desc: "The Governor of the critical swing state of Pennsylvania.", img: "https://via.placeholder.com/150?text=Shapiro" },
+    
+    // REPUBLICANS
+    { id: "vance", name: "JD Vance", party: "R", home: "OH", desc: "The current torchbearer of the MAGA movement.", img: "https://via.placeholder.com/150?text=Vance" },
+    { id: "desantis", name: "Ron DeSantis", party: "R", home: "FL", desc: "Fighting the culture war from the Sunshine State.", img: "https://via.placeholder.com/150?text=DeSantis" },
+    { id: "haley", name: "Nikki Haley", party: "R", home: "SC", desc: "A traditional conservative with foreign policy chops.", img: "https://via.placeholder.com/150?text=Haley" },
+    
+    // INDEPENDENT
+    { id: "yang", name: "Andrew Yang", party: "I", home: "NY", desc: "Forward Party founder focused on automation and UBI.", img: "https://via.placeholder.com/150?text=Yang" }
 ];
 
-// Expanded State List (Top 15 key states for gameplay balance)
-const STATES_DATA = [
-    { id: "CA", name: "California", ev: 54, polling: 65, cost: 90000 },
-    { id: "TX", name: "Texas", ev: 40, polling: 42, cost: 85000 },
-    { id: "FL", name: "Florida", ev: 30, polling: 44, cost: 75000 },
-    { id: "NY", name: "New York", ev: 28, polling: 62, cost: 70000 },
-    { id: "PA", name: "Pennsylvania", ev: 19, polling: 50, cost: 60000 }, // Swing
-    { id: "IL", name: "Illinois", ev: 19, polling: 58, cost: 55000 },
-    { id: "OH", name: "Ohio", ev: 17, polling: 45, cost: 50000 },
-    { id: "GA", name: "Georgia", ev: 16, polling: 49, cost: 48000 },     // Swing
-    { id: "NC", name: "North Carolina", ev: 16, polling: 48, cost: 48000 }, // Swing
-    { id: "MI", name: "Michigan", ev: 15, polling: 51, cost: 45000 },     // Swing
-    { id: "AZ", name: "Arizona", ev: 11, polling: 49, cost: 40000 },      // Swing
-    { id: "WI", name: "Wisconsin", ev: 10, polling: 50, cost: 38000 },    // Swing
-    { id: "NV", name: "Nevada", ev: 6, polling: 50, cost: 25000 },        // Swing
-    { id: "MN", name: "Minnesota", ev: 10, polling: 53, cost: 35000 },
-    { id: "VA", name: "Virginia", ev: 13, polling: 54, cost: 42000 }
-];
+// Initial State Data (Wikipedia Color Scheme Defaults)
+// You would eventually load a CSV here, but this object acts as our "CSV" for now.
+const INITIAL_MAP_DATA = {
+    "CA": { ev: 54, lean: "D", margin: 20 },
+    "TX": { ev: 40, lean: "R", margin: 10 },
+    "FL": { ev: 30, lean: "R", margin: 8 },
+    "NY": { ev: 28, lean: "D", margin: 25 },
+    "PA": { ev: 19, lean: "D", margin: 1 }, // Swing
+    "IL": { ev: 19, lean: "D", margin: 15 },
+    "OH": { ev: 17, lean: "R", margin: 8 },
+    "GA": { ev: 16, lean: "R", margin: 2 }, // Swing
+    "NC": { ev: 16, lean: "R", margin: 3 }, // Swing
+    "MI": { ev: 15, lean: "D", margin: 2 }, // Swing
+    // ... add all states ...
+};
