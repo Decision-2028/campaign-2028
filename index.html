@@ -356,4 +356,262 @@
         "VT": "M 565 194 L 579 183 L 582 216 L 569 220 Z",
         "NH": "M 579 183 L 591 176 L 594 214 L 582 216 Z",
         "ME": "M 591 176 L 610 156 L 633 186 L 594 214 Z",
-        "MA": "M 569 220 L 594
+        "MA": "M 569 220 L 594 214 L 602 225 L 572 231 Z",
+        "RI": "M 590 228 L 596 228 L 595 234 Z",
+        "CT": "M 572 231 L 590 228 L 586 238 L 570 238 Z",
+        "NJ": "M 536 279 L 555 272 L 552 300 L 538 290 Z",
+        "DE": "M 538 290 L 552 300 L 548 312 Z",
+        "MD": "M 538 290 L 548 312 L 515 315 L 492 318 Z",
+        "VA": "M 465 330 L 492 318 L 548 312 L 545 348 L 458 350 Z",
+        "NC": "M 458 350 L 545 348 L 526 376 L 460 366 Z",
+        "SC": "M 460 366 L 526 376 L 507 400 L 455 390 Z",
+        "GA": "M 455 390 L 507 400 L 505 450 L 450 445 Z",
+        "AL": "M 410 393 L 455 390 L 450 445 L 420 440 Z",
+        "AK": "M 90 450 L 160 450 L 180 500 L 100 520 Z",
+        "DC": "M 518 308 L 522 308 L 522 312 L 518 312 Z"
+    };
+
+    // --- GAME ENGINE ---
+    class GameEngine {
+        constructor() {
+            this.gameState = 'INTRO';
+            this.party = null;
+            this.player = null;
+            this.vp = null;
+            this.funds = 0;
+            this.week = 1;
+            this.maxWeeks = 12;
+            this.states = {};
+            this.init();
+        }
+
+        init() {
+            // Load Scenario
+            document.getElementById('scenario-text').innerText = SCENARIO_TEXT;
+            
+            // Clone State Data (So we don't modify the original constant)
+            this.states = JSON.parse(JSON.stringify(STATE_DATA));
+
+            // Attach Event Listeners
+            document.getElementById('start-btn').addEventListener('click', () => {
+                this.setScreen('screen-party');
+            });
+
+            document.querySelectorAll('.party-card').forEach(card => {
+                card.addEventListener('click', () => this.selectParty(card.dataset.party));
+            });
+
+            document.getElementById('campaign-btn').addEventListener('click', () => this.campaignInState());
+
+            // Build Map
+            this.renderMapStructure();
+        }
+
+        // Navigation
+        setScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Logic
+        selectParty(partyCode) {
+            this.party = partyCode;
+            const pData = PARTIES[partyCode];
+            
+            document.getElementById('party-name').innerText = pData.name;
+            document.getElementById('party-name').style.color = pData.color;
+            document.getElementById('party-desc').innerText = pData.desc;
+            document.getElementById('chair-name').innerText = pData.chair;
+            document.getElementById('chair-img').src = pData.chair_img;
+            document.getElementById('party-header-bar').style.borderLeftColor = pData.color;
+
+            const list = document.getElementById('candidate-list');
+            list.innerHTML = '';
+            
+            CANDIDATES.filter(c => c.party === partyCode).forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'candidate-card';
+                div.innerHTML = `
+                    <img src="${c.img}" onerror="this.src='https://via.placeholder.com/80?text=IMG'">
+                    <div class="c-info">
+                        <h3>${c.name}</h3>
+                        <p class="c-desc">${c.desc}</p>
+                        <p class="c-buff">${c.buff}</p>
+                    </div>
+                `;
+                div.onclick = () => this.selectCandidate(c);
+                list.appendChild(div);
+            });
+
+            // Custom Candidate
+            const custom = document.createElement('div');
+            custom.className = 'candidate-card';
+            custom.style.justifyContent = 'center'; 
+            custom.style.fontWeight = 'bold';
+            custom.innerHTML = `+ CREATE CUSTOM CANDIDATE`;
+            custom.onclick = () => this.createCustom();
+            list.appendChild(custom);
+
+            this.setScreen('screen-candidate');
+        }
+
+        createCustom() {
+            const name = prompt("Enter Candidate Name:");
+            const home = prompt("Home State Code (e.g. TX):");
+            if(name && home && STATE_DATA[home.toUpperCase()]) {
+                const custom = { id: "custom", name: name, party: this.party, home: home.toUpperCase(), desc: "Grassroots Campaign", buff: "Wildcard", img: "images/scenario.jpg" };
+                this.selectCandidate(custom);
+            } else {
+                alert("Invalid info or state code.");
+            }
+        }
+
+        selectCandidate(c) {
+            this.player = c;
+            const list = document.getElementById('vp-list');
+            list.innerHTML = '';
+            
+            // Filter VPs (Same party, not self)
+            CANDIDATES.filter(vp => vp.party === this.party && vp.id !== c.id).forEach(vp => {
+                const div = document.createElement('div');
+                div.className = 'candidate-card';
+                div.innerHTML = `
+                    <img src="${vp.img}" onerror="this.src='https://via.placeholder.com/80?text=IMG'">
+                    <div class="c-info">
+                        <h3>${vp.name}</h3>
+                        <p class="c-desc">Home: ${vp.home}</p>
+                        <p class="c-buff">Buff: Boosts ${vp.home}</p>
+                    </div>
+                `;
+                div.onclick = () => this.selectVP(vp);
+                list.appendChild(div);
+            });
+            this.setScreen('screen-vp');
+        }
+
+        selectVP(vp) {
+            this.vp = vp;
+            this.funds = 2000000;
+            
+            // Apply Home State Bonuses
+            this.applyBonus(this.player.home, 10);
+            this.applyBonus(this.vp.home, 6);
+
+            this.setScreen('screen-map');
+            this.updateHUD();
+            this.colorMap();
+        }
+
+        applyBonus(stateId, amount) {
+            if(this.states[stateId]) {
+                if(this.party === 'D') this.states[stateId].polling += amount;
+                else if(this.party === 'R') this.states[stateId].polling -= amount;
+                // Independents just gain raw %
+                else this.states[stateId].polling = 50; 
+            }
+        }
+
+        // Map Functions
+        renderMapStructure() {
+            const svg = document.getElementById('us-map');
+            for(const [id, d] of Object.entries(US_STATE_PATHS)) {
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", d);
+                path.setAttribute("id", id);
+                path.onclick = () => this.clickState(id);
+                path.onmouseenter = (e) => this.showTooltip(e, id);
+                path.onmouseleave = () => this.hideTooltip();
+                svg.appendChild(path);
+            }
+        }
+
+        colorMap() {
+            for(const [id, state] of Object.entries(this.states)) {
+                const el = document.getElementById(id);
+                if(!el) continue;
+                
+                let color = "#ccc"; // Tossup
+                const p = state.polling;
+
+                if (p >= 60) color = "#003f5c";       // Safe D
+                else if (p >= 54) color = "#00AEF3";  // Likely D
+                else if (p >= 51) color = "#58508d";  // Lean D
+                else if (p <= 40) color = "#bc5090";  // Safe R
+                else if (p <= 46) color = "#E81B23";  // Likely R
+                else if (p <= 49) color = "#ff6361";  // Lean R
+                
+                el.style.fill = color;
+            }
+        }
+
+        clickState(id) {
+            this.selectedState = id;
+            const s = this.states[id];
+            
+            document.getElementById('selected-state-name').innerText = `${s.name} (${s.ev} EV)`;
+            document.getElementById('state-info').innerText = `Polls: ${s.polling.toFixed(1)}% Dem`;
+            
+            const btn = document.getElementById('campaign-btn');
+            btn.disabled = false;
+            btn.innerText = `CAMPAIGN IN ${id} ($100k)`;
+        }
+
+        campaignInState() {
+            if(this.funds < 100000) { alert("No funds!"); return; }
+            this.funds -= 100000;
+            
+            const s = this.states[this.selectedState];
+            const boost = (Math.random() * 2) + 0.5;
+            
+            if(this.party === 'D') s.polling += boost;
+            else s.polling -= boost;
+            
+            this.week++;
+            if(this.week > 12) this.endGame();
+            
+            this.updateHUD();
+            this.colorMap();
+            this.clickState(this.selectedState); // Refresh UI text
+        }
+
+        updateHUD() {
+            document.getElementById('hud-candidate').innerText = this.player.name;
+            document.getElementById('hud-turn').innerText = 12 - this.week;
+            document.getElementById('hud-funds').innerText = `$${(this.funds/1000000).toFixed(1)}M`;
+            
+            let d_ev = 0, r_ev = 0;
+            for(const s of Object.values(this.states)) {
+                if(s.polling >= 50) d_ev += s.ev;
+                else r_ev += s.ev;
+            }
+            document.getElementById('hud-ev').innerText = `${this.party === 'D' ? d_ev : r_ev} / 270`;
+        }
+
+        showTooltip(e, id) {
+            const tip = document.getElementById('state-tooltip');
+            const s = this.states[id];
+            tip.style.display = 'block';
+            tip.style.left = (e.pageX + 15) + 'px';
+            tip.style.top = (e.pageY + 15) + 'px';
+            tip.innerHTML = `<strong>${s.name}</strong><br>${s.polling.toFixed(1)}% Dem`;
+        }
+
+        hideTooltip() {
+            document.getElementById('state-tooltip').style.display = 'none';
+        }
+
+        endGame() {
+            let d_ev = 0;
+            for(const s of Object.values(this.states)) if(s.polling >= 50) d_ev += s.ev;
+            
+            const win = (this.party === 'D' && d_ev >= 270) || (this.party === 'R' && d_ev < 270);
+            alert(win ? "YOU WON THE ELECTION!" : "You lost the election.");
+            location.reload();
+        }
+    }
+
+    // Initialize
+    window.onload = () => { const game = new GameEngine(); };
+    </script>
+</body>
+</html>
