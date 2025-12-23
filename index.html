@@ -4,7 +4,189 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Campaign Trail 2028</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS STYLES */
+        :root {
+            --bg-dark: #121214;
+            --bg-panel: #1e1e24;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --blue: #00AEF3;
+            --red: #E81B23;
+            --gold: #F2C75C;
+            --green: #4caf50;
+            --border: #333;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .screen { display: none; max-width: 1100px; margin: 0 auto; animation: fadeIn 0.4s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Buttons */
+        .primary-btn {
+            background: var(--text-main);
+            color: var(--bg-dark);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        .primary-btn:hover { transform: scale(1.05); background: #e0e0e0; }
+        
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--green);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .action-btn:disabled { background: #444; cursor: not-allowed; }
+
+        /* Intro */
+        .intro-container { text-align: center; max-width: 800px; margin: 40px auto; }
+        .game-title { font-size: 3rem; letter-spacing: 3px; border-bottom: 2px solid var(--border); padding-bottom: 20px; }
+        .intro-visuals img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; opacity: 0.8; }
+        .scenario-box { font-size: 1.2rem; line-height: 1.6; color: var(--text-muted); margin: 30px 0; }
+
+        /* Party Select */
+        .party-grid { display: flex; gap: 30px; justify-content: center; margin-top: 50px; flex-wrap: wrap; }
+        .party-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--border);
+            padding: 40px;
+            width: 200px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .party-card:hover { transform: translateY(-5px); border-color: white; }
+        .party-icon { font-size: 3rem; font-weight: bold; margin-bottom: 10px; }
+        .party-d { color: var(--blue); border-color: var(--blue); }
+        .party-r { color: var(--red); border-color: var(--red); }
+        .party-i { color: var(--gold); border-color: var(--gold); }
+
+        /* Lists */
+        .party-header {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid white;
+            margin-bottom: 30px;
+        }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        #chair-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #555; background: #000; }
+        .chair-details { text-align: right; font-size: 0.9rem; }
+        .chair-details .label { display: block; color: var(--text-muted); font-size: 0.8rem; }
+
+        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .candidate-card {
+            background: var(--bg-panel);
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            align-items: center;
+        }
+        .candidate-card:hover { background: #2a2a30; border-color: #777; }
+        .candidate-card img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; background: #333; }
+        .c-info h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
+        .c-desc { font-size: 0.85rem; color: var(--text-muted); margin: 5px 0; }
+        .c-buff { font-size: 0.8rem; color: var(--gold); font-weight: bold; }
+
+        /* Map & HUD */
+        .dashboard-hud {
+            display: flex;
+            justify-content: space-between;
+            background: #000;
+            padding: 15px 25px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .hud-item { text-align: center; }
+        .hud-label { display: block; font-size: 0.75rem; color: #888; letter-spacing: 1px; }
+        .hud-value { font-size: 1.2rem; font-weight: bold; }
+
+        .map-wrapper {
+            position: relative;
+            background: #2b303b;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 600px;
+        }
+        #us-map { width: 100%; height: 100%; display: block; }
+        
+        path {
+            stroke: #fff;
+            stroke-width: 0.5;
+            transition: fill 0.2s, opacity 0.2s;
+            cursor: pointer;
+        }
+        path:hover { opacity: 0.8; stroke-width: 1.5; }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            padding: 10px;
+            border: 1px solid #666;
+            pointer-events: none;
+            display: none;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .controls-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            background: var(--bg-panel);
+            padding: 15px;
+            border-radius: 8px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .legend { display: flex; gap: 15px; align-items: center; font-size: 0.8rem; flex-wrap: wrap; }
+        .dot { width: 12px; height: 12px; display: inline-block; border-radius: 50%; margin-right: 5px; }
+        .safe-d { background: #003f5c; }
+        .lean-d { background: #58508d; }
+        .tossup { background: #ccc; }
+        .lean-r { background: #ff6361; }
+        .safe-r { background: #bc5090; }
+        .action-panel { width: 300px; text-align: right; }
+        
+        /* Mobile */
+        @media (max-width: 600px) {
+            .map-wrapper { height: 300px; }
+            .controls-area { flex-direction: column; }
+            .action-panel { width: 100%; text-align: center; }
+        }
+    </style>
 </head>
 <body>
 
@@ -12,17 +194,17 @@
         <div class="intro-container">
             <h1 class="game-title">THE CAMPAIGN TRAIL 2028</h1>
             <div class="intro-visuals">
-                <img src="images/scenario.jpg" alt="White House" class="scenario-img">
+                <img src="images/scenario.jpg" alt="White House" onerror="this.style.display='none'">
             </div>
             <div class="scenario-box">
-                <p id="scenario-text"></p>
+                <p id="scenario-text">Loading Scenario...</p>
             </div>
             <button class="primary-btn" id="start-btn">BEGIN SIMULATION</button>
         </div>
     </div>
 
     <div id="screen-party" class="screen">
-        <h2 class="screen-title">SELECT YOUR PARTY</h2>
+        <h2 class="game-title" style="font-size: 2rem;">SELECT YOUR PARTY</h2>
         <div class="party-grid">
             <div class="party-card party-d" data-party="D">
                 <div class="party-icon">D</div>
@@ -43,7 +225,7 @@
         <header class="party-header" id="party-header-bar">
             <div class="header-left">
                 <h2 id="party-name">PARTY NAME</h2>
-                <p id="party-desc">Party Description</p>
+                <p id="party-desc">Description</p>
             </div>
             <div class="header-right">
                 <img id="chair-img" src="" alt="Chair">
@@ -53,42 +235,26 @@
                 </div>
             </div>
         </header>
-
-        <h3 class="section-label">Select Presidential Nominee</h3>
-        <div id="candidate-list" class="grid-list">
-            </div>
+        <h3>Select Presidential Nominee</h3>
+        <div id="candidate-list" class="grid-list"></div>
     </div>
 
     <div id="screen-vp" class="screen">
-        <h2 class="screen-title">Select Running Mate</h2>
-        <p class="screen-subtitle">Your VP choice will boost polling in their home region.</p>
-        <div id="vp-list" class="grid-list">
-            </div>
+        <h2 class="game-title" style="font-size: 2rem;">Select Running Mate</h2>
+        <p style="text-align: center; color: #aaa;">Your VP choice will boost polling in their home region.</p>
+        <div id="vp-list" class="grid-list"></div>
     </div>
 
     <div id="screen-map" class="screen">
         <header class="dashboard-hud">
-            <div class="hud-item">
-                <span class="hud-label">CANDIDATE</span>
-                <span id="hud-candidate" class="hud-value">Name</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">ELECTORAL VOTES</span>
-                <span id="hud-ev" class="hud-value">0 / 270</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">WEEKS LEFT</span>
-                <span id="hud-turn" class="hud-value">12</span>
-            </div>
-            <div class="hud-item">
-                <span class="hud-label">FUNDS</span>
-                <span id="hud-funds" class="hud-value">$0</span>
-            </div>
+            <div class="hud-item"><span class="hud-label">CANDIDATE</span><span id="hud-candidate" class="hud-value">Name</span></div>
+            <div class="hud-item"><span class="hud-label">ELECTORAL VOTES</span><span id="hud-ev" class="hud-value">0 / 270</span></div>
+            <div class="hud-item"><span class="hud-label">WEEKS LEFT</span><span id="hud-turn" class="hud-value">12</span></div>
+            <div class="hud-item"><span class="hud-label">FUNDS</span><span id="hud-funds" class="hud-value">$0</span></div>
         </header>
 
         <div class="map-wrapper">
             <svg id="us-map" viewBox="0 0 960 600"></svg>
-            
             <div id="state-tooltip" class="tooltip"></div>
         </div>
 
@@ -108,7 +274,86 @@
         </div>
     </div>
 
-    <script src="data.js"></script>
-    <script src="game.js"></script>
-</body>
-</html>
+    <script>
+    // --- DATA SECTION ---
+    const SCENARIO_TEXT = "The year is 2028. The nation is at a crossroads. Following a tumultuous decade, the electorate is fractured. The Rust Belt is trending right, the Sun Belt is trending left, and new coalitions are forming. You must navigate the primaries, select a VP to balance your ticket, and manage your resources to win 270 Electoral Votes.";
+
+    const PARTIES = {
+        D: { name: "Democratic Party", color: "#00AEF3", chair: "Jaime Harrison", chair_img: "images/dem_chair.jpg", desc: "Platform: Climate Action, Healthcare Expansion, Social Equality." },
+        R: { name: "Republican Party", color: "#E81B23", chair: "Michael Whatley", chair_img: "images/gop_chair.jpg", desc: "Platform: Border Security, Economic Deregulation, Traditional Values." },
+        I: { name: "Independent", color: "#F2C75C", chair: "N/A", chair_img: "images/scenario.jpg", desc: "Platform: Electoral Reform, Anti-Corruption, Centrist Solutions." }
+    };
+
+    const CANDIDATES = [
+        { id: "newsom", name: "Gavin Newsom", party: "D", home: "CA", desc: "Media-savvy Governor of California.", buff: "Fundraising Machine (Cash x1.2)", img: "images/newsom.jpg" },
+        { id: "harris", name: "Kamala Harris", party: "D", home: "CA", desc: "Former Vice President.", buff: "Base Turnout (+Safe D States)", img: "images/harris.jpg" },
+        { id: "whitmer", name: "Gretchen Whitmer", party: "D", home: "MI", desc: "Governor of Michigan.", buff: "Rust Belt Appeal (+MI/WI/PA)", img: "images/whitmer.jpg" },
+        { id: "shapiro", name: "Josh Shapiro", party: "D", home: "PA", desc: "Popular PA Governor.", buff: "Swing State King (+PA)", img: "images/shapiro.jpg" },
+        { id: "buttigieg", name: "Pete Buttigieg", party: "D", home: "MI", desc: "Transportation Secretary.", buff: "Media Darling (+Global Polls)", img: "images/buttigieg.jpg" },
+        { id: "vance", name: "JD Vance", party: "R", home: "OH", desc: "The populist standard-bearer.", buff: "Rust Belt Appeal (+OH/PA)", img: "images/vance.jpg" },
+        { id: "desantis", name: "Ron DeSantis", party: "R", home: "FL", desc: "Governor of Florida.", buff: "Culture Warrior (+FL/TX)", img: "images/desantis.jpg" },
+        { id: "haley", name: "Nikki Haley", party: "R", home: "SC", desc: "Former UN Ambassador.", buff: "Suburban Appeal (+VA/CO)", img: "images/haley.jpg" },
+        { id: "ramaswamy", name: "Vivek Ramaswamy", party: "R", home: "OH", desc: "Tech Entrepreneur.", buff: "Self-Funder (Start with $5M)", img: "images/vance.jpg" },
+        { id: "yang", name: "Andrew Yang", party: "I", home: "NY", desc: "Forward Party Founder.", buff: "UBI Appeal (+Youth Vote)", img: "images/yang.jpg" }
+    ];
+
+    const STATE_DATA = {
+        "AL": { name: "Alabama", ev: 9, polling: 35 }, "AK": { name: "Alaska", ev: 3, polling: 42 }, "AZ": { name: "Arizona", ev: 11, polling: 49 },
+        "AR": { name: "Arkansas", ev: 6, polling: 35 }, "CA": { name: "California", ev: 54, polling: 65 }, "CO": { name: "Colorado", ev: 10, polling: 56 },
+        "CT": { name: "Connecticut", ev: 7, polling: 59 }, "DE": { name: "Delaware", ev: 3, polling: 60 }, "DC": { name: "District of Columbia", ev: 3, polling: 90 },
+        "FL": { name: "Florida", ev: 30, polling: 45 }, "GA": { name: "Georgia", ev: 16, polling: 48 }, "HI": { name: "Hawaii", ev: 4, polling: 68 },
+        "ID": { name: "Idaho", ev: 4, polling: 30 }, "IL": { name: "Illinois", ev: 19, polling: 57 }, "IN": { name: "Indiana", ev: 11, polling: 40 },
+        "IA": { name: "Iowa", ev: 6, polling: 43 }, "KS": { name: "Kansas", ev: 6, polling: 40 }, "KY": { name: "Kentucky", ev: 8, polling: 35 },
+        "LA": { name: "Louisiana", ev: 8, polling: 38 }, "ME": { name: "Maine", ev: 4, polling: 55 }, "MD": { name: "Maryland", ev: 10, polling: 63 },
+        "MA": { name: "Massachusetts", ev: 11, polling: 65 }, "MI": { name: "Michigan", ev: 15, polling: 51 }, "MN": { name: "Minnesota", ev: 10, polling: 53 },
+        "MS": { name: "Mississippi", ev: 6, polling: 38 }, "MO": { name: "Missouri", ev: 10, polling: 41 }, "MT": { name: "Montana", ev: 4, polling: 40 },
+        "NE": { name: "Nebraska", ev: 5, polling: 38 }, "NV": { name: "Nevada", ev: 6, polling: 50 }, "NH": { name: "New Hampshire", ev: 4, polling: 52 },
+        "NJ": { name: "New Jersey", ev: 14, polling: 58 }, "NM": { name: "New Mexico", ev: 5, polling: 54 }, "NY": { name: "New York", ev: 28, polling: 60 },
+        "NC": { name: "North Carolina", ev: 16, polling: 48 }, "ND": { name: "North Dakota", ev: 3, polling: 30 }, "OH": { name: "Ohio", ev: 17, polling: 45 },
+        "OK": { name: "Oklahoma", ev: 7, polling: 32 }, "OR": { name: "Oregon", ev: 8, polling: 58 }, "PA": { name: "Pennsylvania", ev: 19, polling: 50 },
+        "RI": { name: "Rhode Island", ev: 4, polling: 60 }, "SC": { name: "South Carolina", ev: 9, polling: 42 }, "SD": { name: "South Dakota", ev: 3, polling: 35 },
+        "TN": { name: "Tennessee", ev: 11, polling: 37 }, "TX": { name: "Texas", ev: 40, polling: 43 }, "UT": { name: "Utah", ev: 6, polling: 38 },
+        "VT": { name: "Vermont", ev: 3, polling: 65 }, "VA": { name: "Virginia", ev: 13, polling: 54 }, "WA": { name: "Washington", ev: 12, polling: 60 },
+        "WV": { name: "West Virginia", ev: 4, polling: 28 }, "WI": { name: "Wisconsin", ev: 10, polling: 50 }, "WY": { name: "Wyoming", ev: 3, polling: 25 }
+    };
+
+    const US_STATE_PATHS = {
+        "HI": "M 295.4 533.2 L 297.1 534.5 L 305.8 535.1 L 309.8 537.1 L 306.2 539.9 L 295.4 533.2 Z M 266.1 522 L 271.7 526.4 L 265.6 523.7 Z M 255.5 516.5 L 257.6 519 L 253.3 516.5 Z",
+        "FL": "M 751.3 473.5 L 760.9 474.3 L 761.6 485.8 L 763.5 488.7 L 761.9 498.4 L 759.2 507 L 748.8 498.1 L 741 483 L 714.3 467.4 Z",
+        "CA": "M 52.8 210.6 L 102.4 199.4 L 140.8 292.8 L 123.6 316.6 L 102.7 313.8 L 74.2 284.2 L 40.7 224.3 Z",
+        "TX": "M 333.4 313.4 L 396.9 313.6 L 401.5 387.9 L 420.7 397.7 L 420.7 416 L 425.2 430.7 L 420.6 440.1 L 396.6 464.7 L 396.8 473 L 391.2 478.5 L 354.9 463.3 L 341.3 449.6 L 333.7 438.3 Z",
+        "NV": "M 52.8 210.6 L 115.3 196.2 L 140.8 292.8 L 102.6 247.9 Z",
+        "OR": "M 48 207.4 L 43.2 210.6 L 39.4 218.4 L 40.7 224.3 L 52.8 210.6 L 115.3 196.2 L 109.8 174.6 L 44 186.9 Z",
+        "WA": "M 44 186.9 L 109.8 174.6 L 105.9 157.9 L 47.9 168.7 Z",
+        "ID": "M 109.8 174.6 L 115.3 196.2 L 147 189.2 L 157.4 227.6 L 175.6 222.7 L 179.8 162.2 Z",
+        "UT": "M 115.3 196.2 L 140.8 292.8 L 180.7 282.3 L 175.6 222.7 L 147 189.2 Z",
+        "AZ": "M 140.8 292.8 L 180.7 282.3 L 183.3 361.3 L 134.4 374.2 Z",
+        "MT": "M 105.9 157.9 L 265.5 167.3 L 261.2 218.5 L 175.6 222.7 L 179.8 162.2 Z",
+        "WY": "M 175.6 222.7 L 261.2 218.5 L 258 276.4 L 180.7 282.3 Z",
+        "CO": "M 180.7 282.3 L 258 276.4 L 254.6 343.8 L 183.3 361.3 Z",
+        "NM": "M 183.3 361.3 L 254.6 343.8 L 250.7 416.3 L 179.2 411.3 Z",
+        "ND": "M 265.5 167.3 L 341.1 171.6 L 338.8 212.8 L 261.2 218.5 Z",
+        "SD": "M 261.2 218.5 L 338.8 212.8 L 337.8 259.6 L 258 276.4 Z",
+        "NE": "M 258 276.4 L 337.8 259.6 L 349.5 289.4 L 269 301.7 L 269 278.4 Z",
+        "KS": "M 269 301.7 L 349.5 289.4 L 352.6 333.1 L 273.7 348 Z",
+        "OK": "M 254.6 343.8 L 273.7 348 L 352.6 333.1 L 353.9 375 L 298.6 390.7 L 297.6 389 Z",
+        "MN": "M 341.1 171.6 L 388.9 168.4 L 369.3 227.1 L 338.8 212.8 Z",
+        "IA": "M 338.8 212.8 L 369.3 227.1 L 365 262.6 L 337.8 259.6 Z",
+        "MO": "M 337.8 259.6 L 365 262.6 L 364.6 302 L 392.5 304 L 384 353 L 352.6 333.1 Z",
+        "AR": "M 352.6 333.1 L 384 353 L 377.9 397.6 L 333.4 397.3 Z",
+        "LA": "M 333.4 397.3 L 377.9 397.6 L 382.7 425.4 L 369.4 443.9 L 343.9 443.3 Z",
+        "WI": "M 369.3 227.1 L 388.9 168.4 L 420.9 184.2 L 409.7 257.6 L 365 262.6 Z",
+        "IL": "M 365 262.6 L 409.7 257.6 L 413.4 321.4 L 392.5 304 L 364.6 302 Z",
+        "KY": "M 392.5 304 L 413.4 321.4 L 458 310 L 442 344 L 384 353 Z",
+        "TN": "M 384 353 L 442 344 L 493.6 340 L 485 369 L 377.9 397.6 Z",
+        "MS": "M 377.9 397.6 L 410 393 L 409 444 L 382.7 425.4 Z",
+        "MI": "M 420.9 184.2 L 475 204 L 460 255 L 409.7 257.6 Z",
+        "IN": "M 409.7 257.6 L 439 254 L 436 312 L 413.4 321.4 Z",
+        "OH": "M 439 254 L 476 244 L 482 299 L 436 312 Z",
+        "WV": "M 436 312 L 482 299 L 492 318 L 465 330 Z",
+        "PA": "M 476 244 L 541 231 L 536 279 L 482 299 Z",
+        "NY": "M 541 231 L 565 194 L 590 196 L 585 240 L 536 279 Z",
+        "VT": "M 565 194 L 579 183 L 582 216 L 569 220 Z",
+        "NH": "M 579 183 L 591 176 L 594 214 L 582 216 Z",
+        "ME": "M 591 176 L 610 156 L 633 186 L 594 214 Z",
+        "MA": "M 569 220 L 594
