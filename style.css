@@ -141,3 +141,33 @@ select { width: 100%; padding: 10px; background: #333; border: 1px solid #555; c
     opacity: 0.9;
     z-index: 100; /* Might not work on SVG paths without reordering DOM, but good to keep */
 }
+/* ... existing CSS ... */
+
+/* TOOLTIP */
+#map-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 10px 15px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    pointer-events: none; /* Allows mouse to pass through */
+    display: none;
+    z-index: 9999;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    min-width: 150px;
+}
+
+#map-tooltip h4 { margin: 0 0 5px 0; font-family: 'Merriweather', serif; color: var(--gold); }
+#map-tooltip .tip-row { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 2px; }
+
+/* HUD DYNAMIC STYLES */
+.hud-border-D { border-color: #0056b3 !important; box-shadow: 0 0 10px #0056b3; }
+.hud-border-R { border-color: #d32f2f !important; box-shadow: 0 0 10px #d32f2f; }
+.hud-border-I { border-color: #d4a017 !important; box-shadow: 0 0 10px #d4a017; }
+
+/* MAP INTERACTION */
+path { cursor: pointer; transition: opacity 0.2s; }
+path:hover { opacity: 0.7; stroke-width: 2px; stroke: white; }
+
