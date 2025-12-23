@@ -238,10 +238,19 @@
         </div>
     </div>
 
+    <div id="bio-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:5000; display:flex; justify-content:center; align-items:center;">
+        <div class="modal-box" style="width: 700px; max-height:90vh; overflow-y:auto; text-align:left; padding:30px;">
+            <div id="bio-content">
+                </div>
+            <button onclick="document.getElementById('bio-modal').classList.add('hidden')" style="width:100%; margin-top:20px; padding:15px; background:#444; border:none; color:white; font-weight:bold; cursor:pointer;">CLOSE REPORT</button>
+        </div>
+    </div>
+
     <div id="map-tooltip"></div>
 
     <div id="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
+
 
