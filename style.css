@@ -125,3 +125,19 @@ select { width: 100%; padding: 10px; background: #333; border: 1px solid #555; c
 #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
 .modal-box { background: white; color: black; padding: 40px; text-align: center; max-width: 500px; box-shadow: 0 0 50px rgba(0,0,0,1); }
 .modal-box button { background: var(--nbc-blue); color: white; border: none; padding: 10px 30px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+
+/* Force the game colors over any internal SVG colors */
+#us-map-svg path {
+    fill: #1e1e1e; /* Default color before JS paints it */
+    stroke: #ffffff;
+    stroke-width: 0.5px; /* Thinner lines look better on detailed maps */
+    cursor: pointer;
+    transition: fill 0.3s ease;
+}
+
+#us-map-svg path:hover {
+    stroke: var(--gold);
+    stroke-width: 1.5px;
+    opacity: 0.9;
+    z-index: 100; /* Might not work on SVG paths without reordering DOM, but good to keep */
+}
