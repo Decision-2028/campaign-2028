@@ -3,682 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2024 Election Simulator: Harris Campaign</title>
-    <style>
-        :root {
-            --dem-blue: #00AEF3;
-            --rep-red: #E81B23;
-            --tossup-gray: #b0b0b0;
-            --bg-dark: #1e293b;
-            --panel-bg: #334155;
-            --text-light: #f8fafc;
-            --accent: #fbbf24;
-        }
-
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* --- Header Stats --- */
-        header {
-            background-color: #0f172a;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #475569;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-        }
-
-        .stat-box {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #94a3b8;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .funds { color: #4ade80; }
-        .weeks { color: var(--accent); }
-        .votes { color: var(--dem-blue); }
-
-        /* --- Main Layout --- */
-        main {
-            display: flex;
-            flex: 1;
-            height: 100%;
-        }
-
-        /* --- Map Container --- */
-        #map-container {
-            flex: 2;
-            position: relative;
-            background: radial-gradient(circle at center, #2d3a4f 0%, #1e293b 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow: hidden;
-        }
-
-        svg {
-            width: 100%;
-            height: 100%;
-            max-height: 90vh;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-        }
-
-        path {
-            stroke: #fff;
-            stroke-width: 0.5;
-            transition: fill 0.4s ease, transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        path:hover {
-            stroke: var(--accent);
-            stroke-width: 2;
-            z-index: 100;
-            transform: scale(1.01); 
-        }
-
-        /* --- Sidebar Controls --- */
-        aside {
-            flex: 1;
-            max-width: 400px;
-            background-color: var(--panel-bg);
-            padding: 20px;
-            overflow-y: auto;
-            border-left: 1px solid #475569;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        h2 { margin-top: 0; font-size: 1.4rem; border-bottom: 1px solid #64748b; padding-bottom: 10px; }
-        
-        .panel-section {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        /* State Info */
-        #state-name { font-size: 1.8rem; font-weight: bold; color: var(--accent); }
-        .lean-bar-container {
-            width: 100%;
-            height: 12px;
-            background: #1e293b;
-            border-radius: 6px;
-            margin: 10px 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .lean-indicator {
-            height: 100%;
-            width: 4px;
-            background: #fff;
-            position: absolute;
-            top: 0;
-            transition: left 0.5s ease;
-            z-index: 2;
-            box-shadow: 0 0 4px #000;
-        }
-        .lean-bg {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--rep-red) 0%, var(--tossup-gray) 50%, var(--dem-blue) 100%);
-        }
-
-        /* Issues List */
-        .issue-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-        .issue-importance {
-            width: 80px;
-            height: 6px;
-            background: #475569;
-            border-radius: 3px;
-        }
-        .issue-importance-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 3px;
-        }
-
-        /* Controls */
-        select, button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 6px;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        select { background: #1e293b; color: white; border: 1px solid #64748b; }
-        
-        button.campaign-btn {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            font-weight: bold;
-            transition: transform 0.1s, box-shadow 0.2s;
-        }
-        button.campaign-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-        }
-        button.campaign-btn:active { transform: translateY(0); }
-        button:disabled { background: #64748b; cursor: not-allowed; opacity: 0.7; }
-
-        /* Notifications */
-        #notification-area {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            pointer-events: none;
-        }
-
-        /* Tooltip */
-        #tooltip {
-            position: absolute;
-            background: rgba(15, 23, 42, 0.95);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            pointer-events: none;
-            display: none;
-            z-index: 1000;
-            border: 1px solid #475569;
-        }
-
-    </style>
+    <title>2024 Election Simulator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-    <div class="stat-box">
-        <div class="stat-label">Candidate</div>
-        <div class="stat-value">Kamala Harris</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-label">Electoral Votes</div>
-        <div class="stat-value votes" id="ev-display">0 / 270</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-label">Weeks Left</div>
-        <div class="stat-value weeks" id="weeks-display">12</div>
-    </div>
-    <div class="stat-box">
-        <div class="stat-label">Funds</div>
-        <div class="stat-value funds" id="funds-display">$50.0M</div>
-    </div>
-</header>
-
-<main>
-    <div id="map-container">
-        <svg id="us-map" viewBox="0 0 950 600">
-             </svg>
-        <div id="tooltip"></div>
-    </div>
-
-    <aside>
-        <div id="state-panel" style="display:none;">
-            <div id="state-name">Select a State</div>
-            <div style="display:flex; justify-content:space-between; margin-top:5px; color:#94a3b8;">
-                <span id="state-ev">0 EV</span>
-                <span id="state-status">Tossup</span>
-            </div>
-            
-            <div class="lean-bar-container">
-                <div class="lean-bg"></div>
-                <div class="lean-indicator" id="lean-marker"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#94a3b8;">
-                <span>Rep</span>
-                <span>50/50</span>
-                <span>Dem</span>
-            </div>
-
-            <div class="panel-section" style="margin-top:20px;">
-                <h3>Campaign Strategy</h3>
-                <label style="font-size:0.85rem; color:#ccc;">Select Issue to Focus On:</label>
-                <select id="issue-select"></select>
-                
-                <div id="issue-feedback" style="margin: 10px 0; font-size: 0.85rem; color: #fbbf24; min-height: 40px;">
-                    </div>
-
-                <button class="campaign-btn" id="campaign-btn" onclick="runCampaign()">
-                    CAMPAIGN ($100k)
-                </button>
-            </div>
-
-            <div class="panel-section" style="margin-top:20px;">
-                <h3>State Priorities</h3>
-                <div id="state-issues-list">
-                    </div>
-            </div>
+    <section id="intro-screen" class="screen active">
+        <div class="content-box fade-in">
+            <h1>The Road to 270</h1>
+            <p>Welcome to the 2024 Election Simulator. <br>Navigating a divided nation requires strategy, funding, and the right message.</p>
+            <button onclick="goToScreen('candidate-screen')">Start Campaign</button>
         </div>
-        <div id="empty-state-msg" style="text-align:center; color:#64748b; margin-top:50px;">
-            Click on a state to view polling data and launch campaign events.
-        </div>
-    </aside>
-</main>
+    </section>
 
-<div id="notification-area">Notification</div>
-
-<script>
-/* --- 1. Game Data & Configuration --- */
-
-// Issues: 0 (Right/Con) to 100 (Left/Lib)
-const ISSUES = [
-    { id: 'econ', name: 'Economy' },
-    { id: 'abort', name: 'Abortion' },
-    { id: 'immig', name: 'Immigration' },
-    { id: 'clim', name: 'Climate Change' },
-    { id: 'gun', name: 'Gun Control' },
-    { id: 'foreign', name: 'Foreign Policy' },
-    { id: 'lgbt', name: 'LGBTQ+ Rights' },
-    { id: 'edu', name: 'Education' },
-    { id: 'health', name: 'Healthcare' },
-    { id: 'crime', name: 'Criminal Justice' },
-    { id: 'trade', name: 'Trade' },
-    { id: 'dem', name: 'Democracy' }
-];
-
-// Candidate Object (Kamala Harris) - Stances researched
-const CANDIDATE = {
-    name: "Kamala Harris",
-    funds: 50.0, // Millions
-    weeks: 11,
-    stances: {
-        econ: 65,     // Pro-middle class, but capitalist
-        abort: 100,   // Strong Pro-Choice
-        immig: 55,    // Moderate-left (border security + pathways)
-        clim: 85,     // Green energy investment
-        gun: 90,      // Assault weapons ban
-        foreign: 75,  // Global alliances
-        lgbt: 100,    // Full equality
-        edu: 85,      // Loan forgiveness
-        health: 80,   // ACA expansion
-        crime: 60,    // Reformist but former prosecutor
-        trade: 60,    // Moderate protectionism
-        dem: 95       // Voting rights priority
-    }
-};
-
-// State Data (Simplified for Simulation)
-// Lean: 0 (Safe R) -> 50 (Tossup) -> 100 (Safe D)
-// Importance: How much that state cares about specific issues (0-10 multiplier)
-const STATES_DATA = {
-    "AL": { name: "Alabama", ev: 9, lean: 15, priorities: { crime: 8, immig: 7, dem: 2 } },
-    "AK": { name: "Alaska", ev: 3, lean: 20, priorities: { clim: 6, econ: 8, gun: 9 } },
-    "AZ": { name: "Arizona", ev: 11, lean: 49.5, priorities: { immig: 10, econ: 8, water: 9 } },
-    "AR": { name: "Arkansas", ev: 6, lean: 18, priorities: { gun: 8, econ: 7 } },
-    "CA": { name: "California", ev: 54, lean: 85, priorities: { clim: 10, lgbt: 9, immig: 8 } },
-    "CO": { name: "Colorado", ev: 10, lean: 65, priorities: { clim: 9, dem: 7 } },
-    "CT": { name: "Connecticut", ev: 7, lean: 70, priorities: { gun: 8, edu: 8 } },
-    "DE": { name: "Delaware", ev: 3, lean: 75, priorities: { econ: 8 } },
-    "FL": { name: "Florida", ev: 30, lean: 35, priorities: { immig: 8, econ: 9, clim: 7 } },
-    "GA": { name: "Georgia", ev: 16, lean: 49.8, priorities: { dem: 9, econ: 8, crime: 7 } },
-    "HI": { name: "Hawaii", ev: 4, lean: 90, priorities: { clim: 10, health: 8 } },
-    "ID": { name: "Idaho", ev: 4, lean: 10, priorities: { gun: 10, land: 8 } },
-    "IL": { name: "Illinois", ev: 19, lean: 75, priorities: { crime: 8, labor: 8 } },
-    "IN": { name: "Indiana", ev: 11, lean: 25, priorities: { econ: 9, trade: 8 } },
-    "IA": { name: "Iowa", ev: 6, lean: 28, priorities: { trade: 9, econ: 8 } },
-    "KS": { name: "Kansas", ev: 6, lean: 22, priorities: { econ: 8, abort: 7 } },
-    "KY": { name: "Kentucky", ev: 8, lean: 15, priorities: { econ: 9, energy: 9 } },
-    "LA": { name: "Louisiana", ev: 8, lean: 20, priorities: { energy: 9, crime: 8 } },
-    "ME": { name: "Maine", ev: 4, lean: 60, priorities: { env: 8, econ: 7 } },
-    "MD": { name: "Maryland", ev: 10, lean: 80, priorities: { edu: 8, crime: 7 } },
-    "MA": { name: "Massachusetts", ev: 11, lean: 90, priorities: { edu: 10, health: 9 } },
-    "MI": { name: "Michigan", ev: 15, lean: 51, priorities: { trade: 10, econ: 9, dem: 7 } },
-    "MN": { name: "Minnesota", ev: 10, lean: 58, priorities: { health: 8, labor: 9 } },
-    "MS": { name: "Mississippi", ev: 6, lean: 18, priorities: { econ: 9, health: 8 } },
-    "MO": { name: "Missouri", ev: 10, lean: 22, priorities: { gun: 8, econ: 7 } },
-    "MT": { name: "Montana", ev: 4, lean: 25, priorities: { gun: 9, land: 8 } },
-    "NE": { name: "Nebraska", ev: 5, lean: 20, priorities: { trade: 9, econ: 8 } },
-    "NV": { name: "Nevada", ev: 6, lean: 50.5, priorities: { econ: 10, immig: 8, labor: 9 } },
-    "NH": { name: "New Hampshire", ev: 4, lean: 55, priorities: { dem: 8, econ: 8 } },
-    "NJ": { name: "New Jersey", ev: 14, lean: 68, priorities: { taxes: 9, edu: 8 } },
-    "NM": { name: "New Mexico", ev: 5, lean: 62, priorities: { immig: 8, energy: 7 } },
-    "NY": { name: "New York", ev: 28, lean: 85, priorities: { crime: 8, housing: 9 } },
-    "NC": { name: "North Carolina", ev: 16, lean: 48, priorities: { edu: 8, econ: 9 } },
-    "ND": { name: "North Dakota", ev: 3, lean: 10, priorities: { energy: 10, trade: 8 } },
-    "OH": { name: "Ohio", ev: 17, lean: 30, priorities: { trade: 9, econ: 9 } },
-    "OK": { name: "Oklahoma", ev: 7, lean: 10, priorities: { energy: 10, gun: 9 } },
-    "OR": { name: "Oregon", ev: 8, lean: 70, priorities: { clim: 9, homeless: 9 } },
-    "PA": { name: "Pennsylvania", ev: 19, lean: 50.2, priorities: { econ: 10, energy: 9, trade: 8 } },
-    "RI": { name: "Rhode Island", ev: 4, lean: 75, priorities: { econ: 7 } },
-    "SC": { name: "South Carolina", ev: 9, lean: 25, priorities: { econ: 8, foreign: 6 } },
-    "SD": { name: "South Dakota", ev: 3, lean: 12, priorities: { trade: 8, gun: 9 } },
-    "TN": { name: "Tennessee", ev: 11, lean: 18, priorities: { econ: 8, gun: 8 } },
-    "TX": { name: "Texas", ev: 40, lean: 35, priorities: { immig: 10, energy: 9, gun: 9 } },
-    "UT": { name: "Utah", ev: 6, lean: 20, priorities: { family: 9, econ: 8 } },
-    "VT": { name: "Vermont", ev: 3, lean: 88, priorities: { clim: 10, health: 9 } },
-    "VA": { name: "Virginia", ev: 13, lean: 58, priorities: { edu: 8, defense: 8 } },
-    "WA": { name: "Washington", ev: 12, lean: 78, priorities: { clim: 9, tech: 8 } },
-    "WV": { name: "West Virginia", ev: 4, lean: 5, priorities: { energy: 10, econ: 9 } },
-    "WI": { name: "Wisconsin", ev: 10, lean: 50.1, priorities: { econ: 9, dairy: 8, dem: 7 } },
-    "WY": { name: "Wyoming", ev: 3, lean: 2, priorities: { energy: 10, gun: 10 } }
-};
-
-// SVG Paths (Simplified for brevity but functional)
-// Note: In a production app, these would be high-res. Here they are simplified polygons.
-const STATE_PATHS = {
-    "HI": "M 250,550 l 10,5 l -5,10 l -10,-5 z", // Abstract placeholder
-    "AK": "M 50,450 l 100,0 l 20,50 l -100,10 z", // Abstract placeholder
-    "WA": "M 130,20 L 210,25 L 205,80 L 135,70 Z",
-    "OR": "M 125,70 L 205,80 L 190,135 L 120,130 Z",
-    "CA": "M 120,130 L 190,135 L 220,250 L 160,280 L 100,180 Z",
-    "ID": "M 210,25 L 250,30 L 240,140 L 205,140 L 205,80 Z",
-    "NV": "M 190,135 L 240,140 L 250,230 L 220,250 Z",
-    "UT": "M 240,140 L 290,145 L 290,210 L 250,210 L 250,230 L 240,140 Z",
-    "AZ": "M 220,250 L 250,230 L 290,235 L 280,330 L 210,310 Z",
-    "MT": "M 250,30 L 400,40 L 390,110 L 240,100 L 240,140 L 250,30 Z", // Fixed overlap logic abstractly
-    "WY": "M 290,110 L 380,115 L 380,180 L 290,175 Z",
-    "CO": "M 290,175 L 380,180 L 380,245 L 290,240 Z",
-    "NM": "M 290,240 L 370,245 L 370,330 L 280,330 L 290,235 Z",
-    "ND": "M 390,40 L 470,45 L 470,90 L 390,90 Z",
-    "SD": "M 390,90 L 470,90 L 475,140 L 380,140 L 380,115 Z",
-    "NE": "M 380,140 L 475,140 L 480,190 L 380,190 L 380,180 Z",
-    "KS": "M 380,190 L 490,195 L 495,245 L 380,245 L 380,245 Z",
-    "OK": "M 370,245 L 495,245 L 495,290 L 400,290 L 400,260 L 370,260 Z",
-    "TX": "M 370,260 L 400,260 L 400,290 L 510,300 L 520,400 L 440,480 L 380,420 L 330,350 Z",
-    "MN": "M 470,45 L 530,50 L 510,120 L 470,120 Z",
-    "IA": "M 470,120 L 530,120 L 540,160 L 480,160 L 475,140 Z",
-    "MO": "M 480,160 L 560,160 L 560,230 L 500,230 L 495,245 L 490,195 Z",
-    "AR": "M 495,245 L 560,245 L 550,300 L 510,300 L 495,290 Z",
-    "LA": "M 510,300 L 550,300 L 560,350 L 580,380 L 530,390 L 510,340 Z",
-    "WI": "M 530,50 L 580,60 L 580,130 L 530,120 Z",
-    "IL": "M 530,120 L 580,130 L 580,210 L 540,220 L 540,160 Z",
-    "MS": "M 550,300 L 590,300 L 580,380 L 560,350 Z",
-    "MI": "M 580,60 L 650,70 L 640,150 L 580,130 Z",
-    "IN": "M 580,130 L 630,135 L 620,200 L 580,210 Z",
-    "KY": "M 540,220 L 620,200 L 680,210 L 660,250 L 560,230 Z",
-    "TN": "M 560,230 L 660,250 L 640,280 L 550,260 L 560,245 Z",
-    "AL": "M 590,300 L 630,300 L 620,380 L 580,380 Z",
-    "OH": "M 630,135 L 680,130 L 690,190 L 620,200 Z",
-    "GA": "M 630,300 L 680,310 L 680,380 L 620,380 Z",
-    "FL": "M 620,380 L 730,390 L 760,490 L 680,480 L 650,400 Z",
-    "NY": "M 690,70 L 770,60 L 770,120 L 720,130 L 690,120 Z",
-    "PA": "M 690,120 L 760,125 L 750,170 L 690,160 Z",
-    "WV": "M 660,190 L 710,180 L 720,210 L 680,210 Z",
-    "VA": "M 680,210 L 760,200 L 770,250 L 680,250 L 660,250 Z",
-    "NC": "M 640,280 L 750,260 L 780,300 L 680,310 Z",
-    "SC": "M 680,310 L 780,300 L 760,350 L 680,350 Z",
-    "ME": "M 790,30 L 840,40 L 830,90 L 790,80 Z",
-    "VT": "M 770,60 L 790,60 L 790,100 L 770,100 Z",
-    "NH": "M 790,60 L 810,65 L 800,105 L 790,100 Z",
-    "MA": "M 770,100 L 820,100 L 820,115 L 770,115 Z",
-    "RI": "M 800,115 L 820,115 L 820,125 L 800,125 Z",
-    "CT": "M 770,115 L 800,115 L 800,125 L 770,125 Z",
-    "NJ": "M 760,125 L 775,125 L 775,160 L 760,160 Z",
-    "DE": "M 750,170 L 770,170 L 770,190 L 750,185 Z",
-    "MD": "M 720,170 L 750,170 L 750,200 L 720,190 Z",
-};
-
-// Add SVG Paths to DOM
-const svg = document.getElementById('us-map');
-for (const [stateCode, d] of Object.entries(STATE_PATHS)) {
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("id", `state-${stateCode}`);
-    path.setAttribute("data-code", stateCode);
-    path.onclick = () => selectState(stateCode);
-    
-    // Add tooltip events
-    path.onmousemove = (e) => showTooltip(e, stateCode);
-    path.onmouseout = hideTooltip;
-    
-    svg.appendChild(path);
-}
-
-/* --- 2. Game Logic --- */
-
-let selectedState = null;
-
-function init() {
-    updateMap();
-    populateIssueSelect();
-    updateHeader();
-}
-
-// Color Logic
-function getStateColor(lean) {
-    // 0 = Full Red, 50 = Gray, 100 = Full Blue
-    // Tossup zone: 45-55 is mostly gray
-    if (lean >= 45 && lean <= 55) {
-        // Interpolate grayness
-        // Actually user wants 50/50 gray, closer states lighter
-        const dist = lean - 50; // -5 to +5
-        // We want pure gray at 0.
-        // Let's use a scale:
-        // 0-40: Red Gradient
-        // 40-50: Light Red to Gray
-        // 50-60: Gray to Light Blue
-        // 60-100: Blue Gradient
+    <section id="candidate-screen" class="screen">
+        <h2>Select Your Candidate</h2>
+        <div class="cards-container" id="candidate-cards">
+            </div>
         
-        if (Math.abs(dist) < 1) return "#b0b0b0"; // Pure Tossup
-        if (dist > 0) return "#93c5fd"; // Light Blue
-        return "#fca5a5"; // Light Red
-    }
-    
-    if (lean > 55) {
-        // Blue scale
-        // 55 -> Lightest Blue (#60a5fa), 100 -> Darkest Blue (#1e3a8a)
-        const intensity = (lean - 55) / 45; 
-        return `rgba(0, 174, 243, ${0.4 + (intensity * 0.6)})`;
-    } else {
-        // Red scale
-        // 45 -> Lightest Red, 0 -> Darkest Red
-        const intensity = (45 - lean) / 45;
-        return `rgba(232, 27, 35, ${0.4 + (intensity * 0.6)})`;
-    }
-}
+        <div id="stance-editor" class="panel hidden">
+            <h3>Adjust Platform Stances</h3>
+            <p class="subtitle">Fine-tune your positions. Moving sliders affects your base appeal.</p>
+            <div id="stance-sliders-container"></div>
+            <button onclick="confirmCandidate()">Confirm Candidate</button>
+        </div>
+    </section>
 
-function updateMap() {
-    let kamalaEV = 0;
-    
-    for (const [code, data] of Object.entries(STATES_DATA)) {
-        const path = document.getElementById(`state-${code}`);
-        if(path) {
-            path.style.fill = getStateColor(data.lean);
-            
-            // Count EV
-            if (data.lean > 50) kamalaEV += data.ev;
-        }
-    }
-    
-    // Animate counter
-    document.getElementById('ev-display').innerText = `${kamalaEV} / 270`;
-}
-
-function selectState(code) {
-    selectedState = code;
-    const data = STATES_DATA[code];
-    const el = document.getElementById('state-panel');
-    const msg = document.getElementById('empty-state-msg');
-    
-    msg.style.display = 'none';
-    el.style.display = 'block';
-    
-    // Basic Info
-    document.getElementById('state-name').innerText = data.name;
-    document.getElementById('state-ev').innerText = `${data.ev} Electoral Votes`;
-    
-    let status = "Tossup";
-    if (data.lean > 55) status = "Lean Dem";
-    if (data.lean > 65) status = "Safe Dem";
-    if (data.lean < 45) status = "Lean Rep";
-    if (data.lean < 35) status = "Safe Rep";
-    document.getElementById('state-status').innerText = status;
-    document.getElementById('state-status').style.color = data.lean > 50 ? 'var(--dem-blue)' : (data.lean < 50 ? 'var(--rep-red)' : 'white');
-
-    // Lean Bar
-    const marker = document.getElementById('lean-marker');
-    marker.style.left = `${data.lean}%`;
-
-    // Issues List
-    const issuesContainer = document.getElementById('state-issues-list');
-    issuesContainer.innerHTML = '';
-    
-    // Sort issues by importance for this state
-    // Use default importance of 5 if not in state priorities
-    const stateIssues = ISSUES.map(i => {
-        return {
-            ...i,
-            imp: data.priorities[i.id] || 4
-        };
-    }).sort((a,b) => b.imp - a.imp);
-
-    // Display Top 5
-    stateIssues.slice(0, 5).forEach(issue => {
-        const div = document.createElement('div');
-        div.className = 'issue-item';
-        div.innerHTML = `
-            <span>${issue.name}</span>
-            <div class="issue-importance">
-                <div class="issue-importance-fill" style="width:${issue.imp * 10}%"></div>
+    <section id="vp-screen" class="screen">
+        <h2>Select Your Running Mate</h2>
+        <p>Your VP choice provides regional boosts and specific issue bonuses.</p>
+        <div class="cards-container" id="vp-cards">
             </div>
-        `;
-        issuesContainer.appendChild(div);
-    });
-    
-    // Reset selection feedback
-    document.getElementById('issue-feedback').innerText = "";
-}
+    </section>
 
-function populateIssueSelect() {
-    const sel = document.getElementById('issue-select');
-    ISSUES.forEach(i => {
-        const opt = document.createElement('option');
-        opt.value = i.id;
-        opt.innerText = i.name;
-        sel.appendChild(opt);
-    });
-    
-    sel.addEventListener('change', updateCampaignFeedback);
-}
+    <section id="game-screen" class="screen">
+        <header>
+            <div class="stat">
+                <span class="label">Candidate</span>
+                <span class="value" id="header-candidate">---</span>
+            </div>
+            <div class="stat">
+                <span class="label">Electoral Votes</span>
+                <span class="value" id="ev-display">0 / 270</span>
+            </div>
+            <div class="stat">
+                <span class="label">Weeks Left</span>
+                <span class="value" id="weeks-display">12</span>
+            </div>
+            <div class="stat">
+                <span class="label">Funds</span>
+                <span class="value funds" id="funds-display">$0M</span>
+            </div>
+        </header>
 
-function updateCampaignFeedback() {
-    if (!selectedState) return;
-    
-    const issueId = document.getElementById('issue-select').value;
-    const stateData = STATES_DATA[selectedState];
-    const imp = stateData.priorities[issueId] || 4; // Default importance
-    const stance = CANDIDATE.stances[issueId];
-    
-    // Logic: If Candidate Stance > 50 (Dem) and State is Red (<50), it's harder unless issue importance is high?
-    // Actually, campaign logic:
-    // If you campaign on an issue, you pull the state toward YOUR stance.
-    // Effectiveness = Issue Importance * Funding
-    
-    let effectText = "Moderate Impact";
-    if (imp >= 8) effectText = "High Impact! This is a key issue here.";
-    if (imp <= 3) effectText = "Low Impact. Voters here don't care much.";
-    
-    const fb = document.getElementById('issue-feedback');
-    fb.innerText = `${effectText} (Importance: ${imp}/10)`;
-}
+        <div class="game-layout">
+            <div id="map-container">
+                <svg id="us-map" viewBox="0 0 950 600"></svg>
+                <div id="tooltip"></div>
+            </div>
 
-function runCampaign() {
-    if (!selectedState || CANDIDATE.funds < 0.1) return;
-    
-    // Deduct Funds
-    CANDIDATE.funds -= 0.1;
-    updateHeader();
-    
-    // Calculate Shift
-    const issueId = document.getElementById('issue-select').value;
-    const stateData = STATES_DATA[selectedState];
-    const imp = stateData.priorities[issueId] || 4;
-    const candidateStance = CANDIDATE.stances[issueId]; // 0-100
-    
-    // Direction of shift: Move state lean toward candidate stance?
-    // In this simple model, campaigning ALWAYS helps the candidate slightly, 
-    // but helps MORE if the issue is important.
-    
-    // Base shift amount (random variance added)
-    let shift = (imp / 2) * (Math.random() * 0.5 + 0.5); 
-    
-    // If state is very partisan opposite, harder to move
-    if (Math.abs(stateData.lean - 50) > 30) {
-        shift = shift * 0.5;
-    }
-    
-    stateData.lean += shift;
-    if (stateData.lean > 100) stateData.lean = 100;
-    
-    // Visual Updates
-    updateMap();
-    selectState(selectedState); // refresh panel
-    showNotification(`Campaigned in ${stateData.name} on ${ISSUES.find(i=>i.id===issueId).name}. Funds -$100k.`);
-    
-    // Decrement time slightly (1 week = 10 campaigns? Let's just say manual turn end later, or auto decrement)
-    // For now, just funds.
-}
+            <aside id="dashboard">
+                <div id="state-info-panel" class="hidden">
+                    <h2 id="state-name">Select State</h2>
+                    <div class="lean-bar-wrap">
+                        <div class="lean-bar-bg"></div>
+                        <div class="lean-marker" id="lean-marker"></div>
+                    </div>
+                    <div class="lean-labels">
+                        <span>Rep</span>
+                        <span>Tossup</span>
+                        <span>Dem</span>
+                    </div>
 
-function updateHeader() {
-    document.getElementById('funds-display').innerText = `$${CANDIDATE.funds.toFixed(1)}M`;
-    document.getElementById('weeks-display').innerText = CANDIDATE.weeks;
-}
+                    <div class="panel-section">
+                        <h4>Campaign Strategy</h4>
+                        <select id="issue-select"></select>
+                        <div id="strategy-feedback">Select an issue...</div>
+                        <button id="campaign-btn" onclick="campaignInState()">
+                            Campaign ($100k)
+                        </button>
+                    </div>
 
-function showNotification(text) {
-    const notif = document.getElementById('notification-area');
-    notif.innerText = text;
-    notif.style.opacity = 1;
-    setTimeout(() => {
-        notif.style.opacity = 0;
-    }, 3000);
-}
+                    <div class="panel-section">
+                        <h4>Top State Issues</h4>
+                        <div id="state-issues-list"></div>
+                    </div>
+                </div>
+                <div id="empty-state-msg">
+                    Select a state on the map to view polling data.
+                </div>
+            </aside>
+        </div>
+    </section>
+    
+    <div id="notification-area"></div>
 
-// Tooltip Logic
-function showTooltip(e, code) {
-    const tt = document.getElementById('tooltip');
-    const data = STATES_DATA[code];
-    tt.style.display = 'block';
-    tt.style.left = (e.clientX + 15) + 'px';
-    tt.style.top = (e.clientY + 15) + 'px';
-    tt.innerText = `${data.name}: ${data.lean.toFixed(1)}% (D)`;
-}
-function hideTooltip() {
-    document.getElementById('tooltip').style.display = 'none';
-}
-
-// Start
-init();
-
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
