@@ -1,5 +1,11 @@
 /* --- CONFIGURATION --- */
-// ... (PARTIES and VPS arrays remain the same as your file) ...
+const PARTIES = {
+    D: { name: "Democratic", color: "#0056b3", desc: "Liberal platform." },
+    R: { name: "Republican", color: "#d32f2f", desc: "Conservative platform." },
+    I: { name: "Independent", color: "#d4a017", desc: "Centrist platform." },
+    G: { name: "Green", color: "#198754", desc: "Eco-Socialist platform." },
+    L: { name: "Libertarian", color: "#fd7e14", desc: "Liberty platform." }
+};
 
 const CANDIDATES = [
     // DEMOCRATS
@@ -24,7 +30,38 @@ const CANDIDATES = [
     { id: "termaat", name: "Mike ter Maat", party: "L", desc: "Economist.", funds: 10, img: "", buff: "Policy Wonk" }
 ];
 
-// ... (INIT_STATES and ISSUES remain the same) ...
+const VPS = [
+    { id: "shapiro", name: "Josh Shapiro", party: "D", state: "PA", desc: "Popular swing state governor." },
+    { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", desc: "Astronaut & Senator." },
+    { id: "cooper", name: "Roy Cooper", party: "D", state: "NC", desc: "Moderate southern appeal." },
+    { id: "rubio", name: "Marco Rubio", party: "R", state: "FL", desc: "Establishment bridge." },
+    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner." }
+];
+
+const INIT_STATES = {
+    "AL": { name: "Alabama", ev: 9, poll: 35 }, "AK": { name: "Alaska", ev: 3, poll: 42 }, "AZ": { name: "Arizona", ev: 11, poll: 49.5 },
+    "AR": { name: "Arkansas", ev: 6, poll: 35 }, "CA": { name: "California", ev: 54, poll: 65 }, "CO": { name: "Colorado", ev: 10, poll: 56 },
+    "CT": { name: "Connecticut", ev: 7, poll: 59 }, "DE": { name: "Delaware", ev: 3, poll: 62 }, "DC": { name: "D.C.", ev: 3, poll: 92 },
+    "FL": { name: "Florida", ev: 30, poll: 46 }, "GA": { name: "Georgia", ev: 16, poll: 49.2 }, "HI": { name: "Hawaii", ev: 4, poll: 68 },
+    "ID": { name: "Idaho", ev: 4, poll: 30 }, "IL": { name: "Illinois", ev: 19, poll: 57 }, "IN": { name: "Indiana", ev: 11, poll: 40 },
+    "IA": { name: "Iowa", ev: 6, poll: 43 }, "KS": { name: "Kansas", ev: 6, poll: 40 }, "KY": { name: "Kentucky", ev: 8, poll: 35 },
+    "LA": { name: "Louisiana", ev: 8, poll: 38 }, "ME": { name: "Maine", ev: 4, poll: 55 }, "MD": { name: "Maryland", ev: 10, poll: 65 },
+    "MA": { name: "Massachusetts", ev: 11, poll: 68 }, "MI": { name: "Michigan", ev: 15, poll: 51.5 }, "MN": { name: "Minnesota", ev: 10, poll: 54 },
+    "MS": { name: "Mississippi", ev: 6, poll: 38 }, "MO": { name: "Missouri", ev: 10, poll: 42 }, "MT": { name: "Montana", ev: 4, poll: 40 },
+    "NE": { name: "Nebraska", ev: 5, poll: 38 }, "NV": { name: "Nevada", ev: 6, poll: 50.5 }, "NH": { name: "New Hampshire", ev: 4, poll: 53 },
+    "NJ": { name: "New Jersey", ev: 14, poll: 58 }, "NM": { name: "New Mexico", ev: 5, poll: 54 }, "NY": { name: "New York", ev: 28, poll: 62 },
+    "NC": { name: "North Carolina", ev: 16, poll: 48.5 }, "ND": { name: "North Dakota", ev: 3, poll: 30 }, "OH": { name: "Ohio", ev: 17, poll: 45 },
+    "OK": { name: "Oklahoma", ev: 7, poll: 32 }, "OR": { name: "Oregon", ev: 8, poll: 58 }, "PA": { name: "Pennsylvania", ev: 19, poll: 50.2 },
+    "RI": { name: "Rhode Island", ev: 4, poll: 60 }, "SC": { name: "South Carolina", ev: 9, poll: 42 }, "SD": { name: "South Dakota", ev: 3, poll: 35 },
+    "TN": { name: "Tennessee", ev: 11, poll: 37 }, "TX": { name: "Texas", ev: 40, poll: 44 }, "UT": { name: "Utah", ev: 6, poll: 38 },
+    "VT": { name: "Vermont", ev: 3, poll: 66 }, "VA": { name: "Virginia", ev: 13, poll: 54 }, "WA": { name: "Washington", ev: 12, poll: 60 },
+    "WV": { name: "West Virginia", ev: 4, poll: 28 }, "WI": { name: "Wisconsin", ev: 10, poll: 50.8 }, "WY": { name: "Wyoming", ev: 3, poll: 25 }
+};
+
+const ISSUES = [
+    { id: 'econ', name: 'Economy' }, { id: 'immig', name: 'Border Security' },
+    { id: 'abort', name: 'Reproductive Rights' }, { id: 'clim', name: 'Climate Change' }
+];
 
 /* --- APP LOGIC --- */
 const app = {
@@ -42,6 +79,7 @@ const app = {
     },
 
     init: function() {
+        console.log("App Initializing...");
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
         for(let s in this.data.states) {
             this.data.states[s].moe = (Math.random() * 2 + 2).toFixed(1);
@@ -58,17 +96,23 @@ const app = {
         document.getElementById(id).classList.add('active');
     },
 
+    /* --- PARTY SELECTION --- */
     renderParties: function() {
         const container = document.getElementById('party-cards');
         if(!container) return;
         container.innerHTML = "";
         
         for(let key in PARTIES) {
-            if(key === 'G' || key === 'L') continue; // Only show major parties + Indep for player selection
+            if(key === 'G' || key === 'L') continue; // Only show major parties + Indep
             const p = PARTIES[key];
             const el = document.createElement('div');
             el.className = "card";
-            el.innerHTML = `<div class="card-info" style="border-top: 5px solid ${p.color}; padding-top:20px;"><h3>${p.name} Party</h3><p>${p.desc}</p></div>`;
+            el.innerHTML = `
+                <div class="card-info" style="border-top: 5px solid ${p.color}; padding-top:20px;">
+                    <h3>${p.name} Party</h3>
+                    <p>${p.desc}</p>
+                </div>
+            `;
             el.onclick = () => {
                 this.data.selectedParty = key;
                 this.renderCandidates(key);
@@ -78,16 +122,33 @@ const app = {
         }
     },
 
+    /* --- CANDIDATE SELECTION --- */
     renderCandidates: function(partyKey) {
         const container = document.getElementById('candidate-cards');
         container.innerHTML = "";
-        const filtered = CANDIDATES.filter(c => c.party === partyKey);
         
+        const filtered = CANDIDATES.filter(c => c.party === partyKey);
+        if(filtered.length === 0) {
+            container.innerHTML = "<p>No candidates available.</p>";
+            return;
+        }
+
         filtered.forEach(c => {
             const el = document.createElement('div');
             el.className = 'card';
-            const imgHTML = c.img ? `<img src="${c.img}">` : "";
-            el.innerHTML = `<div class="portrait">${imgHTML}<div class="portrait-placeholder">${c.name.charAt(0)}</div></div><div class="card-info"><h3>${c.name}</h3><p>${c.desc}</p><p class="buff-text">${c.buff}</p><p style="color:#4ade80">Funds: $${c.funds}M</p></div>`;
+            const imgHTML = c.img ? `<img src="${c.img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : "";
+            el.innerHTML = `
+                <div class="portrait">
+                    ${imgHTML}
+                    <div class="portrait-placeholder" ${imgHTML ? 'style="display:none"' : ''}>${c.name.charAt(0)}</div>
+                </div>
+                <div class="card-info">
+                    <h3>${c.name}</h3>
+                    <p>${c.desc}</p>
+                    <p class="buff-text">${c.buff}</p>
+                    <p style="color:#4ade80">Funds: $${c.funds}M</p>
+                </div>
+            `;
             el.onclick = () => {
                 this.data.candidate = c;
                 this.renderVPs(c.party);
@@ -97,15 +158,27 @@ const app = {
         });
     },
 
+    /* --- VP SELECTION --- */
     renderVPs: function(partyKey) {
         const container = document.getElementById('vp-cards');
         container.innerHTML = "";
         const filtered = VPS.filter(v => v.party === partyKey);
         
+        if(filtered.length === 0) {
+             container.innerHTML = "<div class='card' onclick='app.renderOpponentSelection(); app.goToScreen(\"opponent-screen\")'><h3>CONTINUE WITHOUT VP</h3></div>";
+             return;
+        }
+
         filtered.forEach(v => {
             const el = document.createElement('div');
             el.className = 'card';
-            el.innerHTML = `<div class="card-info"><h3>${v.name}</h3><p>Home: ${v.state}</p><p>${v.desc}</p></div>`;
+            el.innerHTML = `
+                <div class="card-info">
+                    <h3>${v.name}</h3>
+                    <p>Home: ${v.state}</p>
+                    <p>${v.desc}</p>
+                </div>
+            `;
             el.onclick = () => {
                 this.data.vp = v;
                 this.renderOpponentSelection();
@@ -115,7 +188,7 @@ const app = {
         });
     },
 
-    /* --- OPPONENT LOGIC --- */
+    /* --- OPPONENT SELECTION --- */
     toggleThirdParties: function() {
         this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked;
         document.getElementById('third-party-section').style.opacity = this.data.thirdPartiesEnabled ? "1" : "0.3";
@@ -129,14 +202,23 @@ const app = {
 
         // Determine Major Rival
         let rivalParty = (this.data.selectedParty === 'D') ? 'R' : 'D';
-        if (this.data.selectedParty === 'I') rivalParty = 'D'; // Independents fight incumbent D
+        if (this.data.selectedParty === 'I') rivalParty = 'D'; 
 
         // Render Major Opponents
         CANDIDATES.filter(c => c.party === rivalParty).forEach(c => {
             const el = document.createElement('div');
             el.className = 'card';
-            const imgHTML = c.img ? `<img src="${c.img}">` : "";
-            el.innerHTML = `<div class="portrait">${imgHTML}</div><div class="card-info"><h3>${c.name}</h3><p>${c.desc}</p></div>`;
+            const imgHTML = c.img ? `<img src="${c.img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : "";
+            el.innerHTML = `
+                <div class="portrait">
+                    ${imgHTML}
+                    <div class="portrait-placeholder" ${imgHTML ? 'style="display:none"' : ''}>${c.name.charAt(0)}</div>
+                </div>
+                <div class="card-info">
+                    <h3>${c.name}</h3>
+                    <p>${c.desc}</p>
+                </div>
+            `;
             el.onclick = () => {
                 this.data.opponent = c;
                 this.startGame();
@@ -149,11 +231,17 @@ const app = {
             const el = document.createElement('div');
             el.className = 'card';
             el.style.transform = "scale(0.9)";
-            el.innerHTML = `<div class="card-info" style="border-top:3px solid ${PARTIES[c.party].color}"><h3>${c.name}</h3><p>${PARTIES[c.party].name}</p></div>`;
+            el.innerHTML = `
+                <div class="card-info" style="border-top:3px solid ${PARTIES[c.party].color}">
+                    <h3>${c.name}</h3>
+                    <p>${PARTIES[c.party].name}</p>
+                </div>
+            `;
             minorContainer.appendChild(el);
         });
     },
 
+    /* --- GAME START --- */
     initIssues: function() {
         const sel = document.getElementById('issue-select');
         ISSUES.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.name}</option>`);
@@ -163,6 +251,7 @@ const app = {
         this.data.funds = this.data.candidate.funds;
         this.goToScreen('game-screen');
         
+        // HUD
         const img = document.getElementById('hud-img');
         if(this.data.candidate.img) { img.src = this.data.candidate.img; img.style.display = "block"; }
         
@@ -180,10 +269,10 @@ const app = {
         // Spoiler Effect
         if(this.data.thirdPartiesEnabled) {
             for(let s in this.data.states) {
-                // Randomly hurts D or R based on state
                 let spoiler = (Math.random() * 4) + 1; 
                 if(Math.random() > 0.5) this.data.states[s].poll -= spoiler; else this.data.states[s].poll += spoiler;
             }
+            this.log("Third parties entered. Polls shifted.");
         }
 
         this.updateHUD();
@@ -191,14 +280,16 @@ const app = {
         this.log(`Campaign vs ${this.data.opponent ? this.data.opponent.name : 'Opponent'} started.`);
     },
 
-    /* --- MAP & GAME LOOP --- */
+    /* --- MAP LOGIC --- */
     initMap: function() {
         for(let code in this.data.states) {
             let path = document.getElementById(code);
             if(path) {
                 path.onclick = () => this.clickState(code);
+                path.onmousemove = (e) => this.showTooltip(e, code);
+                path.onmouseleave = () => this.hideTooltip();
                 path.style.cursor = "pointer";
-                path.style.transition = "fill 0.2s";
+                path.style.transition = "fill 0.2s, opacity 0.2s";
             }
         }
         this.colorMap();
@@ -209,28 +300,58 @@ const app = {
             const s = this.data.states[code];
             const p = document.getElementById(code);
             if(!p) continue;
+
             let fill;
-            if(s.poll > 55) fill = "#0056b3"; else if(s.poll > 50) fill = "#4fa1ff"; else if(s.poll > 45) fill = "#ff6b6b"; else fill = "#d32f2f";
-            if(s.poll >= 48 && s.poll <= 52) fill = "#64748b";
+            if(s.poll > 55) fill = "#0056b3";      // Safe Dem
+            else if(s.poll > 50) fill = "#4fa1ff"; // Lean Dem
+            else if(s.poll > 45) fill = "#ff6b6b"; // Lean Rep
+            else fill = "#d32f2f";                 // Safe Rep
+            
+            if(s.poll >= 48 && s.poll <= 52) fill = "#64748b"; // Tossup
+
             p.style.fill = fill;
-            p.style.stroke = "white"; p.style.strokeWidth = "1";
         }
         this.updateScore();
+    },
+
+    showTooltip: function(e, code) {
+        const tt = document.getElementById('map-tooltip');
+        const s = this.data.states[code];
+        const dPct = s.poll.toFixed(1);
+        const rPct = (100 - s.poll).toFixed(1);
+        
+        tt.innerHTML = `
+            <h4>${s.name}</h4>
+            <div class="tip-row"><span style="color:#4fa1ff">DEM</span> <span>${dPct}%</span></div>
+            <div class="tip-row"><span style="color:#ff6b6b">REP</span> <span>${rPct}%</span></div>
+            <div class="tip-row" style="color:#aaa; font-size:0.75rem; margin-top:5px; border-top:1px solid #444; padding-top:4px;">${s.ev} Electoral Votes</div>
+        `;
+        tt.style.display = 'block';
+        tt.style.left = (e.clientX + 15) + 'px';
+        tt.style.top = (e.clientY + 15) + 'px';
+    },
+
+    hideTooltip: function() {
+        document.getElementById('map-tooltip').style.display = 'none';
     },
 
     clickState: function(code) {
         this.data.selectedState = code;
         const s = this.data.states[code];
+        
         document.getElementById('empty-msg').classList.add('hidden');
         document.getElementById('state-panel').classList.remove('hidden');
         document.getElementById('sp-name').innerText = s.name;
         document.getElementById('sp-ev').innerText = s.ev + " EV";
         document.getElementById('sp-moe').innerText = `MOE: ±${s.moe}%`;
-        const dVal = s.poll.toFixed(1); const rVal = (100 - s.poll).toFixed(1);
+
+        const dVal = s.poll.toFixed(1);
+        const rVal = (100 - s.poll).toFixed(1);
         document.getElementById('poll-dem-bar').style.width = dVal + "%";
         document.getElementById('poll-rep-bar').style.width = rVal + "%";
         document.getElementById('poll-dem-val').innerText = dVal + "%";
         document.getElementById('poll-rep-val').innerText = rVal + "%";
+
         const list = document.getElementById('sp-issues-list');
         list.innerHTML = '';
         ISSUES.sort((a,b) => s.priorities[b.id] - s.priorities[a.id]).slice(0,3).forEach(x => {
@@ -256,7 +377,8 @@ const app = {
         this.data.funds -= 2.5; this.data.actionsLeft--;
         for(let code in this.data.states) {
             const boost = (Math.random() * 0.5); 
-            if(this.data.selectedParty === 'D') this.data.states[code].poll += boost; else this.data.states[code].poll -= boost;
+            if(this.data.selectedParty === 'D') this.data.states[code].poll += boost;
+            else this.data.states[code].poll -= boost;
         }
         this.log("National Ad Buy.");
         this.updateHUD(); this.colorMap(); if(this.data.selectedState) this.clickState(this.data.selectedState);
