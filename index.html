@@ -3,78 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2028 Election Sim</title>
+    <title>Campaign Trail 2028</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="screen-intro" class="screen">
-        <div class="intro-box">
-            <h1>THE CAMPAIGN TRAIL 2028</h1>
-            <div class="img-row">
-                <img src="images/scenario.jpg" alt="Election Scenario" style="max-width: 100%; border-radius: 8px;">
+    <div id="screen-intro" class="screen active">
+        <div class="intro-container">
+            <h1 class="game-title">THE CAMPAIGN TRAIL 2028</h1>
+            <div class="intro-visuals">
+                <img src="images/scenario.jpg" alt="White House" class="scenario-img">
             </div>
-            <p id="scenario-text" class="scenario-text"></p>
-            <button class="big-btn" id="start-btn">PLAY SIMULATION</button>
+            <div class="scenario-box">
+                <p id="scenario-text"></p>
+            </div>
+            <button class="primary-btn" id="start-btn">BEGIN SIMULATION</button>
         </div>
     </div>
 
     <div id="screen-party" class="screen">
-        <h2>SELECT YOUR PARTY</h2>
+        <h2 class="screen-title">SELECT YOUR PARTY</h2>
         <div class="party-grid">
-            <div class="party-option" style="border-color: #00AEF3" data-party="D">
-                <h3 style="color:#00AEF3">DEMOCRATS</h3>
+            <div class="party-card party-d" data-party="D">
+                <div class="party-icon">D</div>
+                <h3>DEMOCRATIC</h3>
             </div>
-            <div class="party-option" style="border-color: #E81B23" data-party="R">
-                <h3 style="color:#E81B23">REPUBLICANS</h3>
+            <div class="party-card party-r" data-party="R">
+                <div class="party-icon">R</div>
+                <h3>REPUBLICAN</h3>
             </div>
-            <div class="party-option" style="border-color: #F2C75C" data-party="I">
-                <h3 style="color:#F2C75C">INDEPENDENT</h3>
+            <div class="party-card party-i" data-party="I">
+                <div class="party-icon">I</div>
+                <h3>INDEPENDENT</h3>
             </div>
         </div>
     </div>
 
     <div id="screen-candidate" class="screen">
-        <div id="party-header" class="party-header">
-            <div>
-                <h2 id="party-name">Party Name</h2>
-                <p id="party-desc">Description</p>
+        <header class="party-header" id="party-header-bar">
+            <div class="header-left">
+                <h2 id="party-name">PARTY NAME</h2>
+                <p id="party-desc">Party Description</p>
             </div>
-            <div class="chair-info">
+            <div class="header-right">
                 <img id="chair-img" src="" alt="Chair">
-                <span id="chair-name"></span>
+                <div class="chair-details">
+                    <span class="label">Party Chair</span>
+                    <span id="chair-name">Name</span>
+                </div>
             </div>
-        </div>
-        <h3>Select Presidential Nominee</h3>
-        <div id="candidate-list" class="scroll-list"></div>
+        </header>
+
+        <h3 class="section-label">Select Presidential Nominee</h3>
+        <div id="candidate-list" class="grid-list">
+            </div>
     </div>
 
     <div id="screen-vp" class="screen">
-        <h2>Select Running Mate (VP)</h2>
-        <p>Choose carefully. This choice affects state polling.</p>
-        <div id="vp-list" class="scroll-list"></div>
+        <h2 class="screen-title">Select Running Mate</h2>
+        <p class="screen-subtitle">Your VP choice will boost polling in their home region.</p>
+        <div id="vp-list" class="grid-list">
+            </div>
     </div>
 
     <div id="screen-map" class="screen">
-        <header class="game-hud">
-            <div>CAMPAIGN 2028</div>
-            <div id="ev-tracker">DEM: 0 | GOP: 0</div>
+        <header class="dashboard-hud">
+            <div class="hud-item">
+                <span class="hud-label">CANDIDATE</span>
+                <span id="hud-candidate" class="hud-value">Name</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">ELECTORAL VOTES</span>
+                <span id="hud-ev" class="hud-value">0 / 270</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">WEEKS LEFT</span>
+                <span id="hud-turn" class="hud-value">12</span>
+            </div>
+            <div class="hud-item">
+                <span class="hud-label">FUNDS</span>
+                <span id="hud-funds" class="hud-value">$0</span>
+            </div>
         </header>
-        
-        <div class="map-container">
-            <svg viewBox="0 0 959 593" id="us-map-svg">
-                <path id="HI" d="M 295.405 533.245 L 297.098 534.542 L 298.343 534.697 L 298.544 533.682 L 298.508 532.541 L 299.715 531.026 L 302.408 529.742 L 303.414 529.742 L 303.889 530.883 L 303.284 532.411 L 303.542 533.725 L 305.826 535.150 L 308.232 536.031 L 309.808 537.103 L 310.274 538.743 L 309.289 539.521 L 308.573 539.114 L 307.742 539.043 L 306.874 539.387 L 306.773 539.921 L 306.208 539.881 L 305.950 539.310 L 305.172 539.160 L 304.577 539.231 L 304.145 539.967 L 303.550 539.697 L 302.247 538.192 L 301.217 537.492 L 300.518 537.284 L 299.245 537.542 L 298.501 537.159 L 296.651 537.388 L 295.748 536.524 L 295.405 533.245 Z M 266.082 522.039 L 268.048 521.841 L 270.816 523.590 L 271.697 525.043 L 271.724 526.444 L 270.218 527.180 L 269.118 527.180 L 267.424 526.868 L 265.574 525.266 L 265.574 523.712 L 266.082 522.039 Z M 255.485 516.486 L 257.481 517.387 L 257.653 519.062 L 256.339 520.150 L 254.915 520.150 L 252.887 518.730 L 252.664 517.484 L 253.303 516.486 L 255.485 516.486 Z M 244.571 515.655 L 246.331 516.697 L 245.864 517.925 L 244.170 518.042 L 242.746 517.200 L 242.929 515.932 L 244.571 515.655 Z M 228.140 511.970 L 229.743 512.697 L 229.414 514.072 L 228.100 514.479 L 226.747 513.682 L 226.980 512.454 L 228.140 511.970 Z" class="state" stroke="#000" stroke-width="0.5"></path>
-                <path id="FL" d="M 751.272 473.541 L 755.207 470.923 L 757.940 470.223 L 760.312 471.166 L 760.892 474.341 L 760.334 476.327 L 761.536 479.799 L 761.642 485.801 L 763.535 488.728 L 763.535 491.135 L 764.551 491.565 L 764.218 493.531 L 763.307 493.531 L 761.916 495.234 L 761.961 498.414 L 760.540 500.180 L 761.353 502.502 L 760.844 504.604 L 759.387 505.319 L 759.204 507.031 L 757.291 506.786 L 756.126 507.564 L 754.756 506.963 L 754.678 505.808 L 755.578 504.536 L 754.346 503.715 L 753.844 502.269 L 752.701 501.990 L 752.091 502.812 L 750.812 502.623 L 749.610 501.446 L 748.777 498.114 L 748.966 496.069 L 747.534 494.613 L 747.889 493.103 L 746.546 490.580 L 746.546 489.102 L 745.069 487.657 L 744.159 484.580 L 741.026 482.991 L 738.649 483.335 L 735.806 481.546 L 731.830 481.790 L 729.064 482.356 L 725.666 481.879 L 721.490 482.268 L 719.146 480.990 L 715.392 481.023 L 713.437 479.945 L 709.873 480.645 L 708.874 479.245 L 709.684 477.534 L 711.239 476.990 L 712.916 475.290 L 715.259 475.524 L 715.703 474.346 L 714.248 471.191 L 714.282 467.436 L 751.272 473.541 Z" class="state" stroke="#000" stroke-width="0.5"></path>
-                <path id="CA" d="M 52.825 210.638 L 102.391 199.378 L 102.657 247.905 L 140.785 292.834 L 138.864 294.544 L 139.119 296.344 L 134.343 301.765 L 134.421 303.321 L 132.899 304.587 L 132.555 306.942 L 130.634 308.209 L 129.534 311.108 L 124.791 313.296 L 123.636 316.596 L 124.325 318.062 L 123.547 319.662 L 122.148 320.195 L 120.371 318.862 L 118.994 319.262 L 118.094 318.729 L 115.695 320.406 L 115.517 322.217 L 114.151 323.016 L 112.552 322.461 L 111.952 323.061 L 109.931 323.150 L 108.309 321.783 L 107.820 318.706 L 105.777 318.261 L 104.999 317.062 L 104.622 314.995 L 102.734 313.751 L 98.713 313.795 L 97.436 312.396 L 96.003 312.285 L 94.614 310.829 L 92.515 311.518 L 88.728 309.840 L 87.528 308.641 L 86.829 306.274 L 84.774 304.497 L 82.597 304.297 L 80.609 300.997 L 80.209 298.153 L 78.488 296.187 L 77.299 292.054 L 75.311 289.466 L 74.200 285.955 L 74.245 284.156 L 73.134 282.845 L 69.180 279.790 L 67.892 279.801 L 65.570 278.434 L 63.882 275.057 L 62.438 273.713 L 59.883 273.235 L 59.572 271.791 L 58.262 270.813 L 57.706 268.047 L 55.496 266.381 L 55.152 263.370 L 53.641 261.215 L 53.530 258.982 L 52.319 256.405 L 50.364 252.172 L 49.342 249.239 L 46.476 244.640 L 46.509 240.241 L 43.199 235.330 L 41.777 230.131 L 41.777 227.132 L 40.755 224.288 L 39.556 222.188 L 39.389 218.411 L 40.355 214.634 L 43.377 210.635 L 47.987 207.391 L 52.825 210.638 Z" class="state" stroke="#000" stroke-width="0.5"></path>
-                <path id="TX" d="M 333.379 313.362 L 396.942 313.562 L 396.653 358.948 L 400.952 359.148 L 401.552 387.891 L 420.733 397.687 L 420.733 416.035 L 420.244 416.146 L 421.288 418.101 L 421.111 419.856 L 419.344 421.056 L 419.789 422.389 L 421.844 422.589 L 423.832 426.699 L 424.166 429.620 L 425.266 430.731 L 425.121 433.053 L 423.510 436.430 L 421.222 438.252 L 420.578 440.095 L 418.678 441.795 L 416.712 441.795 L 414.935 444.606 L 412.558 445.694 L 410.747 448.571 L 409.614 449.193 L 407.037 452.925 L 405.004 454.436 L 405.004 455.769 L 402.105 456.969 L 401.371 458.746 L 399.716 459.723 L 398.928 461.945 L 397.717 462.623 L 396.650 464.733 L 396.695 466.866 L 397.717 467.577 L 397.583 469.776 L 396.228 471.198 L 396.795 473.064 L 396.028 474.086 L 396.384 476.352 L 395.206 476.352 L 394.395 477.585 L 391.207 478.474 L 391.307 480.096 L 390.418 481.562 L 388.929 482.028 L 387.696 480.529 L 385.919 480.240 L 384.997 481.517 L 383.653 481.440 L 382.720 480.140 L 381.564 480.207 L 379.876 478.963 L 378.143 479.541 L 376.510 478.297 L 374.832 478.430 L 373.910 477.108 L 371.499 476.797 L 370.255 474.786 L 368.611 474.375 L 367.633 472.953 L 365.189 471.531 L 363.845 469.543 L 362.590 469.176 L 359.857 466.455 L 356.635 465.111 L 354.913 463.356 L 353.491 463.067 L 352.025 460.679 L 349.537 459.257 L 347.881 458.746 L 346.726 456.980 L 345.248 456.635 L 343.893 454.380 L 343.838 452.126 L 341.282 449.615 L 340.405 448.749 L 339.738 447.238 L 338.405 446.738 L 336.561 443.984 L 336.194 442.228 L 333.683 438.307 L 332.617 435.030 L 330.684 433.008 L 328.718 431.142 L 328.618 429.354 L 327.351 428.176 L 327.429 427.010 L 325.929 425.221 L 324.496 425.043 L 323.085 423.444 L 321.352 422.377 L 320.619 419.833 L 319.463 418.500 L 317.886 418.345 L 317.075 416.712 L 316.553 416.490 L 314.286 412.069 L 314.120 409.603 L 313.120 407.392 L 311.609 405.037 L 310.664 404.149 L 310.276 401.071 L 309.131 400.127 L 307.742 399.772 L 306.965 397.683 L 305.820 396.950 L 305.154 395.773 L 303.465 393.973 L 302.265 393.640 L 301.121 391.896 L 298.666 390.696 L 297.666 389.041 L 296.222 388.463 L 295.633 386.841 L 293.422 386.419 L 292.000 384.731 L 291.600 382.720 L 290.589 382.264 L 290.478 379.865 L 291.133 377.943 L 290.356 376.632 L 289.034 374.966 L 289.034 373.955 L 288.001 372.433 L 287.978 371.189 L 287.034 370.478 L 286.923 367.756 L 286.045 366.190 L 286.590 364.579 L 285.423 362.590 L 285.745 361.324 L 284.990 360.546 L 284.534 358.558 L 285.590 357.780 L 285.568 356.591 L 284.757 355.602 L 285.601 354.347 L 285.112 353.414 L 285.523 351.981 L 284.390 350.237 L 333.379 313.362 Z" class="state" stroke="#000" stroke-width="0.5"></path>
-                <text x="50%" y="50%" fill="red" font-size="20">PASTE THE REST OF THE SVG PATHS HERE</text>
-            </svg>
+
+        <div class="map-wrapper">
+            <svg id="us-map" viewBox="0 0 960 600"></svg>
+            
+            <div id="state-tooltip" class="tooltip"></div>
         </div>
 
-        <div class="legend">
-            <span style="color:#00AEF3">■ Democrat</span>
-            <span style="color:#E81B23">■ Republican</span>
-            <span style="color:#F2C75C">■ Independent</span>
+        <div class="controls-area">
+            <div class="legend">
+                <div class="legend-item"><span class="dot safe-d"></span> Safe D</div>
+                <div class="legend-item"><span class="dot lean-d"></span> Lean D</div>
+                <div class="legend-item"><span class="dot tossup"></span> Tossup</div>
+                <div class="legend-item"><span class="dot lean-r"></span> Lean R</div>
+                <div class="legend-item"><span class="dot safe-r"></span> Safe R</div>
+            </div>
+            <div class="action-panel">
+                <h3 id="selected-state-name">Select a State</h3>
+                <div id="state-info">Click on the map to campaign.</div>
+                <button id="campaign-btn" class="action-btn" disabled>CAMPAIGN ($100k)</button>
+            </div>
         </div>
     </div>
 
