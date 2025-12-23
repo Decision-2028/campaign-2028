@@ -1,17 +1,34 @@
 /* --- CONFIGURATION --- */
 const PARTIES = {
-    D: { name: "Democratic", color: "#0056b3", desc: "Liberal platform focused on social equity." },
-    R: { name: "Republican", color: "#d32f2f", desc: "Conservative platform focused on deregulation." },
-    I: { name: "Independent", color: "#d4a017", desc: "Centrist platform focused on reform." }
+    D: { name: "Democratic", color: "#0056b3", desc: "Liberal platform." },
+    R: { name: "Republican", color: "#d32f2f", desc: "Conservative platform." },
+    I: { name: "Independent", color: "#d4a017", desc: "Centrist/Populist." },
+    G: { name: "Green", color: "#198754", desc: "Environmentalist/Left." },
+    L: { name: "Libertarian", color: "#fd7e14", desc: "Liberty/Small Gov." }
 };
 
 const CANDIDATES = [
+    // DEMOCRATS
     { id: "harris", name: "Kamala Harris", party: "D", desc: "Incumbent VP.", funds: 60, img: "images/harris.jpg", buff: "Incumbent Advantage" },
     { id: "newsom", name: "Gavin Newsom", party: "D", desc: "CA Governor.", funds: 75, img: "images/newsom.jpg", buff: "Fundraising Machine" },
     { id: "whitmer", name: "Gretchen Whitmer", party: "D", desc: "MI Governor.", funds: 55, img: "images/whitmer.jpg", buff: "Rust Belt Appeal" },
+    { id: "shapiro", name: "Josh Shapiro", party: "D", desc: "PA Governor.", funds: 50, img: "images/shapiro.jpg", buff: "Swing State King" },
+    // REPUBLICANS
     { id: "desantis", name: "Ron DeSantis", party: "R", desc: "FL Governor.", funds: 65, img: "images/desantis.jpg", buff: "Culture Warrior" },
     { id: "vance", name: "JD Vance", party: "R", desc: "OH Senator.", funds: 50, img: "images/vance.jpg", buff: "Populist Appeal" },
-    { id: "yang", name: "Andrew Yang", party: "I", desc: "Forward Party.", funds: 40, img: "images/yang.jpg", buff: "Tech Innovator" }
+    { id: "haley", name: "Nikki Haley", party: "R", desc: "Former UN Amb.", funds: 55, img: "images/haley.jpg", buff: "Suburban Appeal" },
+    { id: "ramaswamy", name: "Vivek Ramaswamy", party: "R", desc: "Entrepreneur.", funds: 70, img: "images/ramaswamy.jpg", buff: "Outsider Energy" },
+    // INDEPENDENT
+    { id: "yang", name: "Andrew Yang", party: "I", desc: "Forward Party.", funds: 40, img: "images/yang.jpg", buff: "Tech Innovator" },
+    { id: "rfk", name: "RFK Jr.", party: "I", desc: "Independent.", funds: 45, img: "", buff: "Name Recognition" },
+    // GREEN
+    { id: "stein", name: "Jill Stein", party: "G", desc: "Green Party.", funds: 10, img: "", buff: "Activist Base" },
+    { id: "west", name: "Cornel West", party: "G", desc: "Philosopher.", funds: 15, img: "", buff: "Intellectual Appeal" },
+    { id: "hawkins", name: "Howie Hawkins", party: "G", desc: "Eco-Socialist.", funds: 8, img: "", buff: "Grassroots" },
+    // LIBERTARIAN
+    { id: "oliver", name: "Chase Oliver", party: "L", desc: "Libertarian.", funds: 12, img: "", buff: "Youth Appeal" },
+    { id: "mapstead", name: "Lars Mapstead", party: "L", desc: "Tech CEO.", funds: 20, img: "", buff: "Self-Funded" },
+    { id: "termaat", name: "Mike ter Maat", party: "L", desc: "Economist.", funds: 10, img: "", buff: "Policy Wonk" }
 ];
 
 const VPS = [
@@ -19,33 +36,12 @@ const VPS = [
     { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", desc: "Astronaut & Senator." },
     { id: "cooper", name: "Roy Cooper", party: "D", state: "NC", desc: "Moderate southern appeal." },
     { id: "rubio", name: "Marco Rubio", party: "R", state: "FL", desc: "Establishment bridge." },
-    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner." }
+    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner." },
+    { id: "tulsi", name: "Tulsi Gabbard", party: "I", state: "HI", desc: "Anti-war populist." }
 ];
 
-const INIT_STATES = {
-    "AL": { name: "Alabama", ev: 9, poll: 35 }, "AK": { name: "Alaska", ev: 3, poll: 42 }, "AZ": { name: "Arizona", ev: 11, poll: 49.5 },
-    "AR": { name: "Arkansas", ev: 6, poll: 35 }, "CA": { name: "California", ev: 54, poll: 65 }, "CO": { name: "Colorado", ev: 10, poll: 56 },
-    "CT": { name: "Connecticut", ev: 7, poll: 59 }, "DE": { name: "Delaware", ev: 3, poll: 62 }, "DC": { name: "D.C.", ev: 3, poll: 92 },
-    "FL": { name: "Florida", ev: 30, poll: 46 }, "GA": { name: "Georgia", ev: 16, poll: 49.2 }, "HI": { name: "Hawaii", ev: 4, poll: 68 },
-    "ID": { name: "Idaho", ev: 4, poll: 30 }, "IL": { name: "Illinois", ev: 19, poll: 57 }, "IN": { name: "Indiana", ev: 11, poll: 40 },
-    "IA": { name: "Iowa", ev: 6, poll: 43 }, "KS": { name: "Kansas", ev: 6, poll: 40 }, "KY": { name: "Kentucky", ev: 8, poll: 35 },
-    "LA": { name: "Louisiana", ev: 8, poll: 38 }, "ME": { name: "Maine", ev: 4, poll: 55 }, "MD": { name: "Maryland", ev: 10, poll: 65 },
-    "MA": { name: "Massachusetts", ev: 11, poll: 68 }, "MI": { name: "Michigan", ev: 15, poll: 51.5 }, "MN": { name: "Minnesota", ev: 10, poll: 54 },
-    "MS": { name: "Mississippi", ev: 6, poll: 38 }, "MO": { name: "Missouri", ev: 10, poll: 42 }, "MT": { name: "Montana", ev: 4, poll: 40 },
-    "NE": { name: "Nebraska", ev: 5, poll: 38 }, "NV": { name: "Nevada", ev: 6, poll: 50.5 }, "NH": { name: "New Hampshire", ev: 4, poll: 53 },
-    "NJ": { name: "New Jersey", ev: 14, poll: 58 }, "NM": { name: "New Mexico", ev: 5, poll: 54 }, "NY": { name: "New York", ev: 28, poll: 62 },
-    "NC": { name: "North Carolina", ev: 16, poll: 48.5 }, "ND": { name: "North Dakota", ev: 3, poll: 30 }, "OH": { name: "Ohio", ev: 17, poll: 45 },
-    "OK": { name: "Oklahoma", ev: 7, poll: 32 }, "OR": { name: "Oregon", ev: 8, poll: 58 }, "PA": { name: "Pennsylvania", ev: 19, poll: 50.2 },
-    "RI": { name: "Rhode Island", ev: 4, poll: 60 }, "SC": { name: "South Carolina", ev: 9, poll: 42 }, "SD": { name: "South Dakota", ev: 3, poll: 35 },
-    "TN": { name: "Tennessee", ev: 11, poll: 37 }, "TX": { name: "Texas", ev: 40, poll: 44 }, "UT": { name: "Utah", ev: 6, poll: 38 },
-    "VT": { name: "Vermont", ev: 3, poll: 66 }, "VA": { name: "Virginia", ev: 13, poll: 54 }, "WA": { name: "Washington", ev: 12, poll: 60 },
-    "WV": { name: "West Virginia", ev: 4, poll: 28 }, "WI": { name: "Wisconsin", ev: 10, poll: 50.8 }, "WY": { name: "Wyoming", ev: 3, poll: 25 }
-};
-
-const ISSUES = [
-    { id: 'econ', name: 'Economy' }, { id: 'immig', name: 'Border Security' },
-    { id: 'abort', name: 'Reproductive Rights' }, { id: 'clim', name: 'Climate Change' }
-];
+// ... KEEP INIT_STATES AND ISSUES ARRAYS AS THEY WERE ... 
+// (I am omitting them here to save space, but DO NOT DELETE THEM from your file)
 
 /* --- APP LOGIC --- */
 const app = {
@@ -53,6 +49,8 @@ const app = {
         selectedParty: null,
         candidate: null, 
         vp: null,
+        opponent: null,
+        thirdPartiesEnabled: true,
         funds: 0, 
         weeks: 14, 
         actionsLeft: 3, 
@@ -81,7 +79,7 @@ const app = {
         document.getElementById(id).classList.add('active');
     },
 
-    /* --- PARTY SELECTION --- */
+    /* --- 1. PARTY & CANDIDATE SELECTION --- */
     renderParties: function() {
         const container = document.getElementById('party-cards');
         if(!container) return;
@@ -106,16 +104,12 @@ const app = {
         }
     },
 
-    /* --- CANDIDATE SELECTION --- */
     renderCandidates: function(partyKey) {
         const container = document.getElementById('candidate-cards');
         container.innerHTML = "";
-        
         const filtered = CANDIDATES.filter(c => c.party === partyKey);
-        if(filtered.length === 0) {
-            container.innerHTML = "<p>No candidates available.</p>";
-            return;
-        }
+        
+        if(filtered.length === 0) { container.innerHTML = "<p>No candidates available.</p>"; return; }
 
         filtered.forEach(c => {
             const el = document.createElement('div');
@@ -129,7 +123,7 @@ const app = {
                 <div class="card-info">
                     <h3>${c.name}</h3>
                     <p>${c.desc}</p>
-                    <p class="buff-text">Buff: ${c.buff}</p>
+                    <p class="buff-text">${c.buff}</p>
                     <p style="color:#4ade80">Funds: $${c.funds}M</p>
                 </div>
             `;
@@ -142,12 +136,23 @@ const app = {
         });
     },
 
-    /* --- VP SELECTION --- */
     renderVPs: function(partyKey) {
         const container = document.getElementById('vp-cards');
         container.innerHTML = "";
         const filtered = VPS.filter(v => v.party === partyKey);
         
+        // Allow choosing from pool if party has no specific VPs
+        if(filtered.length === 0 && (partyKey === 'G' || partyKey === 'L')) {
+             container.innerHTML = "<p>VP will be auto-selected.</p>";
+             // Auto-advance logic could go here, but for now let's just make a generic button
+             const btn = document.createElement('button');
+             btn.className = "start-btn";
+             btn.innerText = "CONTINUE WITHOUT VP";
+             btn.onclick = () => { this.renderOpponentSelection(); this.goToScreen('opponent-screen'); };
+             container.appendChild(btn);
+             return;
+        }
+
         filtered.forEach(v => {
             const el = document.createElement('div');
             el.className = 'card';
@@ -160,67 +165,133 @@ const app = {
             `;
             el.onclick = () => {
                 this.data.vp = v;
-                // VP Home State Buff
-                if(this.data.states[v.state]) {
-                    if(partyKey === 'D') this.data.states[v.state].poll += 5;
-                    else this.data.states[v.state].poll -= 5;
-                }
-                this.startGame();
+                this.renderOpponentSelection();
+                this.goToScreen('opponent-screen');
             };
             container.appendChild(el);
         });
     },
 
-    initIssues: function() {
-        const sel = document.getElementById('issue-select');
-        ISSUES.forEach(i => {
-            sel.innerHTML += `<option value="${i.id}">${i.name}</option>`;
+    /* --- 2. OPPONENT SELECTION (NEW) --- */
+    toggleThirdParties: function() {
+        this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked;
+        const section = document.getElementById('third-party-section');
+        section.style.opacity = this.data.thirdPartiesEnabled ? "1" : "0.3";
+    },
+
+    renderOpponentSelection: function() {
+        const majorContainer = document.getElementById('opponent-cards-major');
+        const minorContainer = document.getElementById('opponent-cards-minor');
+        majorContainer.innerHTML = "";
+        minorContainer.innerHTML = "";
+
+        // Determine Major Rival Party
+        let rivalParty = 'R';
+        if (this.data.selectedParty === 'R') rivalParty = 'D';
+        if (this.data.selectedParty !== 'D' && this.data.selectedParty !== 'R') rivalParty = 'D'; // Indep/3rd party fights incumbent D?
+
+        // 1. Render Major Opponents
+        const majors = CANDIDATES.filter(c => c.party === rivalParty);
+        majors.forEach(c => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            const imgHTML = c.img ? `<img src="${c.img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : "";
+            el.innerHTML = `
+                <div class="portrait">
+                    ${imgHTML}
+                    <div class="portrait-placeholder" ${imgHTML ? 'style="display:none"' : ''}>${c.name.charAt(0)}</div>
+                </div>
+                <div class="card-info">
+                    <h3>${c.name}</h3>
+                    <p>${c.desc}</p>
+                </div>
+            `;
+            el.onclick = () => {
+                this.data.opponent = c;
+                this.startGame(); // Opponent selected, start!
+            };
+            majorContainer.appendChild(el);
+        });
+
+        // 2. Render Third Parties (Visual Only/Spoiler context)
+        const minors = CANDIDATES.filter(c => ['G', 'L', 'I'].includes(c.party) && c.id !== this.data.candidate.id);
+        minors.forEach(c => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.style.transform = "scale(0.9)"; // Smaller visual
+            el.innerHTML = `
+                <div class="card-info" style="border-top:3px solid ${PARTIES[c.party].color}">
+                    <h3>${c.name}</h3>
+                    <p>${PARTIES[c.party].name}</p>
+                </div>
+            `;
+            minorContainer.appendChild(el);
         });
     },
 
-    /* --- MAIN GAME START --- */
-startGame: function() {
+    /* --- 3. GAME INITIALIZATION --- */
+    initIssues: function() {
+        const sel = document.getElementById('issue-select');
+        ISSUES.forEach(i => sel.innerHTML += `<option value="${i.id}">${i.name}</option>`);
+    },
+
+    startGame: function() {
         this.data.funds = this.data.candidate.funds;
         this.goToScreen('game-screen');
         
-        // --- 1. SET HUD VISUALS ---
+        // --- 1. SET HUD ---
         const img = document.getElementById('hud-img');
         if(this.data.candidate.img) {
             img.src = this.data.candidate.img;
             img.style.display = "block";
         }
         
-        // Dynamic Styling based on Party
         const pKey = this.data.selectedParty;
-        const pName = PARTIES[pKey].name;
-        
-        // Reset and apply new border class
-        img.className = ""; 
-        img.classList.add(`hud-border-${pKey}`);
-        
-        // Set Text
+        img.className = `hud-border-${pKey}`; 
         document.getElementById('hud-cand-name').innerText = this.data.candidate.name.toUpperCase();
-        document.getElementById('hud-party-name').innerText = pName.toUpperCase() + " NOMINEE";
+        document.getElementById('hud-party-name').innerText = PARTIES[pKey].name.toUpperCase() + " NOMINEE";
         
+        // --- 2. APPLY VP BUFF ---
+        if(this.data.vp && this.data.states[this.data.vp.state]) {
+            // Boost in VP home state
+            if(pKey === 'D') this.data.states[this.data.vp.state].poll += 5;
+            else this.data.states[this.data.vp.state].poll -= 5;
+        }
+
+        // --- 3. APPLY THIRD PARTY SPOILER EFFECT ---
+        if(this.data.thirdPartiesEnabled && pKey !== 'G' && pKey !== 'L' && pKey !== 'I') {
+            for(let s in this.data.states) {
+                // Determine 3rd party share based on state history/randomness
+                // Rough sim: 3rd parties take 2-6% of vote. 
+                // In this simplified model (0-100 D share), we simply compress the available share.
+                // Or, simply shift poll towards 50 (chaos) or random subtraction.
+                // Let's effectively "steal" vote share.
+                
+                let spoiler = (Math.random() * 4) + 1; // 1-5% spoiler
+                // If D, spoiler hurts D share. If R, spoiler hurts R share (adds to D poll number).
+                // Actually, usually 3rd parties hurt both. 
+                // Let's say spoiler reduces the *Margin*.
+                // Simpler: Just random chaos.
+                if(Math.random() > 0.5) this.data.states[s].poll -= spoiler; // Hurts D
+                else this.data.states[s].poll += spoiler; // Hurts R
+            }
+            this.log("Third parties entered the race. Polling adjusted.");
+        }
+
+        // --- 4. START ---
         this.updateHUD();
         this.initMap();
-        this.log(`Campaign started as ${pName} Party.`);
+        this.log(`Campaign started vs ${this.data.opponent.name}.`);
     },
 
-    /* --- MAP LOGIC --- */
+    /* --- MAP & GAMEPLAY --- */
     initMap: function() {
-        // No fetch needed, SVG is embedded
         for(let code in this.data.states) {
             let path = document.getElementById(code);
             if(path) {
-                // Click Interaction
                 path.onclick = () => this.clickState(code);
-                
-                // Tooltip Interaction
                 path.onmousemove = (e) => this.showTooltip(e, code);
                 path.onmouseleave = () => this.hideTooltip();
-                
-                // Base Visuals
                 path.style.cursor = "pointer";
                 path.style.transition = "fill 0.2s, opacity 0.2s";
             }
@@ -235,38 +306,30 @@ startGame: function() {
             if(!p) continue;
 
             let fill;
-            // D = Blue, R = Red
             if(s.poll > 55) fill = "#0056b3";      // Safe Dem
             else if(s.poll > 50) fill = "#4fa1ff"; // Lean Dem
             else if(s.poll > 45) fill = "#ff6b6b"; // Lean Rep
             else fill = "#d32f2f";                 // Safe Rep
             
-            // Tossup Zone (Gray)
-            if(s.poll >= 48 && s.poll <= 52) fill = "#64748b"; 
+            if(s.poll >= 48 && s.poll <= 52) fill = "#64748b"; // Tossup
 
             p.style.fill = fill;
         }
         this.updateScore();
     },
 
-    /* --- TOOLTIP LOGIC --- */
     showTooltip: function(e, code) {
         const tt = document.getElementById('map-tooltip');
         const s = this.data.states[code];
-        
-        // Calculate Percentages
         const dPct = s.poll.toFixed(1);
         const rPct = (100 - s.poll).toFixed(1);
         
-        // Set Content
         tt.innerHTML = `
             <h4>${s.name}</h4>
             <div class="tip-row"><span style="color:#4fa1ff">DEM</span> <span>${dPct}%</span></div>
             <div class="tip-row"><span style="color:#ff6b6b">REP</span> <span>${rPct}%</span></div>
-            <div class="tip-row" style="color:#aaa; font-size:0.7rem; margin-top:5px;">${s.ev} Electoral Votes</div>
+            <div class="tip-row" style="color:#aaa; font-size:0.75rem; margin-top:5px; border-top:1px solid #444; padding-top:4px;">${s.ev} Electoral Votes</div>
         `;
-        
-        // Position
         tt.style.display = 'block';
         tt.style.left = (e.clientX + 15) + 'px';
         tt.style.top = (e.clientY + 15) + 'px';
@@ -276,19 +339,16 @@ startGame: function() {
         document.getElementById('map-tooltip').style.display = 'none';
     },
 
-    /* --- GAMEPLAY --- */
     clickState: function(code) {
         this.data.selectedState = code;
         const s = this.data.states[code];
         
         document.getElementById('empty-msg').classList.add('hidden');
         document.getElementById('state-panel').classList.remove('hidden');
-        
         document.getElementById('sp-name').innerText = s.name;
         document.getElementById('sp-ev').innerText = s.ev + " EV";
         document.getElementById('sp-moe').innerText = `MOE: ±${s.moe}%`;
 
-        // Update Poll Bars
         const dVal = s.poll.toFixed(1);
         const rVal = (100 - s.poll).toFixed(1);
         document.getElementById('poll-dem-bar').style.width = dVal + "%";
@@ -296,7 +356,6 @@ startGame: function() {
         document.getElementById('poll-dem-val').innerText = dVal + "%";
         document.getElementById('poll-rep-val').innerText = rVal + "%";
 
-        // Issues
         const list = document.getElementById('sp-issues-list');
         list.innerHTML = '';
         ISSUES.sort((a,b) => s.priorities[b.id] - s.priorities[a.id]).slice(0,3).forEach(x => {
@@ -314,12 +373,11 @@ startGame: function() {
         const s = this.data.states[this.data.selectedState];
         const boost = (Math.random() * 1.5) + 0.5;
         
-        // Apply shift based on party
         if(this.data.selectedParty === 'D') s.poll += boost;
         else if(this.data.selectedParty === 'R') s.poll -= boost;
         
-        if(s.poll > 100) s.poll = 100;
-        if(s.poll < 0) s.poll = 0;
+        // Clamp
+        if(s.poll > 100) s.poll = 100; if(s.poll < 0) s.poll = 0;
 
         this.log(`Ad Blitz in ${s.name}.`);
         this.updateHUD();
@@ -350,18 +408,17 @@ startGame: function() {
         this.data.weeks--;
         this.data.actionsLeft = 3;
         
-        // Opponent Logic
         for(let code in this.data.states) {
-            // Random Drift
             let drift = (Math.random() * 1.0) - 0.5; 
             this.data.states[code].poll += drift;
             
-            // Explicit Opponent Attack (Undoing your work)
-            // If you are D, Opponent is R (wants poll < 50)
-            if(this.data.selectedParty === 'D' && Math.random() > 0.8) {
-                this.data.states[code].poll -= 1.2; 
-            } else if(this.data.selectedParty === 'R' && Math.random() > 0.8) {
-                this.data.states[code].poll += 1.2;
+            // Opponent Logic (Undo player progress)
+            if(this.data.opponent) {
+                if(this.data.selectedParty === 'D' && Math.random() > 0.8) {
+                    this.data.states[code].poll -= 1.2; 
+                } else if(this.data.selectedParty === 'R' && Math.random() > 0.8) {
+                    this.data.states[code].poll += 1.2;
+                }
             }
         }
 
@@ -403,33 +460,6 @@ startGame: function() {
         t.innerText = msg;
         t.style.opacity = 1;
         setTimeout(() => t.style.opacity = 0, 2000);
-    },
-        
-    /* --- TOOLTIP HELPERS --- */
-    showTooltip: function(e, code) {
-        const tt = document.getElementById('map-tooltip');
-        const s = this.data.states[code];
-        
-        // Calculate Percentages
-        const dPct = s.poll.toFixed(1);
-        const rPct = (100 - s.poll).toFixed(1);
-        
-        // Set Content
-        tt.innerHTML = `
-            <h4>${s.name}</h4>
-            <div class="tip-row"><span style="color:#4fa1ff">DEM</span> <span>${dPct}%</span></div>
-            <div class="tip-row"><span style="color:#ff6b6b">REP</span> <span>${rPct}%</span></div>
-            <div class="tip-row" style="color:#aaa; font-size:0.75rem; margin-top:5px; border-top:1px solid #444; padding-top:4px;">${s.ev} Electoral Votes</div>
-        `;
-        
-        // Position
-        tt.style.display = 'block';
-        tt.style.left = (e.clientX + 15) + 'px';
-        tt.style.top = (e.clientY + 15) + 'px';
-    },
-
-    hideTooltip: function() {
-        document.getElementById('map-tooltip').style.display = 'none';
     }
 };
 
