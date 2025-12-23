@@ -8,96 +8,97 @@
 </head>
 <body>
 
-    <section id="intro-screen" class="screen active">
-        <div class="content-box fade-in">
-            <h1>The Road to 270</h1>
-            <p>Welcome to the 2024 Election Simulator. <br>Navigating a divided nation requires strategy, funding, and the right message.</p>
-            <button onclick="goToScreen('candidate-screen')">Start Campaign</button>
-        </div>
-    </section>
+    <section id="selection-screen" class="screen active">
+        <div class="selection-container">
+            <h1>Select Your Candidate</h1>
+            
+            <div class="candidates-row" id="candidate-cards">
+                </div>
 
-    <section id="candidate-screen" class="screen">
-        <h2>Select Your Candidate</h2>
-        <div class="cards-container" id="candidate-cards">
+            <div id="policy-editor" class="hidden">
+                <h3>Adjust Platform Stances</h3>
+                <p class="subtext">Fine-tune your campaign positions.</p>
+                <div class="sliders-grid" id="stance-sliders"></div>
+                
+                <button class="action-btn" onclick="goToVP()">Next: Select VP</button>
             </div>
-        
-        <div id="stance-editor" class="panel hidden">
-            <h3>Adjust Platform Stances</h3>
-            <p class="subtitle">Fine-tune your positions. Moving sliders affects your base appeal.</p>
-            <div id="stance-sliders-container"></div>
-            <button onclick="confirmCandidate()">Confirm Candidate</button>
         </div>
     </section>
 
     <section id="vp-screen" class="screen">
-        <h2>Select Your Running Mate</h2>
-        <p>Your VP choice provides regional boosts and specific issue bonuses.</p>
-        <div class="cards-container" id="vp-cards">
-            </div>
+        <div class="selection-container">
+            <h1>Select Running Mate</h1>
+            <div class="candidates-row" id="vp-cards">
+                </div>
+            <button class="action-btn secondary" onclick="backToCandidate()">Back</button>
+        </div>
     </section>
 
     <section id="game-screen" class="screen">
         <header>
-            <div class="stat">
-                <span class="label">Candidate</span>
-                <span class="value" id="header-candidate">---</span>
+            <div class="stat-box">
+                <div class="stat-label">Candidate</div>
+                <div class="stat-value" id="header-candidate">---</div>
             </div>
-            <div class="stat">
-                <span class="label">Electoral Votes</span>
-                <span class="value" id="ev-display">0 / 270</span>
+            <div class="stat-box">
+                <div class="stat-label">Electoral Votes</div>
+                <div class="stat-value votes" id="ev-display">0 / 270</div>
             </div>
-            <div class="stat">
-                <span class="label">Weeks Left</span>
-                <span class="value" id="weeks-display">12</span>
+            <div class="stat-box">
+                <div class="stat-label">Weeks Left</div>
+                <div class="stat-value weeks" id="weeks-display">11</div>
             </div>
-            <div class="stat">
-                <span class="label">Funds</span>
-                <span class="value funds" id="funds-display">$0M</span>
+            <div class="stat-box">
+                <div class="stat-label">Funds</div>
+                <div class="stat-value funds" id="funds-display">$0.0M</div>
             </div>
         </header>
 
-        <div class="game-layout">
+        <main>
             <div id="map-container">
                 <svg id="us-map" viewBox="0 0 950 600"></svg>
                 <div id="tooltip"></div>
             </div>
 
-            <aside id="dashboard">
-                <div id="state-info-panel" class="hidden">
-                    <h2 id="state-name">Select State</h2>
-                    <div class="lean-bar-wrap">
-                        <div class="lean-bar-bg"></div>
-                        <div class="lean-marker" id="lean-marker"></div>
+            <aside>
+                <div id="state-panel" style="display:none;">
+                    <h2 id="state-name">State Name</h2>
+                    
+                    <div class="lean-header">
+                        <span id="state-ev">0 EV</span>
+                        <span id="state-status">Tossup</span>
+                    </div>
+
+                    <div class="lean-bar-container">
+                        <div class="lean-bg"></div>
+                        <div class="lean-indicator" id="lean-marker"></div>
                     </div>
                     <div class="lean-labels">
                         <span>Rep</span>
-                        <span>Tossup</span>
+                        <span>50/50</span>
                         <span>Dem</span>
                     </div>
 
                     <div class="panel-section">
-                        <h4>Campaign Strategy</h4>
+                        <h3>Campaign Strategy</h3>
                         <select id="issue-select"></select>
-                        <div id="strategy-feedback">Select an issue...</div>
-                        <button id="campaign-btn" onclick="campaignInState()">
-                            Campaign ($100k)
-                        </button>
+                        <div id="issue-feedback"></div>
+                        <button class="campaign-btn" onclick="runCampaign()">CAMPAIGN ($100k)</button>
                     </div>
 
                     <div class="panel-section">
-                        <h4>Top State Issues</h4>
+                        <h3>State Priorities</h3>
                         <div id="state-issues-list"></div>
                     </div>
                 </div>
                 <div id="empty-state-msg">
-                    Select a state on the map to view polling data.
+                    Click a state to view polling and campaign.
                 </div>
             </aside>
-        </div>
+        </main>
     </section>
-    
-    <div id="notification-area"></div>
 
+    <div id="notification-area"></div>
     <script src="script.js"></script>
 </body>
 </html>
