@@ -39,8 +39,7 @@
         </header>
         <div class="panel-container">
             <h2 class="section-title">SELECT PRESIDENTIAL NOMINEE</h2>
-            <div class="cards-row" id="candidate-cards">
-                </div>
+            <div class="cards-row" id="candidate-cards"></div>
             <button class="back-btn" onclick="app.goToScreen('party-screen')">&larr; BACK TO PARTIES</button>
         </div>
     </section>
@@ -52,38 +51,37 @@
         <div class="panel-container">
             <h2 class="section-title">SELECT RUNNING MATE</h2>
             <p class="instruction-text">Your VP choice can deliver a key swing state or boost your funds.</p>
-            <div class="cards-row" id="vp-cards">
-                </div>
+            <div class="cards-row" id="vp-cards"></div>
         </div>
     </section>
 
     <section id="opponent-screen" class="screen">
-    <header class="news-header">
-        <div class="logo">DECISION <span class="red-text">2028</span></div>
-    </header>
-    <div class="panel-container">
-        <h2 class="section-title">SELECT YOUR OPPONENT</h2>
-        <p class="instruction-text">Choose the primary challenger. Third parties can be toggled.</p>
-        
-        <div class="toggle-wrapper">
-            <span class="toggle-label">INCLUDE THIRD PARTIES?</span>
-            <label class="switch">
-                <input type="checkbox" id="third-party-toggle" checked onchange="app.toggleThirdParties()">
-                <span class="slider"></span>
-            </label>
-        </div>
+        <header class="news-header">
+            <div class="logo">DECISION <span class="red-text">2028</span></div>
+        </header>
+        <div class="panel-container">
+            <h2 class="section-title">SELECT YOUR OPPONENT</h2>
+            <p class="instruction-text">Choose your main rival. Toggle third parties for added chaos.</p>
+            
+            <div class="toggle-wrapper">
+                <span class="toggle-label">INCLUDE THIRD PARTIES?</span>
+                <label class="switch">
+                    <input type="checkbox" id="third-party-toggle" checked onchange="app.toggleThirdParties()">
+                    <span class="slider"></span>
+                </label>
+            </div>
 
-        <div class="opponent-section">
-            <h3>Major Party Challenger</h3>
-            <div class="cards-row" id="opponent-cards-major"></div>
-        </div>
+            <div class="opponent-section">
+                <h3>Major Party Challenger</h3>
+                <div class="cards-row" id="opponent-cards-major"></div>
+            </div>
 
-        <div class="opponent-section" id="third-party-section">
-            <h3>Third Party Challengers</h3>
-            <div class="cards-row" id="opponent-cards-minor"></div>
+            <div class="opponent-section" id="third-party-section">
+                <h3>Third Party Challengers</h3>
+                <div class="cards-row" id="opponent-cards-minor"></div>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <section id="game-screen" class="screen">
         <header class="hud-header">
@@ -232,10 +230,8 @@
     </div>
 
     <div id="map-tooltip"></div>
+
     <div id="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
