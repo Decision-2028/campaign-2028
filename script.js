@@ -1,6 +1,6 @@
-/* --- CONFIGURATION --- */
+/* --- CONFIGURATION & DATA --- */
 const PARTIES = {
-    D: { name: "Democratic", color: "#00AEF3", img: "images/harrison.jpg", desc: "Liberal platform focused on social equality and economic reform." },
+    D: { name: "Democratic", color: "#0056b3", img: "images/harrison.jpg", desc: "Liberal platform focused on social equality and economic reform." },
     R: { name: "Republican", color: "#E81B23", img: "images/whatley.jpg", desc: "Conservative platform focused on deregulation and traditional values." },
     I: { name: "Independent", color: "#F2C75C", img: "images/scenario.jpg", desc: "Centrist coalition seeking electoral reform." },
     G: { name: "Green", color: "#198754", img: "images/scenario.jpg", desc: "Environmental justice and social democracy." },
@@ -37,10 +37,10 @@ const CANDIDATES = [
 ];
 
 const VPS = [
-    { id: "shapiro", name: "Josh Shapiro", party: "D", state: "PA", desc: "Popular swing state governor." },
-    { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", desc: "Astronaut & Senator." },
-    { id: "rubio", name: "Marco Rubio", party: "R", state: "FL", desc: "Establishment bridge." },
-    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner." }
+    { id: "shapiro", name: "Josh Shapiro", party: "D", state: "PA", desc: "Popular swing state governor.", img: "images/shapiro.jpg" },
+    { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", desc: "Astronaut & Senator.", img: "images/scenario.jpg" },
+    { id: "rubio", name: "Marco Rubio", party: "R", state: "FL", desc: "Establishment bridge.", img: "images/scenario.jpg" },
+    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner.", img: "images/scenario.jpg" }
 ];
 
 const INIT_STATES = {
@@ -63,7 +63,7 @@ const INIT_STATES = {
     "WV": { name: "West Virginia", ev: 4, poll: 28 }, "WI": { name: "Wisconsin", ev: 10, poll: 50.8 }, "WY": { name: "Wyoming", ev: 3, poll: 25 }
 };
 
-/* --- APP LOGIC --- */
+/* --- APP ENGINE --- */
 const app = {
     data: {
         currentDate: new Date("2028-07-04"),
@@ -76,6 +76,7 @@ const app = {
     },
 
     init: function() {
+        console.log("App Initializing...");
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
         
         // Initialize Advanced State Data
@@ -108,7 +109,7 @@ const app = {
         if(!c) return; c.innerHTML = "";
         ['D','R','I'].forEach(k => {
             const p = PARTIES[k];
-            c.innerHTML += `<div class="card card-party" onclick="app.selParty('${k}')" style="background-image:url('${p.img}'); border-top:5px solid ${p.color}"><div class="party-overlay"><h3>${p.name}</h3><div class="party-desc">${p.desc}</div></div></div>`;
+            c.innerHTML += `<div class="card card-party" onclick="app.selParty('${k}')" style="background-image:url('${p.img}'); border-top:5px solid ${p.color}"><div class="party-overlay"><h3>${p.name} Party</h3><div class="party-desc">${p.desc}</div></div></div>`;
         });
     },
     selParty: function(k) { this.data.selectedParty = k; this.renderCands(k); this.goToScreen('candidate-screen'); },
@@ -133,7 +134,7 @@ const app = {
         const c = document.getElementById('vp-cards');
         c.innerHTML = "";
         const vps = VPS.filter(x => x.party === pk);
-        if(vps.length === 0) c.innerHTML = "<div class='card' onclick='app.renderOpp()'><div class="card-info"><h3>SKIP VP</h3></div></div>";
+        if(vps.length === 0) c.innerHTML = "<div class='card' onclick='app.renderOpp()'><div class='card-info'><h3>SKIP VP</h3></div></div>";
         vps.forEach(v => {
             const img = v.img ? `<img src="${v.img}">` : "";
             c.innerHTML += `<div class="card" onclick="app.selVP('${v.id}')"><div class="portrait">${img}</div><div class="card-info"><h3>${v.name}</h3><p>${v.state}</p></div></div>`;
@@ -178,13 +179,14 @@ const app = {
         this.saveSnapshot(); // Undo point
         this.goToScreen('game-screen');
         
-        // Setup HUD
+        // HUD Setup
         const pKey = this.data.selectedParty;
         document.getElementById('hud-img').src = this.data.candidate.img || "";
         document.getElementById('hud-img').style.display = "block";
         document.getElementById('hud-img').className = `hud-border-${pKey}`;
         document.getElementById('hud-cand-name').innerText = this.data.candidate.name.toUpperCase();
         document.getElementById('hud-party-name').innerText = PARTIES[pKey].name.toUpperCase();
+        document.getElementById('hud-party-name').className = `cand-party text-${pKey}`;
         
         // VP Buff
         if(this.data.vp && this.data.states[this.data.vp.state]) {
@@ -422,12 +424,34 @@ const app = {
     showTooltip: function(e, code) {
         const tt = document.getElementById('map-tooltip');
         const s = this.data.states[code];
-        tt.innerHTML = `<h4>${s.name}</h4><div>D: ${s.poll.toFixed(1)}%</div><div>R: ${(100-s.poll).toFixed(1)}%</div>`;
+        
+        let lead = s.poll > 50 ? "DEM" : "REP";
+        let margin = Math.abs(s.poll - (100-s.poll)).toFixed(1);
+        let name = "Opponent";
+        
+        // Try to get leader name
+        if(lead === "DEM" && this.data.selectedParty === 'D') name = this.data.candidate.name.split(" ").pop();
+        else if(lead === "REP" && this.data.selectedParty === 'R') name = this.data.candidate.name.split(" ").pop();
+        else if(this.data.opponent) name = this.data.opponent.name.split(" ").pop();
+        
+        let colorClass = lead === "DEM" ? "blue" : "red";
+        
+        tt.innerHTML = `
+            <span class="tooltip-leader" style="color:${lead==='DEM'?'#4fa1ff':'#ff6b6b'}">${name} +${margin}</span>
+            <div class="tip-row"><span class="blue">DEM</span> <span>${s.poll.toFixed(1)}%</span></div>
+            <div class="tip-row"><span class="red">REP</span> <span>${(100-s.poll).toFixed(1)}%</span></div>
+            <div style="font-size:0.7rem; color:#aaa; margin-top:4px;">${s.ev} Electoral Votes</div>
+        `;
         tt.style.display='block'; tt.style.left=(e.clientX+15)+'px'; tt.style.top=(e.clientY+15)+'px';
     },
     showToast: function(msg) {
         const t = document.getElementById('toast');
         t.innerText = msg; t.style.opacity = 1; setTimeout(() => t.style.opacity = 0, 2000);
+    },
+    toggleThirdParties: function() {
+        this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked;
+        const section = document.getElementById('third-party-section');
+        section.style.opacity = this.data.thirdPartiesEnabled ? "1" : "0.3";
     }
 };
 
