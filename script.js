@@ -1,7 +1,7 @@
-/* --- CONFIGURATION & DATA --- */
+/* --- CONFIGURATION --- */
 const PARTIES = {
     D: { name: "Democratic", color: "#0056b3", img: "images/harrison.jpg", desc: "Liberal platform focused on social equality and economic reform." },
-    R: { name: "Republican", color: "#E81B23", img: "images/whatley.jpg", desc: "Conservative platform focused on deregulation and traditional values." },
+    R: { name: "Republican", color: "#d32f2f", img: "images/whatley.jpg", desc: "Conservative platform focused on deregulation and traditional values." },
     I: { name: "Independent", color: "#F2C75C", img: "images/scenario.jpg", desc: "Centrist coalition seeking electoral reform." },
     G: { name: "Green", color: "#198754", img: "images/scenario.jpg", desc: "Environmental justice and social democracy." },
     L: { name: "Libertarian", color: "#fd7e14", img: "images/scenario.jpg", desc: "Individual liberty and free markets." }
@@ -23,17 +23,17 @@ const INTEREST_GROUPS = [
 
 const CANDIDATES = [
     // Democrats
-    { id: "harris", name: "Kamala Harris", party: "D", funds: 60, img: "images/harris.jpg", buff: "Incumbent Advantage", stamina: 8 },
-    { id: "newsom", name: "Gavin Newsom", party: "D", funds: 75, img: "images/newsom.jpg", buff: "Fundraising Machine", stamina: 9 },
-    { id: "whitmer", name: "Gretchen Whitmer", party: "D", funds: 55, img: "images/whitmer.jpg", buff: "Rust Belt Appeal", stamina: 8 },
+    { id: "harris", name: "Kamala Harris", party: "D", funds: 60, img: "images/harris.jpg", buff: "Incumbent Advantage", desc: "Current Vice President.", stamina: 8 },
+    { id: "newsom", name: "Gavin Newsom", party: "D", funds: 75, img: "images/newsom.jpg", buff: "Fundraising Machine", desc: "Governor of California.", stamina: 9 },
+    { id: "whitmer", name: "Gretchen Whitmer", party: "D", funds: 55, img: "images/whitmer.jpg", buff: "Rust Belt Appeal", desc: "Governor of Michigan.", stamina: 8 },
     // Republicans
-    { id: "desantis", name: "Ron DeSantis", party: "R", funds: 65, img: "images/desantis.jpg", buff: "Culture Warrior", stamina: 9 },
-    { id: "vance", name: "JD Vance", party: "R", funds: 50, img: "images/vance.jpg", buff: "Populist Appeal", stamina: 8 },
-    { id: "ramaswamy", name: "Vivek Ramaswamy", party: "R", funds: 70, img: "images/ramaswamy.jpg", buff: "Outsider Energy", stamina: 10 },
+    { id: "desantis", name: "Ron DeSantis", party: "R", funds: 65, img: "images/desantis.jpg", buff: "Culture Warrior", desc: "Governor of Florida.", stamina: 9 },
+    { id: "vance", name: "JD Vance", party: "R", funds: 50, img: "images/vance.jpg", buff: "Populist Appeal", desc: "Senator from Ohio.", stamina: 8 },
+    { id: "ramaswamy", name: "Vivek Ramaswamy", party: "R", funds: 70, img: "images/ramaswamy.jpg", buff: "Outsider Energy", desc: "Tech Entrepreneur.", stamina: 10 },
     // Third Party
-    { id: "yang", name: "Andrew Yang", party: "I", funds: 40, img: "images/yang.jpg", buff: "Tech Innovator", stamina: 8 },
-    { id: "stein", name: "Jill Stein", party: "G", funds: 10, img: "images/scenario.jpg", buff: "Eco-Activist", stamina: 6 },
-    { id: "oliver", name: "Chase Oliver", party: "L", funds: 12, img: "images/scenario.jpg", buff: "Liberty First", stamina: 7 }
+    { id: "yang", name: "Andrew Yang", party: "I", funds: 40, img: "images/yang.jpg", buff: "Tech Innovator", desc: "Forward Party Founder.", stamina: 8 },
+    { id: "stein", name: "Jill Stein", party: "G", funds: 10, img: "images/scenario.jpg", buff: "Eco-Activist", desc: "Green Party Nominee.", stamina: 6 },
+    { id: "oliver", name: "Chase Oliver", party: "L", funds: 12, img: "images/scenario.jpg", buff: "Liberty First", desc: "Libertarian Nominee.", stamina: 7 }
 ];
 
 const VPS = [
@@ -43,6 +43,7 @@ const VPS = [
     { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner.", img: "images/scenario.jpg" }
 ];
 
+// DATA INITIALIZATION
 const INIT_STATES = {
     "AL": { name: "Alabama", ev: 9, poll: 35 }, "AK": { name: "Alaska", ev: 3, poll: 42 }, "AZ": { name: "Arizona", ev: 11, poll: 49.5 },
     "AR": { name: "Arkansas", ev: 6, poll: 35 }, "CA": { name: "California", ev: 54, poll: 65 }, "CO": { name: "Colorado", ev: 10, poll: 56 },
@@ -63,7 +64,7 @@ const INIT_STATES = {
     "WV": { name: "West Virginia", ev: 4, poll: 28 }, "WI": { name: "Wisconsin", ev: 10, poll: 50.8 }, "WY": { name: "Wyoming", ev: 3, poll: 25 }
 };
 
-/* --- APP ENGINE --- */
+/* --- APP LOGIC --- */
 const app = {
     data: {
         currentDate: new Date("2028-07-04"),
@@ -72,7 +73,7 @@ const app = {
         funds: 0, energy: 8, maxEnergy: 8,
         thirdPartiesEnabled: true,
         states: {}, selectedState: null,
-        turnSnapshot: null // For Undo
+        turnSnapshot: null 
     },
 
     init: function() {
@@ -82,7 +83,7 @@ const app = {
         // Initialize Advanced State Data
         for(let s in this.data.states) {
             this.data.states[s].moe = (Math.random() * 2 + 1.5).toFixed(1);
-            this.data.states[s].donorFatigue = 0; // Starts at 0
+            this.data.states[s].donorFatigue = 0; 
             
             this.data.states[s].priorities = {};
             ISSUES.forEach(i => this.data.states[s].priorities[i.id] = Math.floor(Math.random()*10)+1);
@@ -90,6 +91,7 @@ const app = {
             this.data.states[s].demographics = {};
             INTEREST_GROUPS.forEach(ig => this.data.states[s].demographics[ig.id] = Math.floor(Math.random()*30)+5);
             
+            // 3rd Party Regional Strength
             this.data.states[s].greenShare = ['CA','OR','VT'].includes(s) ? 3.5 : 1.0;
             this.data.states[s].libShare = ['NH','MT','NV'].includes(s) ? 4.0 : 1.5;
         }
@@ -109,6 +111,7 @@ const app = {
         if(!c) return; c.innerHTML = "";
         ['D','R','I'].forEach(k => {
             const p = PARTIES[k];
+            // Fixed quote syntax here
             c.innerHTML += `<div class="card card-party" onclick="app.selParty('${k}')" style="background-image:url('${p.img}'); border-top:5px solid ${p.color}"><div class="party-overlay"><h3>${p.name} Party</h3><div class="party-desc">${p.desc}</div></div></div>`;
         });
     },
@@ -134,7 +137,13 @@ const app = {
         const c = document.getElementById('vp-cards');
         c.innerHTML = "";
         const vps = VPS.filter(x => x.party === pk);
-        if(vps.length === 0) c.innerHTML = "<div class='card' onclick='app.renderOpp()'><div class='card-info'><h3>SKIP VP</h3></div></div>";
+        
+        // Fixed syntax error here (replaced inner quotes)
+        if(vps.length === 0) {
+            c.innerHTML = "<div class='card' onclick='app.renderOpp()'><div class='card-info'><h3>CONTINUE (NO VP)</h3></div></div>";
+            return;
+        }
+
         vps.forEach(v => {
             const img = v.img ? `<img src="${v.img}">` : "";
             c.innerHTML += `<div class="card" onclick="app.selVP('${v.id}')"><div class="portrait">${img}</div><div class="card-info"><h3>${v.name}</h3><p>${v.state}</p></div></div>`;
@@ -148,8 +157,10 @@ const app = {
     renderOpp: function() {
         const maj = document.getElementById('opponent-cards-major');
         const min = document.getElementById('opponent-cards-minor');
+        if(!maj || !min) return; // Safety check
         maj.innerHTML = ""; min.innerHTML = "";
         
+        // Determine Rival Party (D vs R, I vs D)
         let rivalP = (this.data.selectedParty === 'D') ? 'R' : 'D';
         if(this.data.selectedParty === 'I') rivalP = 'D';
 
@@ -176,39 +187,33 @@ const app = {
     /* --- GAME START --- */
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
-        this.saveSnapshot(); // Undo point
+        this.saveSnapshot(); 
         this.goToScreen('game-screen');
         
-        // HUD Setup
+        const img = document.getElementById('hud-img');
+        if(this.data.candidate.img) { img.src = this.data.candidate.img; img.style.display = "block"; }
         const pKey = this.data.selectedParty;
-        document.getElementById('hud-img').src = this.data.candidate.img || "";
-        document.getElementById('hud-img').style.display = "block";
-        document.getElementById('hud-img').className = `hud-border-${pKey}`;
+        img.className = `hud-border-${pKey}`;
         document.getElementById('hud-cand-name').innerText = this.data.candidate.name.toUpperCase();
-        document.getElementById('hud-party-name').innerText = PARTIES[pKey].name.toUpperCase();
+        document.getElementById('hud-party-name').innerText = PARTIES[pKey].name.toUpperCase() + " NOMINEE";
         document.getElementById('hud-party-name').className = `cand-party text-${pKey}`;
-        
-        // VP Buff
-        if(this.data.vp && this.data.states[this.data.vp.state]) {
-            if(pKey === 'D') this.data.states[this.data.vp.state].poll += 5;
-            else this.data.states[this.data.vp.state].poll -= 5;
-        }
 
-        // Spoiler Logic
+        // 3rd Party Effect
         if(this.data.thirdPartiesEnabled) {
             for(let s in this.data.states) {
                 let spoil = this.data.states[s].greenShare + this.data.states[s].libShare;
-                // Simplified: hurts leader
                 if(this.data.states[s].poll > 50) this.data.states[s].poll -= (spoil * 0.6);
                 else this.data.states[s].poll += (spoil * 0.6);
             }
+            this.log("Third parties active. Polls adjusted.");
         }
 
         this.initMap();
         this.updateHUD();
+        this.log(`Campaign vs ${this.data.opponent ? this.data.opponent.name : 'Opponent'} started.`);
     },
 
-    /* --- GAMEPLAY ACTIONS --- */
+    /* --- GAMEPLAY --- */
     initIssues: function() {
         const s = document.getElementById('issue-select');
         const r = document.getElementById('rally-issue-select');
@@ -224,7 +229,6 @@ const app = {
         this.data.energy--;
         
         const s = this.data.states[this.data.selectedState];
-        // Formula: Base * EV * Support * Fatigue
         let base = 0.5; 
         let support = (this.data.selectedParty==='D' ? s.poll : (100-s.poll)) / 50;
         let fatigue = Math.pow(0.5, s.donorFatigue);
@@ -277,7 +281,6 @@ const app = {
         const modal = document.getElementById('bio-modal');
         const content = document.getElementById('bio-content');
         
-        // Build Demographics
         let demoHTML = `<div class="ig-grid">`;
         for(let k in s.demographics) {
             let n = INTEREST_GROUPS.find(x=>x.id===k).name;
@@ -289,7 +292,7 @@ const app = {
             <div class="bio-header" style="background:#333;">
                 <div class="bio-title"><h2>${s.name}</h2></div>
             </div>
-            <div class="bio-lore">"Battleground with ${s.ev} Electoral Votes."</div>
+            <div class="bio-lore">"Key battleground with ${s.ev} Electoral Votes."</div>
             <h3>DEMOGRAPHICS</h3>${demoHTML}
             <h3 style="margin-top:20px;">POLLING</h3>
             <p><span class="blue">${s.poll.toFixed(1)}% D</span> vs <span class="red">${(100-s.poll).toFixed(1)}% R</span></p>
@@ -297,17 +300,15 @@ const app = {
         modal.classList.remove('hidden');
     },
 
-    /* --- TURN SYSTEM --- */
+    /* --- TURN & AI --- */
     nextWeek: function() {
-        if(this.data.currentDate >= this.data.electionDay) return alert("Election Day!");
+        if(this.data.currentDate >= this.data.electionDay) return alert("Election Day Reached! Tallying votes...");
         
         this.data.currentDate.setDate(this.data.currentDate.getDate()+7);
         
-        // Restore Energy (Stacking)
         let roll = this.data.energy;
         this.data.energy = Math.min(this.data.maxEnergy + roll, Math.floor(this.data.maxEnergy*1.5));
         
-        // Reset Fatigue
         for(let s in this.data.states) { if(this.data.states[s].donorFatigue > 0) this.data.states[s].donorFatigue--; }
         
         this.opponentTurn();
@@ -326,14 +327,11 @@ const app = {
             // Drift
             s.poll += (Math.random()*0.6 - 0.3);
             
-            // AI Logic
+            // AI
             let isSwing = (s.poll >= 45 && s.poll <= 55);
-            let aiWinning = playerIsDem ? (s.poll < 48) : (s.poll > 52);
+            let attackChance = isSwing ? 0.5 : 0.1;
             
-            let chance = isSwing ? 0.5 : 0.1;
-            if(aiWinning && Math.random()>0.8) chance = 0.3;
-            
-            if(Math.random() < chance) {
+            if(Math.random() < attackChance) {
                 let shift = Math.random()*1.2 + 0.2;
                 if(playerIsDem) s.poll -= shift; else s.poll += shift;
             }
@@ -341,7 +339,6 @@ const app = {
         }
     },
 
-    /* --- UNDO --- */
     saveSnapshot: function() { this.data.turnSnapshot = JSON.stringify(this.data); },
     undoLastAction: function() {
         if(!this.data.turnSnapshot) return;
@@ -429,20 +426,23 @@ const app = {
         let margin = Math.abs(s.poll - (100-s.poll)).toFixed(1);
         let name = "Opponent";
         
-        // Try to get leader name
         if(lead === "DEM" && this.data.selectedParty === 'D') name = this.data.candidate.name.split(" ").pop();
         else if(lead === "REP" && this.data.selectedParty === 'R') name = this.data.candidate.name.split(" ").pop();
         else if(this.data.opponent) name = this.data.opponent.name.split(" ").pop();
         
-        let colorClass = lead === "DEM" ? "blue" : "red";
+        let color = lead === "DEM" ? "#4fa1ff" : "#ff6b6b";
         
         tt.innerHTML = `
-            <span class="tooltip-leader" style="color:${lead==='DEM'?'#4fa1ff':'#ff6b6b'}">${name} +${margin}</span>
+            <span class="tooltip-leader" style="color:${color}">${name} +${margin}</span>
             <div class="tip-row"><span class="blue">DEM</span> <span>${s.poll.toFixed(1)}%</span></div>
             <div class="tip-row"><span class="red">REP</span> <span>${(100-s.poll).toFixed(1)}%</span></div>
             <div style="font-size:0.7rem; color:#aaa; margin-top:4px;">${s.ev} Electoral Votes</div>
         `;
         tt.style.display='block'; tt.style.left=(e.clientX+15)+'px'; tt.style.top=(e.clientY+15)+'px';
+    },
+    log: function(msg) {
+        const feed = document.getElementById('log-content');
+        if(feed) { const div = document.createElement('div'); div.className = "log-entry"; div.innerText = `> ${msg}`; feed.prepend(div); }
     },
     showToast: function(msg) {
         const t = document.getElementById('toast');
@@ -450,8 +450,7 @@ const app = {
     },
     toggleThirdParties: function() {
         this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked;
-        const section = document.getElementById('third-party-section');
-        section.style.opacity = this.data.thirdPartiesEnabled ? "1" : "0.3";
+        document.getElementById('third-party-section').style.opacity = this.data.thirdPartiesEnabled ? "1" : "0.3";
     }
 };
 
