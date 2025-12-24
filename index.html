@@ -203,14 +203,36 @@
                         </div>
                         <div class="poll-moe" id="sp-moe">MOE: ±3.4%</div>
                     </div>
-                    <div class="action-menu">
-                        <h4>CAMPAIGN ACTIONS <span id="action-points">3/3 LEFT</span></h4>
-                        <div class="action-row">
-                            <select id="issue-select"></select>
-                            <button class="btn-action" onclick="app.runStateAd()">STATE AD BLITZ <span class="cost">$500k</span></button>
+                   <div class="action-menu">
+                        <h4>CAMPAIGN STRATEGY</h4>
+                        
+                        <div class="action-grid">
+                            <button class="act-btn" onclick="app.setupRally()">
+                                <span class="act-icon">🎤</span>
+                                <span>HOLD RALLY</span>
+                                <span class="act-cost">2 ENG / $100K</span>
+                            </button>
+                            <button class="act-btn" onclick="app.fundraise()">
+                                <span class="act-icon">💰</span>
+                                <span>FUNDRAISE</span>
+                                <span class="act-cost">1 ENG</span>
+                            </button>
+                            <button class="act-btn" onclick="app.runStateAd()">
+                                <span class="act-icon">📺</span>
+                                <span>TV AD BLITZ</span>
+                                <span class="act-cost">0 ENG / $500K</span>
+                            </button>
+                            <button class="act-btn" onclick="app.openStateBio()">
+                                <span class="act-icon">📖</span>
+                                <span>VIEW INTEL</span>
+                                <span class="act-cost">FREE</span>
+                            </button>
                         </div>
-                        <div class="action-row">
-                            <button class="btn-action purple" onclick="app.runNationalAd()">NATIONAL AD BUY <span class="cost">$2.5M</span></button>
+
+                        <div style="margin-top:15px;" id="rally-options" class="hidden">
+                            <label style="font-size:0.8rem; color:#aaa;">SELECT RALLY FOCUS:</label>
+                            <select id="rally-issue-select"></select>
+                            <button class="btn-action" onclick="app.executeRally()">CONFIRM RALLY</button>
                         </div>
                     </div>
                     <div class="issues-list">
@@ -252,5 +274,6 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
 
