@@ -28,8 +28,7 @@
         </header>
         <div class="panel-container">
             <h2 class="section-title">SELECT YOUR PARTY</h2>
-            <div class="cards-row" id="party-cards">
-                </div>
+            <div class="cards-row" id="party-cards"></div>
         </div>
     </section>
 
@@ -106,24 +105,15 @@
 
             <div class="hud-right">
                 <div class="stat-group">
-                    <label>ENERGY</label>
-                    <div class="energy-container" id="hud-energy">
-                        </div>
-                </div>
-                <div class="stat-group">
                     <label>WAR CHEST</label>
                     <span class="money" id="hud-funds">$0.0M</span>
                 </div>
                 <div class="stat-group">
-                    <label>WEEK OF</label>
-                    <span class="date-display" id="hud-date">JUL 4</span>
+                    <label>ACTIONS</label>
+                    <span class="date-display" id="action-points">3/3</span>
                 </div>
-                <div class="stat-group" style="display:flex; flex-direction:column; align-items:flex-end;">
+                <div class="stat-group">
                     <button class="next-turn-btn" onclick="app.nextWeek()">NEXT WEEK &rarr;</button>
-                    <div class="turn-controls">
-                        <button class="mini-btn" onclick="app.undoLastAction()">UNDO</button>
-                        <button class="mini-btn" onclick="app.resetTurn()">RESET</button>
-                    </div>
                 </div>
             </div>
         </header>
@@ -203,36 +193,20 @@
                         </div>
                         <div class="poll-moe" id="sp-moe">MOE: ±3.4%</div>
                     </div>
-                   <div class="action-menu">
-                        <h4>CAMPAIGN STRATEGY</h4>
-                        
-                        <div class="action-grid">
-                            <button class="act-btn" onclick="app.setupRally()">
-                                <span class="act-icon">🎤</span>
-                                <span>HOLD RALLY</span>
-                                <span class="act-cost">2 ENG / $100K</span>
-                            </button>
-                            <button class="act-btn" onclick="app.fundraise()">
-                                <span class="act-icon">💰</span>
-                                <span>FUNDRAISE</span>
-                                <span class="act-cost">1 ENG</span>
-                            </button>
-                            <button class="act-btn" onclick="app.runStateAd()">
-                                <span class="act-icon">📺</span>
-                                <span>TV AD BLITZ</span>
-                                <span class="act-cost">0 ENG / $500K</span>
-                            </button>
-                            <button class="act-btn" onclick="app.openStateBio()">
-                                <span class="act-icon">📖</span>
-                                <span>VIEW INTEL</span>
-                                <span class="act-cost">FREE</span>
+                    <div class="action-menu">
+                        <h4>CAMPAIGN ACTIONS</h4>
+                        <div class="action-row">
+                            <select id="issue-select"></select>
+                            <button class="btn-action" onclick="app.runStateAd()">
+                                <span>📺 STATE AD BLITZ</span>
+                                <span class="cost">$500k</span>
                             </button>
                         </div>
-
-                        <div style="margin-top:15px;" id="rally-options" class="hidden">
-                            <label style="font-size:0.8rem; color:#aaa;">SELECT RALLY FOCUS:</label>
-                            <select id="rally-issue-select"></select>
-                            <button class="btn-action" onclick="app.executeRally()">CONFIRM RALLY</button>
+                        <div class="action-row">
+                            <button class="btn-action purple" onclick="app.runNationalAd()">
+                                <span>📢 NATIONAL AD BUY</span>
+                                <span class="cost">$2.5M</span>
+                            </button>
                         </div>
                     </div>
                     <div class="issues-list">
@@ -240,10 +214,12 @@
                         <div id="sp-issues-list"></div>
                     </div>
                 </div>
+                
                 <div id="empty-msg">
                     <div class="empty-icon">Select a State</div>
                     <p>Click the map to view polling and campaign.</p>
                 </div>
+                
                 <div id="log-feed">
                     <h4>CAMPAIGN LOG</h4>
                     <div id="log-content"></div>
@@ -252,28 +228,9 @@
         </div>
     </section>
 
-    <div id="modal-overlay" class="hidden">
-        <div class="modal-box">
-            <h2>BREAKING NEWS</h2>
-            <p id="event-text">Event description...</p>
-            <button onclick="document.getElementById('modal-overlay').classList.add('hidden')">CONTINUE</button>
-        </div>
-    </div>
-
-    <div id="bio-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:5000; display:flex; justify-content:center; align-items:center;">
-        <div class="modal-box" style="width: 700px; max-height:90vh; overflow-y:auto; text-align:left; padding:30px;">
-            <div id="bio-content">
-                </div>
-            <button onclick="document.getElementById('bio-modal').classList.add('hidden')" style="width:100%; margin-top:20px; padding:15px; background:#444; border:none; color:white; font-weight:bold; cursor:pointer;">CLOSE REPORT</button>
-        </div>
-    </div>
-
     <div id="map-tooltip"></div>
 
     <div id="toast"></div>
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
