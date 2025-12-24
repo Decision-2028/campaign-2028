@@ -99,8 +99,6 @@ body {
 
 .ev-display { display: flex; justify-content: space-between; font-weight: 900; font-size: 1.5rem; margin-bottom: 5px; }
 .dem-score { color: var(--dem-blue); } .rep-score { color: var(--rep-red); }
-.progress-bar-bg { height: 14px; background: #333; overflow: hidden; width: 400px; border: 1px solid #555; border-radius: 0; }
-.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--dem-blue) 50%, var(--rep-red) 50%); }
 
 .hud-right { display: flex; gap: 20px; align-items: center; }
 .stat-group { text-align: right; }
@@ -145,7 +143,6 @@ select { width: 100%; padding: 10px; background: #333; border: 1px solid #555; c
 }
 #map-tooltip h4 { margin: 0 0 8px 0; font-family: 'Merriweather', serif; color: #ffd700; border-bottom: 1px solid #444; padding-bottom: 4px; }
 .tip-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 3px; }
-.tooltip-leader { font-family: 'Merriweather', serif; font-weight: 700; font-size: 1.1rem; border-bottom: 1px solid #555; padding-bottom: 3px; margin-bottom: 5px; display: block; }
 
 /* OPPONENT SCREEN & TOGGLES */
 .party-G { background: #198754; } 
@@ -221,3 +218,21 @@ input:checked + .slider:before { transform: translateX(26px); }
 .turn-controls { display: flex; gap: 5px; margin-top: 5px; }
 .mini-btn { padding: 5px 10px; background: #444; border: none; color: white; font-size: 0.7rem; cursor: pointer; }
 .mini-btn:hover { background: #666; }
+
+/* Update these styles */
+.progress-bar-bg { 
+    height: 14px; 
+    background: #333; 
+    border-radius: 0; /* Sharp corners */
+    overflow: hidden; 
+    width: 400px; 
+    border: 1px solid #555; 
+}
+
+.tooltip-leader { 
+    font-family: 'Merriweather', serif; 
+    font-weight: 700; 
+    font-size: 1.4rem; 
+    display: block; 
+    line-height: 1.1;
+}
