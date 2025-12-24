@@ -167,3 +167,36 @@ input:checked + .slider:before { transform: translateX(26px); }
 
 .opponent-section { margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
 .opponent-section h3 { color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+
+/* Add these to your style.css */
+
+/* Energy Bar */
+.energy-container { display: flex; gap: 4px; }
+.energy-pip { width: 10px; height: 18px; background: #333; border: 1px solid #555; transform: skewX(-10deg); }
+.energy-pip.active { background: #ffd700; box-shadow: 0 0 5px #ffd700; border-color: #fff; }
+
+/* Action Grid */
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
+.act-btn {
+    padding: 12px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s;
+}
+.act-btn:hover { background: #333; border-color: #666; }
+.act-icon { font-size: 1.4rem; }
+.act-cost { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+
+/* State Bio Modal */
+.bio-header { height: 100px; position: relative; margin: -30px -30px 20px -30px; border-bottom: 4px solid #ffd700; }
+.bio-title { padding: 60px 0 0 30px; color: white; text-shadow: 0 2px 4px black; }
+.bio-title h2 { margin: 0; font-family: 'Merriweather', serif; font-size: 2rem; }
+.bio-lore { font-style: italic; color: #ccc; border-left: 3px solid #ffd700; padding-left: 10px; margin-bottom: 20px; }
+
+/* Demographics */
+.ig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
+.ig-tag { background: #1a1a1a; padding: 8px; border: 1px solid #333; border-radius: 4px; text-align: center; }
+.ig-val { display: block; font-weight: bold; color: #ffd700; font-size: 1.1rem; }
+
+/* Undo/Reset */
+.turn-controls { margin-top: 5px; }
+.mini-btn { background: #444; border: none; color: white; padding: 4px 8px; font-size: 0.7rem; cursor: pointer; border-radius: 3px; }
+.mini-btn:hover { background: #666; }
