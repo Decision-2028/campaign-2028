@@ -78,19 +78,20 @@ body {
 }
 .start-btn:hover { background: white; color: var(--dem-blue); }
 
-/* --- HEADERS --- */
+/* --- HEADERS (REVERTED TO DARK THEME) --- */
 .news-header {
-    background: white;
-    color: black;
-    padding: 10px 0;
-    border-bottom: 4px solid var(--rep-red);
+    background: #1a1a1a; /* Reverted to Dark */
+    color: white;        /* Reverted to White Text */
+    padding: 15px 20px;
+    border-bottom: 1px solid #333; /* Thinner, subtle border */
+    display: flex;
+    align-items: center;
 }
 
 .logo {
     font-family: 'Merriweather', serif;
     font-weight: 900;
     font-size: 1.5rem;
-    padding-left: 20px;
 }
 .red-text { color: var(--rep-red); }
 
