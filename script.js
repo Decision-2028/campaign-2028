@@ -43,24 +43,25 @@ const VPS = [
     { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner.", img: "images/scenario.jpg" }
 ];
 
+// STATES with FIPS CODES for SVG Splitting
 const INIT_STATES = {
-    "AL": { name: "Alabama", ev: 9 }, "AK": { name: "Alaska", ev: 3 }, "AZ": { name: "Arizona", ev: 11 },
-    "AR": { name: "Arkansas", ev: 6 }, "CA": { name: "California", ev: 54 }, "CO": { name: "Colorado", ev: 10 },
-    "CT": { name: "Connecticut", ev: 7 }, "DE": { name: "Delaware", ev: 3 }, "DC": { name: "District of Columbia", ev: 3 },
-    "FL": { name: "Florida", ev: 30 }, "GA": { name: "Georgia", ev: 16 }, "HI": { name: "Hawaii", ev: 4 },
-    "ID": { name: "Idaho", ev: 4 }, "IL": { name: "Illinois", ev: 19 }, "IN": { name: "Indiana", ev: 11 },
-    "IA": { name: "Iowa", ev: 6 }, "KS": { name: "Kansas", ev: 6 }, "KY": { name: "Kentucky", ev: 8 },
-    "LA": { name: "Louisiana", ev: 8 }, "ME": { name: "Maine", ev: 4 }, "MD": { name: "Maryland", ev: 10 },
-    "MA": { name: "Massachusetts", ev: 11 }, "MI": { name: "Michigan", ev: 15 }, "MN": { name: "Minnesota", ev: 10 },
-    "MS": { name: "Mississippi", ev: 6 }, "MO": { name: "Missouri", ev: 10 }, "MT": { name: "Montana", ev: 4 },
-    "NE": { name: "Nebraska", ev: 5 }, "NV": { name: "Nevada", ev: 6 }, "NH": { name: "New Hampshire", ev: 4 },
-    "NJ": { name: "New Jersey", ev: 14 }, "NM": { name: "New Mexico", ev: 5 }, "NY": { name: "New York", ev: 28 },
-    "NC": { name: "North Carolina", ev: 16 }, "ND": { name: "North Dakota", ev: 3 }, "OH": { name: "Ohio", ev: 17 },
-    "OK": { name: "Oklahoma", ev: 7 }, "OR": { name: "Oregon", ev: 8 }, "PA": { name: "Pennsylvania", ev: 19 },
-    "RI": { name: "Rhode Island", ev: 4 }, "SC": { name: "South Carolina", ev: 9 }, "SD": { name: "South Dakota", ev: 3 },
-    "TN": { name: "Tennessee", ev: 11 }, "TX": { name: "Texas", ev: 40 }, "UT": { name: "Utah", ev: 6 },
-    "VT": { name: "Vermont", ev: 3 }, "VA": { name: "Virginia", ev: 13 }, "WA": { name: "Washington", ev: 12 },
-    "WV": { name: "West Virginia", ev: 4 }, "WI": { name: "Wisconsin", ev: 10 }, "WY": { name: "Wyoming", ev: 3 }
+    "AL": { name: "Alabama", ev: 9, fips: "01" }, "AK": { name: "Alaska", ev: 3, fips: "02" }, "AZ": { name: "Arizona", ev: 11, fips: "04" },
+    "AR": { name: "Arkansas", ev: 6, fips: "05" }, "CA": { name: "California", ev: 54, fips: "06" }, "CO": { name: "Colorado", ev: 10, fips: "08" },
+    "CT": { name: "Connecticut", ev: 7, fips: "09" }, "DE": { name: "Delaware", ev: 3, fips: "10" }, "DC": { name: "District of Columbia", ev: 3, fips: "11" },
+    "FL": { name: "Florida", ev: 30, fips: "12" }, "GA": { name: "Georgia", ev: 16, fips: "13" }, "HI": { name: "Hawaii", ev: 4, fips: "15" },
+    "ID": { name: "Idaho", ev: 4, fips: "16" }, "IL": { name: "Illinois", ev: 19, fips: "17" }, "IN": { name: "Indiana", ev: 11, fips: "18" },
+    "IA": { name: "Iowa", ev: 6, fips: "19" }, "KS": { name: "Kansas", ev: 6, fips: "20" }, "KY": { name: "Kentucky", ev: 8, fips: "21" },
+    "LA": { name: "Louisiana", ev: 8, fips: "22" }, "ME": { name: "Maine", ev: 4, fips: "23" }, "MD": { name: "Maryland", ev: 10, fips: "24" },
+    "MA": { name: "Massachusetts", ev: 11, fips: "25" }, "MI": { name: "Michigan", ev: 15, fips: "26" }, "MN": { name: "Minnesota", ev: 10, fips: "27" },
+    "MS": { name: "Mississippi", ev: 6, fips: "28" }, "MO": { name: "Missouri", ev: 10, fips: "29" }, "MT": { name: "Montana", ev: 4, fips: "30" },
+    "NE": { name: "Nebraska", ev: 5, fips: "31" }, "NV": { name: "Nevada", ev: 6, fips: "32" }, "NH": { name: "New Hampshire", ev: 4, fips: "33" },
+    "NJ": { name: "New Jersey", ev: 14, fips: "34" }, "NM": { name: "New Mexico", ev: 5, fips: "35" }, "NY": { name: "New York", ev: 28, fips: "36" },
+    "NC": { name: "North Carolina", ev: 16, fips: "37" }, "ND": { name: "North Dakota", ev: 3, fips: "38" }, "OH": { name: "Ohio", ev: 17, fips: "39" },
+    "OK": { name: "Oklahoma", ev: 7, fips: "40" }, "OR": { name: "Oregon", ev: 8, fips: "41" }, "PA": { name: "Pennsylvania", ev: 19, fips: "42" },
+    "RI": { name: "Rhode Island", ev: 4, fips: "44" }, "SC": { name: "South Carolina", ev: 9, fips: "45" }, "SD": { name: "South Dakota", ev: 3, fips: "46" },
+    "TN": { name: "Tennessee", ev: 11, fips: "47" }, "TX": { name: "Texas", ev: 40, fips: "48" }, "UT": { name: "Utah", ev: 6, fips: "49" },
+    "VT": { name: "Vermont", ev: 3, fips: "50" }, "VA": { name: "Virginia", ev: 13, fips: "51" }, "WA": { name: "Washington", ev: 12, fips: "53" },
+    "WV": { name: "West Virginia", ev: 4, fips: "54" }, "WI": { name: "Wisconsin", ev: 10, fips: "55" }, "WY": { name: "Wyoming", ev: 3, fips: "56" }
 };
 
 /* --- CIV & COUNTY ENGINE --- */
@@ -69,20 +70,17 @@ class County {
         this.id = id;
         this.name = name || id;
         
-        // Procedural Type Determination
+        // Procedural Type Logic
         const rand = Math.random();
         if (stateType === 'Urban') this.type = rand > 0.4 ? 'Urban' : 'Suburb';
         else if (stateType === 'Rural') this.type = rand > 0.9 ? 'Urban' : 'Rural';
         else this.type = rand > 0.8 ? 'Urban' : (rand > 0.4 ? 'Suburb' : 'Rural');
 
-        // Population (Civs)
         let base = this.type === 'Urban' ? 500000 : (this.type === 'Suburb' ? 100000 : 20000);
         this.population = Math.floor(base * (0.8 + Math.random() * 0.4));
 
-        // Demographics
         this.demographics = this.generateDemographics(this.type);
         
-        // Vote Calculation
         let lean = this.calculateLean(); 
         this.pcts = { 
             D: lean, 
@@ -96,35 +94,24 @@ class County {
 
     generateDemographics(type) {
         let demos = {};
-        // Init safe values
         INTEREST_GROUPS.forEach(ig => demos[ig.id] = Math.floor(Math.random()*5));
-
-        if (type === 'Urban') { 
-            demos.white_col += 30; demos.aa += 25; demos.his += 20; demos.youth += 15; demos.white_wc += 10; 
-        } else if (type === 'Suburb') { 
-            demos.white_col += 45; demos.white_wc += 25; demos.his += 15; demos.youth += 10; demos.aa += 5; 
-        } else { 
-            demos.white_wc += 60; demos.evang += 30; demos.rural += 50; 
-        } 
+        if (type === 'Urban') { demos.white_col += 30; demos.aa += 25; demos.his += 20; demos.youth += 15; demos.white_wc += 10; }
+        else if (type === 'Suburb') { demos.white_col += 45; demos.white_wc += 25; demos.his += 15; demos.youth += 10; demos.aa += 5; }
+        else { demos.white_wc += 60; demos.evang += 30; demos.rural += 50; } 
         return demos;
     }
 
     calculateLean() {
         let dScore = 0, rScore = 0;
-        // Base Leans
         if(this.type === 'Urban') dScore += 25;
         if(this.type === 'Rural') rScore += 25;
-        
-        // Group Influence
         if(this.demographics.aa > 20) dScore += 30;
         if(this.demographics.evang > 20) rScore += 30;
         if(this.demographics.youth > 20) dScore += 20;
         if(this.demographics.rural > 20) rScore += 20;
-        
         let total = dScore + rScore;
         let dPct = (dScore / total) * 100;
-        // Clamp result
-        return Math.max(10, Math.min(90, dPct + (Math.random()*10 - 5)));
+        return Math.max(15, Math.min(85, dPct + (Math.random()*10 - 5)));
     }
 
     normalizePcts() {
@@ -149,11 +136,11 @@ const app = {
         selectedParty: null, candidate: null, vp: null, opponent: null, opponentVP: null,
         funds: 0, energy: 8, maxEnergy: 8, thirdPartiesEnabled: true,
         states: {}, selectedState: null, activeCountyState: null,
-        mapMode: 'political'
+        mapMode: 'political', masterMapCache: null
     },
 
     init: function() {
-        console.log("Initializing Decision 2028...");
+        console.log("System Start...");
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
         
         for(let sCode in this.data.states) {
@@ -163,15 +150,12 @@ const app = {
             s.priorities = {}; 
             ISSUES.forEach(i => s.priorities[i.id] = Math.floor(Math.random()*10)+1);
             
-            // Format Names for Wikipedia URL
             let safeName = s.name.replace(/ /g, "_");
             s.flagUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/Flag_of_${safeName}.svg`;
 
-            // Procedural Baseline for 3rd Parties
             let baseG = ['CA','OR','VT','WA'].includes(sCode) ? 4.0 : 1.0;
             let baseL = ['NH','MT','NV','AK'].includes(sCode) ? 4.5 : 1.5;
             
-            // Generate Initial Procedural Data (Fallback)
             s.counties = this.generateCountiesForState(s, baseG, baseL);
             this.recalcStatePoll(s);
         }
@@ -183,17 +167,11 @@ const app = {
     generateCountiesForState: function(state, baseG, baseL) {
         let counties = [];
         let numCounties = Math.max(5, Math.floor(state.ev * 1.8)); 
-        
-        // Generate valid IDs without spaces for the fallback
         let safeName = state.name.replace(/ /g, "");
-        counties.push(new County(`c_${safeName}_Urban`, "Metro City", "Urban", baseG, baseL));
-        
-        let numSubs = Math.floor(numCounties * 0.3);
-        for(let i=0; i<numSubs; i++) counties.push(new County(`c_${safeName}_Sub_${i}`, `Suburb ${i+1}`, "Suburb", baseG, baseL));
-        
-        let numRural = numCounties - 1 - numSubs;
-        for(let i=0; i<numRural; i++) counties.push(new County(`c_${safeName}_Rur_${i}`, `Rural Dist ${i+1}`, "Rural", baseG, baseL));
-        
+        // Procedural Fallback data
+        counties.push(new County(`c_${safeName}_U`, "Metro City", "Urban", baseG, baseL));
+        for(let i=0; i<Math.floor(numCounties * 0.3); i++) counties.push(new County(`c_${safeName}_S${i}`, `Suburb ${i+1}`, "Suburb", baseG, baseL));
+        for(let i=0; i<numCounties * 0.7; i++) counties.push(new County(`c_${safeName}_R${i}`, `Rural Dist ${i+1}`, "Rural", baseG, baseL));
         return counties;
     },
 
@@ -220,7 +198,7 @@ const app = {
         document.getElementById(id).classList.add('active');
     },
 
-    // --- SETUP FLOW ---
+    /* --- SETUP SCREENS --- */
     renderParties: function() {
         const c = document.getElementById('party-cards'); 
         if(!c) return;
@@ -231,7 +209,6 @@ const app = {
         });
     },
     selParty: function(k) { this.data.selectedParty = k; this.renderCands(k); this.goToScreen('candidate-screen'); },
-    
     renderCands: function(pk) {
         const c = document.getElementById('candidate-cards'); c.innerHTML = "";
         CANDIDATES.filter(x => x.party === pk).forEach(cand => {
@@ -243,7 +220,6 @@ const app = {
         this.data.maxEnergy = this.data.candidate.stamina; this.data.energy = this.data.maxEnergy;
         this.renderVPs(this.data.candidate.party); this.goToScreen('vp-screen');
     },
-    
     renderVPs: function(pk) {
         const c = document.getElementById('vp-cards'); c.innerHTML = "";
         const vps = VPS.filter(x => x.party === pk);
@@ -253,14 +229,12 @@ const app = {
         });
     },
     selVP: function(id) { this.data.vp = VPS.find(x => x.id === id); this.renderOpp(); },
-    
     renderOpp: function() {
         const maj = document.getElementById('opponent-cards-major');
         const min = document.getElementById('opponent-cards-minor');
         maj.innerHTML = ""; min.innerHTML = "";
         let rival = this.data.selectedParty === 'D' ? 'R' : 'D';
         if(this.data.selectedParty === 'I') rival = 'D';
-        
         CANDIDATES.filter(x => x.party === rival).forEach(o => {
             maj.innerHTML += `<div class="card" onclick="app.selOpp('${o.id}')"><div class="portrait"><img src="${o.img}"></div><div class="card-info"><h3>${o.name}</h3></div></div>`;
         });
@@ -270,7 +244,6 @@ const app = {
         this.goToScreen('opponent-screen');
     },
     selOpp: function(id) { this.data.opponent = CANDIDATES.find(x => x.id === id); this.renderOppVP(); },
-    
     renderOppVP: function() {
         const maj = document.getElementById('opponent-cards-major'); maj.innerHTML = "";
         document.getElementById('opp-section-title').innerText = "SELECT OPPONENT'S VP";
@@ -281,10 +254,8 @@ const app = {
         });
     },
     selOppVP: function(id) { this.data.opponentVP = VPS.find(x => x.id === id); this.startGame(); },
-    
     toggleThirdParties: function() { this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked; },
 
-    /* --- START GAME --- */
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
         this.goToScreen('game-screen');
@@ -305,7 +276,7 @@ const app = {
         this.initMap(); this.updateHUD();
     },
 
-    /* --- MAP SYSTEM (Wikipedia SVG Loader) --- */
+    /* --- MAP SYSTEM (MASTER MAP SPLITTER) --- */
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -314,61 +285,109 @@ const app = {
         document.getElementById('cv-flag').src = s.flagUrl;
         
         const container = document.getElementById('county-map-container');
-        container.innerHTML = `<p style="color:#aaa;">Establishing Satellite Link...</p>`;
+        container.innerHTML = `<p style="color:#aaa;">Loading State Data...</p>`;
         document.getElementById('county-modal').classList.remove('hidden');
         
-        // Exact URL Logic
-        let safeName = s.name.replace(/ /g, "_");
-        let url = `https://commons.wikimedia.org/wiki/Special:FilePath/${safeName}_Presidential_Election_Results_2024.svg`;
-        
-        fetch(url)
-            .then(res => { if(!res.ok) throw new Error("Fetch Fail"); return res.text(); })
-            .then(data => {
-                if(data.includes("<svg")) {
-                    container.innerHTML = data;
-                    this.parseCountySVG(container.querySelector('svg'), s); 
-                } else throw new Error("Invalid SVG");
-            })
-            .catch(err => {
-                // FALLBACK: Generate procedural map grid if fetch fails (CORS/404)
-                console.warn("Map load failed, using synthetic grid.");
-                this.generateFallbackMap(container, s);
-            });
+        // 1. Check if Master Map is Cached
+        if(this.data.masterMapCache) {
+            this.extractStateFromMaster(this.data.masterMapCache, s, container);
+        } else {
+            // 2. Fetch Master Map
+            fetch('counties/uscountymap.svg')
+                .then(res => { if(!res.ok) throw new Error("No Master Map"); return res.text(); })
+                .then(data => {
+                    this.data.masterMapCache = data; // Cache it
+                    this.extractStateFromMaster(data, s, container);
+                })
+                .catch(err => {
+                    console.warn("Master map load failed. Using procedural grid.");
+                    this.generateFallbackMap(container, s);
+                });
+        }
     },
 
-    parseCountySVG: function(svg, stateObj) {
-        if(!svg) return;
-        svg.style.width="100%"; svg.style.height="100%";
-        let paths = svg.querySelectorAll('path, g, rect, polygon');
+    extractStateFromMaster: function(svgData, stateObj, container) {
+        // Create a temporary parser
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(svgData, "image/svg+xml");
+        let allPaths = doc.querySelectorAll('path, polygon, g');
+        
+        // FIPS Filter (e.g. "01" for AL)
+        let fips = stateObj.fips; 
+        let validPaths = [];
         let newCounties = [];
         
-        paths.forEach((p, idx) => {
-            // Find a valid ID
-            let id = p.id;
-            if(!id || id.length < 2) return; 
+        // Bounds Calculation
+        let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
 
-            let existing = stateObj.counties.find(c => c.id === id);
-            if(!existing) {
-                // Create county data if new
-                let baseG = ['California','Oregon','Vermont'].includes(stateObj.name) ? 4.0 : 1.0;
-                let baseL = ['New_Hampshire','Montana'].includes(stateObj.name.replace(/ /g,"_")) ? 4.5 : 1.5;
-                let cObj = new County(id, id, "Rural", baseG, baseL); 
-                newCounties.push(cObj);
-                existing = cObj;
+        allPaths.forEach(p => {
+            let id = p.id;
+            // Standard US County Maps use FIPS (e.g. 01001)
+            // Filter: Must match State FIPS
+            if(id && id.startsWith(fips)) {
+                // Determine bounding box via manual coordinate parsing (simplified)
+                // Note: accurate bbox requires rendering, we will approximate via path string parsing for 'M' or viewbox logic
+                // Actually, simplest way is to clone the node into our new container
+                validPaths.push(p);
+                
+                // Logic: Init Game Data for this county
+                let existing = stateObj.counties.find(c => c.id === id);
+                if(!existing) {
+                    let baseG = ['CA','OR'].includes(stateObj.name)?4.0:1.0;
+                    let baseL = ['NH'].includes(stateObj.name)?4.5:1.5;
+                    let cObj = new County(id, p.getAttribute('title')||p.getAttribute('name')||id, "Rural", baseG, baseL);
+                    newCounties.push(cObj);
+                    existing = cObj;
+                }
             }
-            
-            p.onclick = (e) => { e.stopPropagation(); this.clickCounty(stateObj.counties.indexOf(existing)); };
-            p.onmousemove = (e) => this.showCountyTooltip(e, existing);
-            p.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
-            
-            this.colorCountyPath(p, existing);
         });
+
+        if(validPaths.length === 0) {
+            // No FIPS match found (maybe different SVG format) -> Fallback
+            this.generateFallbackMap(container, stateObj);
+            return;
+        }
+
+        // Construct New SVG for just this state
+        // We can't calculate exact viewBox easily without rendering, so we use 100% and CSS scaling
+        // OR better: we render them and then use JS to zoom.
+        // Simplified approach: Render all, hide others? No, performance heavy.
+        // Approach: Inject just these paths into a fresh SVG.
         
+        let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        newSvg.setAttribute("viewBox", "0 0 990 600"); // Master dimensions usually
+        newSvg.style.width = "100%"; newSvg.style.height = "100%";
+        
+        validPaths.forEach(p => {
+            // Need to deep clone
+            let clone = p.cloneNode(true);
+            let c = stateObj.counties.find(ct => ct.id === p.id) || newCounties.find(ct => ct.id === p.id);
+            
+            clone.onclick = (e) => { e.stopPropagation(); this.clickCounty(stateObj.counties.indexOf(c)); };
+            clone.onmousemove = (e) => this.showCountyTooltip(e, c);
+            clone.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
+            
+            this.colorCountyPath(clone, c);
+            newSvg.appendChild(clone);
+        });
+
+        // Update State Data if new counties found
         if(newCounties.length > 0) {
             stateObj.counties = newCounties;
             this.recalcStatePoll(stateObj);
             this.clickState(this.data.selectedState);
         }
+
+        container.innerHTML = "";
+        container.appendChild(newSvg);
+        
+        // Auto-Zoom Hack:
+        // Since we kept original coordinates, we need to calculate bbox of the group
+        // In a real browser, getBBox works once appended.
+        try {
+            let bbox = newSvg.getBBox();
+            if(bbox.width > 0) newSvg.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+        } catch(e) { /* JSDOM/Non-rendered context issue, ignore */ }
     },
 
     generateFallbackMap: function(container, stateObj) {
@@ -387,7 +406,6 @@ const app = {
             rect.setAttribute("x", x); rect.setAttribute("y", y);
             rect.setAttribute("width", size); rect.setAttribute("height", size);
             
-            // Pass index to clickCounty
             rect.onclick = () => this.clickCounty(i);
             rect.onmousemove = (e) => this.showCountyTooltip(e, c);
             rect.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
@@ -407,7 +425,6 @@ const app = {
             let intensity = Math.min(c.population / 200000, 1);
             fill = `rgba(74, 222, 128, ${intensity})`;
         } else {
-            // Demographics map mode
             let key = this.data.mapMode;
             let val = c.demographics[key] || 0;
             fill = `rgba(255, 215, 0, ${val/50})`;
@@ -428,11 +445,16 @@ const app = {
                 let container = document.getElementById('county-map-container');
                 if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
                 else {
-                    let p = document.getElementById(c.id);
-                    if(p) this.colorCountyPath(p, c);
+                    // Refresh SVG via re-extraction or re-color loop
+                    // Simple re-color:
+                    let all = container.querySelectorAll('path, rect');
+                    all.forEach((el, i) => {
+                        // Assuming index match for simple fallback, or ID match for SVG
+                        if(el.id === c.id) this.colorCountyPath(el, c);
+                    });
                 }
                 this.clickState(this.data.selectedState); 
-                this.showToast(`Rally held in ${c.name}!`);
+                this.showToast(`Rally in ${c.name}!`);
             } else {
                 this.showToast("No Energy!");
             }
@@ -449,17 +471,29 @@ const app = {
         tt.classList.remove('hidden');
     },
 
-    setMapMode: function(mode, isCounty=false) {
+    setCountyMapMode: function(mode) {
         this.data.mapMode = mode;
-        if(isCounty) {
-            this.generateFallbackMap(document.getElementById('county-map-container'), this.data.activeCountyState);
-        } else {
-            this.colorMap();
+        if(this.data.activeCountyState) {
+            let container = document.getElementById('county-map-container');
+            let paths = container.querySelectorAll('path, rect, polygon');
+            let s = this.data.activeCountyState;
+            
+            if(container.querySelector('rect') && paths.length === s.counties.length) {
+                // Procedural Grid
+                this.generateFallbackMap(container, s);
+            } else {
+                // Real SVG
+                paths.forEach(p => {
+                    let c = s.counties.find(county => county.id === p.id);
+                    if(c) this.colorCountyPath(p, c);
+                });
+            }
         }
     },
     
-    setCountyMapMode: function(mode) {
-        this.setMapMode(mode, true);
+    setMapMode: function(mode) {
+        this.data.mapMode = mode;
+        this.colorMap();
     },
 
     closeCountyView: function() {
@@ -514,7 +548,6 @@ const app = {
         document.getElementById('sp-name').innerHTML = `${s.name} <span class="${col}" style="font-size:0.8em; margin-left:10px;">${lead}</span>`;
         document.getElementById('sp-ev').innerText = s.ev + " EV";
         
-        // 4-Way Bar
         let wrap = document.querySelector('.poll-bar-wrap');
         wrap.innerHTML = `
             <div style="width:${s.pcts.D}%; background:#00AEF3;"></div>
@@ -531,7 +564,6 @@ const app = {
         });
     },
     
-    // UI Helpers
     initIssues: function(){ const s=document.getElementById('issue-select'); if(s) ISSUES.forEach(i=>s.innerHTML+=`<option value="${i.id}">${i.name}</option>`); },
     fundraise: function(){ if(this.data.energy<1)return; this.data.energy--; this.data.funds+=0.5; this.updateHUD(); this.showToast("Funds Raised!"); },
     runStateAd: function(){ this.data.funds-=0.5; this.updateHUD(); this.showToast("Ad Campaign Live"); },
