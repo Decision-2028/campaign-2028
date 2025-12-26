@@ -49,6 +49,7 @@
         </header>
         <div class="panel-container">
             <h2 class="section-title">SELECT RUNNING MATE</h2>
+            <p class="instruction-text">Your VP choice can deliver a key swing state or boost your funds.</p>
             <div class="cards-row" id="vp-cards"></div>
         </div>
     </section>
@@ -59,6 +60,7 @@
         </header>
         <div class="panel-container">
             <h2 class="section-title" id="opp-section-title">SELECT YOUR OPPONENT</h2>
+            <p class="instruction-text">Choose your main rival. Toggle third parties for added chaos.</p>
             
             <div class="opponent-section">
                 <h3>Major Party Challenger</h3>
@@ -125,7 +127,7 @@
 
         <div class="map-controls">
             <select id="map-mode-select" onchange="app.setMapMode(this.value)">
-                <option value="political">POLITICAL MAP</option>
+                <option value="political">POLITICAL MARGIN</option>
                 <option value="fundraising">FUNDRAISING HEATMAP</option>
                 <option disabled>--- DEMOGRAPHICS ---</option>
                 <option value="aa">AFRICAN AMERICAN</option>
@@ -260,10 +262,9 @@
     <div id="county-modal" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background: #121212; z-index:4000; display:flex; flex-direction:column;">
         <div id="county-view-header" style="padding:10px 20px; background:#1a1a1a; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:15px;">
-                <img id="cv-flag" src="" style="height:50px; width:auto; border:1px solid #555;">
+                <img id="cv-flag" src="" style="height:50px; border:1px solid #555;">
                 <div>
                     <h2 id="cv-title" style="margin:0; font-family:'Merriweather', serif; font-size:2rem;">STATE NAME</h2>
-                    <p id="cv-desc" style="margin:0; color:#aaa; font-style:italic;">State description goes here.</p>
                 </div>
             </div>
             <button onclick="app.closeCountyView()" class="start-btn" style="margin:0; padding:10px 20px; font-size:0.9rem;">RETURN TO NATIONAL MAP</button>
@@ -272,7 +273,7 @@
         <div id="county-tooltip" class="hidden" style="position:fixed; background:rgba(0,0,0,0.9); color:white; padding:10px; border:1px solid #777; border-radius:4px; pointer-events:none; z-index:5000;"></div>
 
         <div id="county-map-container" style="flex:1; display:flex; justify-content:center; align-items:center; background:#222; overflow:hidden; position:relative;">
-            <p style="color:#666;">Loading County Data...</p>
+            <p style="color:#666;">Loading Satellite Data...</p>
         </div>
         
         <div style="height:60px; background:#1a1a1a; border-top:1px solid #333; display:flex; align-items:center; justify-content:center; gap:20px;">
