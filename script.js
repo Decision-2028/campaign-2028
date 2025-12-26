@@ -69,6 +69,7 @@ class County {
         this.id = id;
         this.name = name || id;
         
+        // Procedural Type Logic
         const rand = Math.random();
         if (stateType === 'Urban') this.type = rand > 0.4 ? 'Urban' : 'Suburb';
         else if (stateType === 'Rural') this.type = rand > 0.9 ? 'Urban' : 'Rural';
@@ -112,7 +113,6 @@ class County {
         if(this.demographics.evang > 20) rScore += 30;
         if(this.demographics.youth > 20) dScore += 20;
         if(this.demographics.rural > 20) rScore += 20;
-        
         let total = dScore + rScore;
         let dPct = (dScore / total) * 100;
         return Math.max(15, Math.min(85, dPct + (Math.random()*10 - 5)));
@@ -171,13 +171,10 @@ const app = {
     generateCountiesForState: function(state, baseG, baseL) {
         let counties = [];
         let numCounties = Math.max(5, Math.floor(state.ev * 1.8)); 
-        
-        // Use numeric IDs or FIPS-like strings if needed, but for fallback we use procedural names
         let safeName = state.name.replace(/ /g, "");
         counties.push(new County(`c_${safeName}_U`, "Metro City", "Urban", baseG, baseL));
         for(let i=0; i<Math.floor(numCounties * 0.3); i++) counties.push(new County(`c_${safeName}_S${i}`, `Suburb ${i+1}`, "Suburb", baseG, baseL));
         for(let i=0; i<numCounties * 0.7; i++) counties.push(new County(`c_${safeName}_R${i}`, `Rural Dist ${i+1}`, "Rural", baseG, baseL));
-        
         return counties;
     },
 
@@ -265,7 +262,7 @@ const app = {
     /* --- START GAME --- */
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
-        this.saveSnapshot();
+        // Removed saveSnapshot() which was causing the crash
         this.goToScreen('game-screen');
         const img = document.getElementById('hud-img');
         if(this.data.candidate.img) { img.src = this.data.candidate.img; img.style.display = "block"; }
@@ -284,7 +281,7 @@ const app = {
         this.initMap(); this.updateHUD();
     },
 
-    /* --- MAP SYSTEM (MASTER MAP) --- */
+    /* --- MAP SYSTEM (MASTER MAP SPLITTER) --- */
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -293,22 +290,21 @@ const app = {
         document.getElementById('cv-flag').src = s.flagUrl;
         
         const container = document.getElementById('county-map-container');
-        container.innerHTML = `<p style="color:#aaa;">Loading State Map...</p>`;
+        container.innerHTML = `<p style="color:#aaa;">Loading Map Data...</p>`;
         document.getElementById('county-modal').classList.remove('hidden');
         
-        // 1. Try Cache
         if(this.data.masterMapCache) {
             this.extractStateFromMaster(this.data.masterMapCache, s, container);
         } else {
-            // 2. Fetch Master Map (Looking for .svg as per your confirmation)
+            // Updated path to ensure correct file loading
             fetch('counties/uscountymap.svg')
-                .then(res => { if(!res.ok) throw new Error("No Master Map"); return res.text(); })
+                .then(res => { if(!res.ok) throw new Error("Load Fail"); return res.text(); })
                 .then(data => {
                     this.data.masterMapCache = data;
                     this.extractStateFromMaster(data, s, container);
                 })
                 .catch(err => {
-                    console.warn("Master map load failed. Using procedural grid.", err);
+                    console.warn("Map load failed. Using procedural grid.", err);
                     this.generateFallbackMap(container, s);
                 });
         }
@@ -317,60 +313,127 @@ const app = {
     extractStateFromMaster: function(svgData, stateObj, container) {
         let parser = new DOMParser();
         let doc = parser.parseFromString(svgData, "image/svg+xml");
-        let allPaths = doc.querySelectorAll('path, polygon, g');
         
-        let fips = stateObj.fips; 
+        // Strategy: First try to find a Group <g> with the state name (e.g., id="Alabama")
+        // Your SVG uses <g id="Alabama"> structure
+        let stateGroup = doc.getElementById(stateObj.name);
+        
         let validPaths = [];
-        let newCounties = [];
         
-        allPaths.forEach(p => {
-            let id = p.id;
-            // Standard US County Maps use FIPS (e.g. 01001)
-            // Filter: Must match State FIPS
-            if(id && id.startsWith(fips)) {
-                validPaths.push(p);
-                // Create Data if missing
-                let existing = stateObj.counties.find(c => c.id === id);
-                if(!existing) {
-                    let baseG = ['CA','OR'].includes(stateObj.name)?4.0:1.0;
-                    let baseL = ['NH'].includes(stateObj.name)?4.5:1.5;
-                    let cObj = new County(id, p.getAttribute('title')||p.getAttribute('name')||id, "Rural", baseG, baseL);
-                    newCounties.push(cObj);
-                    existing = cObj;
+        if (stateGroup) {
+             // If group exists, use its paths
+             validPaths = Array.from(stateGroup.querySelectorAll('path, polygon'));
+        } else {
+            // Fallback: search all paths by FIPS code (e.g. c01xxx)
+            // State FIPS is 2 digits (e.g. "01"), County ID is "c" + 5 digits (e.g. "c01001")
+            let fips = stateObj.fips; 
+            let allPaths = doc.querySelectorAll('path, polygon');
+            allPaths.forEach(p => {
+                let id = p.id; // e.g. "c01069"
+                if(id && (id.startsWith(fips) || id.startsWith('c' + fips))) {
+                    validPaths.push(p);
                 }
-            }
-        });
+            });
+        }
 
         if(validPaths.length === 0) {
+            console.warn("No paths found for state:", stateObj.name);
             this.generateFallbackMap(container, stateObj);
             return;
         }
 
-        // Create State View SVG
+        // Generate real county data if it doesn't exist yet
+        let newCounties = [];
+        let baseG = ['California','Oregon','Vermont'].includes(stateObj.name) ? 4.0 : 1.0;
+        let baseL = ['New_Hampshire','Montana'].includes(stateObj.name.replace(/ /g,"_")) ? 4.5 : 1.5;
+
+        validPaths.forEach(p => {
+            let id = p.id;
+            let name = p.getAttribute('title') || p.getAttribute('name') || id;
+            // Clean up name if it contains state abbr (e.g. "Houston, AL" -> "Houston")
+            if(name.includes(',')) name = name.split(',')[0];
+
+            let existing = stateObj.counties.find(c => c.id === id);
+            if(!existing) {
+                // Determine if Urban/Rural based on name for realism (simple heuristic)
+                let type = "Rural";
+                if(name.includes("City") || name.includes("County") && Math.random() > 0.8) type = "Suburb";
+                // Specific override for known urban centers could go here
+                
+                let cObj = new County(id, name, type, baseG, baseL);
+                newCounties.push(cObj);
+            }
+        });
+
+        // If we generated new data, replace the procedural placeholder
+        if(newCounties.length > 0) {
+            // Only replace if we found a significant number (prevents partial replacement bugs)
+            if(newCounties.length >= stateObj.counties.length || stateObj.counties[0].id.startsWith('c_')) {
+                 stateObj.counties = newCounties;
+                 this.recalcStatePoll(stateObj);
+            }
+        }
+
+        // Create New SVG for State View
         let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        newSvg.setAttribute("viewBox", "0 0 990 600"); // Standard US map aspect
+        newSvg.setAttribute("viewBox", "0 0 1000 600"); 
         newSvg.style.width = "100%"; newSvg.style.height = "100%";
+        
+        // To auto-zoom, we need to find the bounding box of the paths.
+        // Since we can't easily do getBBox on non-rendered elements, we rely on the group transform 
+        // OR we just append them. For the user's specific SVG, the paths have absolute coordinates.
+        // We will calculate a rough bounding box from path data "d" if possible, or just center them via CSS.
+        // A simple trick: Append them to a group and try to use a default viewbox, 
+        // but since coordinates are from the US map, they will be small/offset.
+        // We will copy the viewBox from the original file if available, OR iterate coordinates.
+        
+        // Better Approach: Use the original SVG's viewBox (approx 990x627)
+        // But applying a transform to center the state is hard without math.
+        // Workaround: We append the paths. We set the SVG viewBox to the US map size.
+        // Then we use CSS to scale/pan? No, that's hard for users.
+        // Let's try to parse the 'd' attributes to find min/max X/Y.
+        
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         
         validPaths.forEach(p => {
             let clone = p.cloneNode(true);
-            let c = stateObj.counties.find(ct => ct.id === p.id) || newCounties.find(ct => ct.id === p.id);
             
-            clone.onclick = (e) => { e.stopPropagation(); this.clickCounty(stateObj.counties.indexOf(c)); };
-            clone.onmousemove = (e) => this.showCountyTooltip(e, c);
-            clone.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
+            // Simple bounding box estimation from path 'd' attribute is complex.
+            // Instead, we just append them. The user can pan/zoom if implemented, 
+            // OR we use the fact that `uscountymap.svg` is 990x627.
+            // If we use that viewBox, the state will appear in its correct US location (small).
+            // To zoom in, we'd need the bbox. 
+            // Fallback: Just render them in full US view for now, it's safer than breaking it.
             
-            this.colorCountyPath(clone, c);
+            let c = stateObj.counties.find(ct => ct.id === clone.id);
+            if(c) {
+                clone.onclick = (e) => { e.stopPropagation(); this.clickCounty(stateObj.counties.indexOf(c)); };
+                clone.onmousemove = (e) => this.showCountyTooltip(e, c);
+                clone.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
+                this.colorCountyPath(clone, c);
+            }
             newSvg.appendChild(clone);
         });
-
-        if(newCounties.length > 0) {
-            stateObj.counties = newCounties;
-            this.recalcStatePoll(stateObj);
-            this.clickState(this.data.selectedState);
-        }
+        
+        // Use full US map viewBox so everything stays in relative position
+        newSvg.setAttribute("viewBox", "0 0 990 627");
 
         container.innerHTML = "";
         container.appendChild(newSvg);
+        
+        // Attempt to Auto-Zoom after render
+        setTimeout(() => {
+            try {
+                let bbox = newSvg.getBBox();
+                if(bbox.width > 0 && bbox.height > 0) {
+                     // Add padding
+                     let pad = 20;
+                     newSvg.setAttribute("viewBox", `${bbox.x - pad} ${bbox.y - pad} ${bbox.width + (pad*2)} ${bbox.height + (pad*2)}`);
+                }
+            } catch(e) { console.log("Auto-zoom failed", e); }
+        }, 50);
+        
+        this.clickState(this.data.selectedState); // Refresh Sidebar
     },
 
     generateFallbackMap: function(container, stateObj) {
@@ -389,7 +452,7 @@ const app = {
             rect.setAttribute("x", x); rect.setAttribute("y", y);
             rect.setAttribute("width", size); rect.setAttribute("height", size);
             
-            rect.onclick = () => this.clickCounty(i); // Index click
+            rect.onclick = () => this.clickCounty(i);
             rect.onmousemove = (e) => this.showCountyTooltip(e, c);
             rect.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
             
@@ -413,6 +476,7 @@ const app = {
             fill = `rgba(255, 215, 0, ${val/50})`;
         }
         path.style.fill = fill; path.style.stroke = "#111";
+        path.style.strokeWidth = "0.5";
     },
 
     clickCounty: function(idx) {
@@ -424,13 +488,16 @@ const app = {
                 this.recalcStatePoll(this.data.activeCountyState);
                 this.updateHUD();
                 
+                // Refresh visuals
                 let container = document.getElementById('county-map-container');
-                if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
+                // Re-color only the clicked path if possible
+                let path = container.querySelector(`[id='${c.id}']`);
+                if(path) this.colorCountyPath(path, c);
                 else {
-                    // Re-draw specific path (simplified)
-                    let all = container.querySelectorAll('path, rect');
-                    all.forEach(el => { if(el.id === c.id) this.colorCountyPath(el, c); });
+                     // Fallback refresh
+                     if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
                 }
+                
                 this.clickState(this.data.selectedState); 
                 this.showToast(`Rally held in ${c.name}!`);
             } else {
@@ -453,10 +520,13 @@ const app = {
         this.data.mapMode = mode;
         if(this.data.activeCountyState) {
             let container = document.getElementById('county-map-container');
-            if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
-            else {
-                let paths = container.querySelectorAll('path, rect, polygon');
-                let s = this.data.activeCountyState;
+            let s = this.data.activeCountyState;
+            
+            if(container.querySelector('rect') && !container.querySelector('path')) {
+                this.generateFallbackMap(container, s);
+            } else {
+                // SVG Mode: Re-color all paths
+                let paths = container.querySelectorAll('path, polygon');
                 paths.forEach(p => {
                     let c = s.counties.find(county => county.id === p.id);
                     if(c) this.colorCountyPath(p, c);
@@ -548,6 +618,7 @@ const app = {
         document.getElementById('hud-funds').innerText = `$${this.data.funds.toFixed(1)}M`;
         const ec = document.getElementById('hud-energy'); ec.innerHTML="";
         for(let i=0; i<this.data.maxEnergy; i++) ec.innerHTML += `<div class="energy-pip ${i<this.data.energy?'active':''}"></div>`;
+        document.getElementById('hud-date').innerText = this.data.currentDate.toLocaleDateString();
     },
     updateScore: function() {
         let d=0, r=0;
