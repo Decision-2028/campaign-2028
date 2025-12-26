@@ -15,7 +15,7 @@ const ISSUES = [
     { id: 'foreign', name: 'Foreign Pol.' }, { id: 'crime', name: 'Crime' }
 ];
 
-// ADDED: ai_skill (1-10) determines how aggressive/smart the opponent is
+// AI SKILL: 1-10 Scale (Higher = Aggressive targeting of swing states)
 const CANDIDATES = [
     { id: "harris", name: "Kamala Harris", party: "D", funds: 60, img: "images/harris.jpg", desc: "Current VP.", stamina: 8, ai_skill: 8 },
     { id: "newsom", name: "Gavin Newsom", party: "D", funds: 75, img: "images/newsom.jpg", desc: "CA Governor.", stamina: 9, ai_skill: 9 },
@@ -28,7 +28,6 @@ const CANDIDATES = [
     { id: "oliver", name: "Chase Oliver", party: "L", funds: 12, img: "images/scenario.jpg", desc: "Libertarian.", stamina: 7, ai_skill: 3 }
 ];
 
-// ADDED: ai_skill (1-5) adds to the ticket's total formidable score
 const VPS = [
     { id: "shapiro", name: "Josh Shapiro", party: "D", state: "PA", desc: "Popular swing state governor.", img: "images/shapiro.jpg", ai_skill: 5 },
     { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", desc: "Astronaut & Senator.", img: "images/scenario.jpg", ai_skill: 4 },
@@ -113,7 +112,7 @@ const app = {
         mapMode: 'political', masterMapCache: null, realCountyData: null,
         selectedCounty: null,
         // AI DATA
-        aiDifficulty: 0, aiFunds: 100
+        aiDifficulty: 0
     },
 
     init: async function() {
@@ -123,7 +122,6 @@ const app = {
             const res = await fetch('counties/county_data.json');
             if (res.ok) {
                 this.data.realCountyData = await res.json();
-                console.log("Loaded Real County Data");
             }
         } catch(e) { console.log("Using procedural data"); }
 
@@ -131,6 +129,7 @@ const app = {
         
         for(let sCode in this.data.states) {
             let s = this.data.states[sCode];
+            s.moe = (Math.random()*2 + 1.5).toFixed(1);
             let safeName = s.name.replace(/ /g, "_");
             s.flagUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/Flag_of_${safeName}.svg`;
 
@@ -143,6 +142,7 @@ const app = {
         
         this.renderParties();
         
+        // Hide county menu on map click
         document.getElementById('county-map-container').addEventListener('click', (e) => {
              if(e.target.tagName !== 'path' && e.target.tagName !== 'rect') {
                  document.getElementById('county-menu').classList.add('hidden');
@@ -154,6 +154,7 @@ const app = {
         let counties = [];
         if (this.data.realCountyData) {
             for (let fips in this.data.realCountyData) {
+                // STRICT CHECK: Ensure FIPS matches state FIPS prefix
                 if (fips.startsWith(state.fips)) {
                     let cData = this.data.realCountyData[fips];
                     let id = "c" + fips; 
@@ -255,10 +256,10 @@ const app = {
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
         
-        // CALC AI DIFFICULTY
+        // AI DIFFICULTY CALCULATION
         let oppSkill = this.data.opponent.ai_skill || 5;
         let vpSkill = this.data.opponentVP ? (this.data.opponentVP.ai_skill || 3) : 0;
-        this.data.aiDifficulty = oppSkill + vpSkill; // Total formidable score (e.g. 9 + 5 = 14)
+        this.data.aiDifficulty = oppSkill + vpSkill; 
         
         this.goToScreen('game-screen');
         const img = document.getElementById('hud-img');
@@ -278,12 +279,11 @@ const app = {
         this.data.currentDate.setDate(this.data.currentDate.getDate()+7);
         if(this.data.currentDate >= this.data.electionDay) { this.endGame(); return; }
         
-        // AI TURN
+        // AI Turn
         this.aiTurn();
         
-        // PLAYER TURN RESET
         this.data.energy = this.data.maxEnergy;
-        this.data.funds += 2; // Fundraising baseline
+        this.data.funds += 2; // Fundraising
         this.updateHUD();
         this.colorMap();
         if(this.data.selectedState) this.clickState(this.data.selectedState);
@@ -292,20 +292,17 @@ const app = {
     
     // --- OVERHAULED AI LOGIC ---
     aiTurn: function() {
-        const difficulty = this.data.aiDifficulty; // e.g., 12
-        const actionsPerTurn = Math.floor(difficulty / 3) + 1; // 12 -> 5 actions
-        const strength = (difficulty / 10) * 2.0; // 12 -> 2.4% swing per action
+        const difficulty = this.data.aiDifficulty; // e.g. 12
+        const actionsPerTurn = Math.floor(difficulty / 3) + 1; // e.g. 5
+        const strength = (difficulty / 10) * 2.0; 
         
-        // 1. Identify Targets: Sort states by "Payoff" (EV / Margin)
-        // This targets high EV states that are very close.
+        // 1. Killer Targeting: Sort by EV / (Margin+0.5)
         let targets = Object.values(this.data.states).map(s => {
             let margin = Math.abs(s.pcts.D - s.pcts.R);
-            // Score = EV / (Margin + 0.5) -- Low margin, High EV = Huge Score
             let score = s.ev / (margin + 0.5);
             return { state: s, score: score };
         });
-        
-        targets.sort((a,b) => b.score - a.score); // Highest score first
+        targets.sort((a,b) => b.score - a.score);
         
         // 2. Execute Actions
         let opponentParty = this.data.selectedParty === 'D' ? 'R' : 'D';
@@ -313,14 +310,14 @@ const app = {
         for(let i=0; i<actionsPerTurn; i++) {
             let s = targets[i].state;
             
-            // AI applies "Neighbor Effect" too to be formidable
+            // Apply Neighbor Ripple to State
             s.counties.forEach(c => {
-                 if(opponentParty === 'R') c.pcts.R += (strength * 0.15); // Small bump to all counties
+                 if(opponentParty === 'R') c.pcts.R += (strength * 0.15); 
                  else c.pcts.D += (strength * 0.15);
                  c.normalizePcts();
             });
             
-            // Major boost to a random county in that state (Simulate Rally)
+            // Major boost to random county (Rally)
             let randomCounty = s.counties[Math.floor(Math.random() * s.counties.length)];
             if(opponentParty === 'R') randomCounty.pcts.R += strength;
             else randomCounty.pcts.D += strength;
@@ -337,7 +334,7 @@ const app = {
         location.reload();
     },
 
-    /* --- MAP SYSTEM --- */
+    /* --- MAP SYSTEM (FIXED) --- */
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -369,16 +366,21 @@ const app = {
     extractStateFromMaster: function(svgData, stateObj, container) {
         let parser = new DOMParser();
         let doc = parser.parseFromString(svgData, "image/svg+xml");
-        let group = doc.getElementById(stateObj.name);
+        
+        // FIX 1: Handle space/underscore mismatch (New York vs New_York)
+        let safeName = stateObj.name.replace(/ /g, "_");
+        let group = doc.getElementById(stateObj.name) || doc.getElementById(safeName);
+        
         let validPaths = [];
         
         if(group) {
             validPaths = Array.from(group.querySelectorAll('path, polygon'));
         } else {
+            // FIX 2: Strict FIPS Check (startsWith "c"+fips)
             let fips = stateObj.fips; 
             let allPaths = doc.querySelectorAll('path, polygon');
             allPaths.forEach(p => {
-                if(p.id && p.id.indexOf(fips) !== -1) validPaths.push(p);
+                if(p.id && p.id.startsWith("c" + fips)) validPaths.push(p);
             });
         }
 
@@ -433,22 +435,22 @@ const app = {
         container.appendChild(svg);
     },
 
-    // --- DARKER HUE COLOR LOGIC ---
+    // --- COLOR LOGIC (DEEP HUES) ---
     getMarginColor: function(margin) {
         let abs = Math.abs(margin);
         if (abs < 0.5) return "#d1d1d1"; // Tossup Gray
         
-        if (margin > 0) { // DEMOCRAT (Blue)
+        if (margin > 0) { // DEM (Blue)
             if (abs > 60) return "#001a33"; // Deepest Navy
             if (abs > 40) return "#002a4d"; 
-            if (abs > 25) return "#004080"; // Deep Blue (Safe)
+            if (abs > 25) return "#004080"; // Deep Blue
             if (abs > 15) return "#005a9c"; // Solid Blue
             if (abs > 5)  return "#4da6ff"; // Lean Blue
             return "#99ccff";               // Tilt Blue
-        } else { // REPUBLICAN (Red)
+        } else { // GOP (Red)
             if (abs > 60) return "#3d0000"; // Deepest Crimson
             if (abs > 40) return "#5e0000"; 
-            if (abs > 25) return "#8b0000"; // Deep Red (Safe)
+            if (abs > 25) return "#8b0000"; // Deep Red
             if (abs > 15) return "#cc0000"; // Solid Red
             if (abs > 5)  return "#ff4d4d"; // Lean Red
             return "#ff9999";               // Tilt Red
@@ -503,8 +505,7 @@ const app = {
         const c = this.data.selectedCounty;
         const s = this.data.activeCountyState;
         
-        // --- NEIGHBOR LOGIC (MEDIA MARKET RIPPLE) ---
-        // Boost selected county by X, boost ALL OTHER counties in state by Y
+        // --- NEIGHBOR EFFECT (Media Market Ripple) ---
         let directBoost = 0;
         let rippleBoost = 0;
 
@@ -542,7 +543,7 @@ const app = {
         }
 
         // Refresh Logic
-        s.counties.forEach(ct => ct.normalizePcts()); // Re-normalize everyone
+        s.counties.forEach(ct => ct.normalizePcts()); 
         this.recalcStatePoll(s);
         this.updateHUD();
         this.clickState(this.data.selectedState); // Update sidebar
@@ -551,7 +552,6 @@ const app = {
         let container = document.getElementById('county-map-container');
         let paths = container.querySelectorAll('path, rect');
         paths.forEach(p => {
-             // Re-color everyone because of Ripple Effect
              let ct = s.counties.find(x => x.id === p.id) || s.counties[p.getAttribute('data-idx')];
              if(ct) this.colorCountyPath(p, ct);
         });
@@ -563,7 +563,7 @@ const app = {
         let tt = document.getElementById('county-tooltip');
         let m = c.pcts.D - c.pcts.R;
         let col = m > 0 ? "#00AEF3" : "#E81B23";
-        // HOVER MARGIN DISPLAY ADDED
+        // Shows "D+12.5" in tooltip
         tt.innerHTML = `
             <span class="tooltip-leader" style="color:${col}">${c.name} +${Math.abs(m).toFixed(1)}</span>
             <div class="tip-row"><span class="blue">DEM ${c.pcts.D.toFixed(1)}%</span> <span class="red">REP ${c.pcts.R.toFixed(1)}%</span></div>
@@ -603,7 +603,7 @@ const app = {
             let p = document.getElementById(code);
             if(p) {
                 p.onclick = () => this.clickState(code);
-                // DOUBLE CLICK FEATURE ADDED
+                // Double Click to enter state view
                 p.ondblclick = () => {
                     this.clickState(code);
                     this.enterStateView();
