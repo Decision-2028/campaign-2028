@@ -203,3 +203,10 @@ input:checked + .slider:before { transform: translateX(26px); }
 .turn-controls { margin-top: 5px; }
 .mini-btn { background: #444; border: none; color: white; padding: 4px 8px; font-size: 0.7rem; cursor: pointer; border-radius: 3px; }
 .mini-btn:hover { background: #666; }
+
+/* Ensure map container can hold the injected SVG properly */
+#county-map-container svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
