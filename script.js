@@ -61,13 +61,18 @@ const INIT_STATES = {
     "WV": { name: "West Virginia", ev: 4 }, "WI": { name: "Wisconsin", ev: 10 }, "WY": { name: "Wyoming", ev: 3 }
 };
 
+/* --- CIV & COUNTY ENGINE --- */
 class County {
     constructor(id, name, stateType, baseG, baseL) {
         this.id = id;
         this.name = name || id;
         
         const rand = Math.random();
-        if (stateType === 'Urban') this.type = rand > 0.4 ? 'Urban' : 'Suburb';
+        // Determine type based on name hints if possible, else random
+        let isUrban = name.includes("Milwaukee") || name.includes("Dane") || name.includes("Cook") || name.includes("Los Angeles");
+        
+        if (isUrban) this.type = 'Urban';
+        else if (stateType === 'Urban') this.type = rand > 0.4 ? 'Urban' : 'Suburb';
         else if (stateType === 'Rural') this.type = rand > 0.9 ? 'Urban' : 'Rural';
         else this.type = rand > 0.8 ? 'Urban' : (rand > 0.4 ? 'Suburb' : 'Rural');
 
@@ -76,7 +81,7 @@ class County {
 
         this.demographics = this.generateDemographics(this.type);
         
-        let lean = this.calculateLean();
+        let lean = this.calculateLean(); 
         this.pcts = { 
             D: lean, 
             R: 100 - lean, 
@@ -139,14 +144,15 @@ const app = {
             s.moe = (Math.random()*2 + 1.5).toFixed(1);
             s.donorFatigue = 0;
             s.priorities = {}; ISSUES.forEach(i => s.priorities[i.id] = Math.floor(Math.random()*10)+1);
+            s.counties = []; // Will be populated lazily or procedurally
             
             // Format for Wikipedia URL
             let safeName = s.name.replace(/ /g, "_");
             s.flagUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Flag_of_${safeName}.svg/1200px-Flag_of_${safeName}.svg.png`;
 
+            // Initial Procedural Data (Placeholder until map load)
             let baseG = ['CA','OR','VT','WA'].includes(sCode) ? 4.0 : 1.0;
             let baseL = ['NH','MT','NV','AK'].includes(sCode) ? 4.5 : 1.5;
-            
             s.counties = this.generateCountiesForState(s, baseG, baseL);
             this.recalcStatePoll(s);
         }
@@ -155,6 +161,7 @@ const app = {
     },
 
     generateCountiesForState: function(state, baseG, baseL) {
+        // Fallback procedural generation
         let counties = [];
         let numCounties = Math.max(5, Math.floor(state.ev * 1.8)); 
         counties.push(new County(`${state.name}_Urban`, "Metro City", "Urban", baseG, baseL));
@@ -260,6 +267,7 @@ const app = {
         this.initMap(); this.updateHUD();
     },
 
+    /* --- MAP SYSTEM (WEB LOAD + FALLBACK) --- */
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -268,23 +276,62 @@ const app = {
         document.getElementById('cv-flag').src = s.flagUrl;
         
         const container = document.getElementById('county-map-container');
-        container.innerHTML = `<p style="color:#aaa;">Establishing Satellite Link...</p>`;
+        container.innerHTML = `<p style="color:#aaa;">Downloading Satellite Imagery...</p>`;
         document.getElementById('county-modal').classList.remove('hidden');
         
         // Formatted Wikipedia URL
         let safeName = s.name.replace(/ /g, "_");
         let url = `https://upload.wikimedia.org/wikipedia/commons/0/01/${safeName}_Presidential_Election_Results_2024.svg`;
         
+        // NOTE: fetching directly from Wikipedia often hits CORS. 
+        // If this fetch fails, it gracefully falls back to the grid map.
         fetch(url)
-            .then(res => { if(!res.ok) throw new Error(); return res.text(); })
+            .then(res => { if(!res.ok) throw new Error("Fetch Fail"); return res.text(); })
             .then(data => {
                 container.innerHTML = data;
-                // Note: Complex parsing required for real SVG logic, using fallback for guaranteed gameplay
-                this.generateFallbackMap(container, s); 
+                this.parseCountySVG(container.querySelector('svg'), s); 
             })
             .catch(() => {
                 this.generateFallbackMap(container, s);
             });
+    },
+
+    parseCountySVG: function(svg, stateObj) {
+        if(!svg) return;
+        svg.style.width="100%"; svg.style.height="100%";
+        
+        // Convert paths to game objects
+        let paths = svg.querySelectorAll('path, rect, polygon');
+        let newCounties = [];
+        
+        paths.forEach((p, idx) => {
+            let id = p.id || `c_${idx}`;
+            let name = p.getAttribute('name') || p.id || `County ${idx+1}`;
+            
+            // Check if this county already exists in data, else create it
+            let existing = stateObj.counties.find(c => c.id === id);
+            if(!existing) {
+                // Determine base stats
+                let baseG = ['CA','OR','VT'].includes(stateObj.name) ? 4.0 : 1.0;
+                let baseL = ['NH','MT','AK'].includes(stateObj.name) ? 4.5 : 1.5;
+                let cObj = new County(id, name, "Rural", baseG, baseL); // Default to Rural, will adjust
+                newCounties.push(cObj);
+                existing = cObj;
+            }
+            
+            // Add interaction
+            p.onclick = () => this.clickCounty(stateObj.counties.indexOf(existing));
+            p.onmousemove = (e) => this.showCountyTooltip(e, stateObj.counties.indexOf(existing));
+            p.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
+            
+            this.colorCountyPath(p, existing);
+        });
+        
+        // If we found new counties in the SVG, replace the procedural ones
+        if(newCounties.length > 0) {
+            stateObj.counties = newCounties;
+            this.recalcStatePoll(stateObj);
+        }
     },
 
     generateFallbackMap: function(container, stateObj) {
@@ -322,7 +369,6 @@ const app = {
             let intensity = Math.min(c.population / 200000, 1);
             fill = `rgba(74, 222, 128, ${intensity})`;
         } else {
-            // Demographics map mode?
             fill = `rgba(255, 215, 0, ${c.population/300000})`;
         }
         path.style.fill = fill; path.style.stroke = "#111";
@@ -336,7 +382,16 @@ const app = {
                 if(this.data.selectedParty==='D') c.enthusiasm.D += 0.2; else c.enthusiasm.R += 0.2;
                 this.recalcStatePoll(this.data.activeCountyState);
                 this.updateHUD();
-                this.generateFallbackMap(document.getElementById('county-map-container'), this.data.activeCountyState);
+                
+                // Refresh view logic depends on if using SVG or Fallback
+                let container = document.getElementById('county-map-container');
+                if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
+                else {
+                    // Update specific path color if using SVG
+                    let p = document.getElementById(c.id);
+                    if(p) this.colorCountyPath(p, c);
+                }
+                
                 this.clickState(this.data.selectedState); 
             }
         }
@@ -356,6 +411,7 @@ const app = {
         this.colorMap();
     },
 
+    /* --- MAP UTILS --- */
     getMarginColor: function(info) {
         let m = Math.abs(info.margin);
         if(m < 0.5) return "#FFFFFF";
@@ -448,10 +504,20 @@ const app = {
     setMapMode: function(mode, isCounty=false) {
         this.data.mapMode = mode;
         if(isCounty && this.data.activeCountyState) {
-            let s = this.data.activeCountyState;
-            for(let i=0; i<s.counties.length; i++) {
-                let el = document.getElementById(i); // Using index as ID for procedural map
-                if(el) this.colorCountyPath(el, s.counties[i]);
+            // Need to re-trigger the view refresh to apply color
+            let container = document.getElementById('county-map-container');
+            if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
+            else {
+                // If using SVG paths, re-color them
+                let s = this.data.activeCountyState;
+                let paths = container.querySelectorAll('path, rect, polygon');
+                paths.forEach((p, idx) => {
+                    // Try to find the associated county object based on how we parsed it
+                    // This is tricky without a direct map reference, but we can iterate state counties
+                    // Ideally we mapped ID->Object.
+                    let c = s.counties[idx]; // Simplified mapping for now
+                    if(c) this.colorCountyPath(p, c);
+                });
             }
         } else {
             this.colorMap();
