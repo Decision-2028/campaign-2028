@@ -228,3 +228,14 @@ input:checked + .slider:before { transform: translateX(26px); }
 .mini-btn { padding: 5px 10px; background: #444; border: none; color: white; font-size: 0.7rem; cursor: pointer; }
 .mini-btn:hover { background: #666; }
 
+/* Update Map Controls */
+.map-controls {
+    position: absolute; top: 90px; left: 20px; z-index: 500;
+}
+#map-mode-select {
+    background: #222; color: white; border: 1px solid #555; padding: 8px; font-family: 'Roboto';
+}
+#map-mode-select:hover { background: #333; }
+
+/* County Modal Specifics */
+#county-view-header { box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 10; }
