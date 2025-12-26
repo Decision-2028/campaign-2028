@@ -43,7 +43,6 @@ const VPS = [
     { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", desc: "Strong aggressive campaigner.", img: "images/scenario.jpg" }
 ];
 
-// STATES with FIPS CODES for SVG Splitting
 const INIT_STATES = {
     "AL": { name: "Alabama", ev: 9, fips: "01" }, "AK": { name: "Alaska", ev: 3, fips: "02" }, "AZ": { name: "Arizona", ev: 11, fips: "04" },
     "AR": { name: "Arkansas", ev: 6, fips: "05" }, "CA": { name: "California", ev: 54, fips: "06" }, "CO": { name: "Colorado", ev: 10, fips: "08" },
@@ -70,7 +69,6 @@ class County {
         this.id = id;
         this.name = name || id;
         
-        // Procedural Type Logic
         const rand = Math.random();
         if (stateType === 'Urban') this.type = rand > 0.4 ? 'Urban' : 'Suburb';
         else if (stateType === 'Rural') this.type = rand > 0.9 ? 'Urban' : 'Rural';
@@ -95,9 +93,14 @@ class County {
     generateDemographics(type) {
         let demos = {};
         INTEREST_GROUPS.forEach(ig => demos[ig.id] = Math.floor(Math.random()*5));
-        if (type === 'Urban') { demos.white_col += 30; demos.aa += 25; demos.his += 20; demos.youth += 15; demos.white_wc += 10; }
-        else if (type === 'Suburb') { demos.white_col += 45; demos.white_wc += 25; demos.his += 15; demos.youth += 10; demos.aa += 5; }
-        else { demos.white_wc += 60; demos.evang += 30; demos.rural += 50; } 
+
+        if (type === 'Urban') { 
+            demos.white_col += 30; demos.aa += 25; demos.his += 20; demos.youth += 15; demos.white_wc += 10; 
+        } else if (type === 'Suburb') { 
+            demos.white_col += 45; demos.white_wc += 25; demos.his += 15; demos.youth += 10; demos.aa += 5; 
+        } else { 
+            demos.white_wc += 60; demos.evang += 30; demos.rural += 50; 
+        } 
         return demos;
     }
 
@@ -109,6 +112,7 @@ class County {
         if(this.demographics.evang > 20) rScore += 30;
         if(this.demographics.youth > 20) dScore += 20;
         if(this.demographics.rural > 20) rScore += 20;
+        
         let total = dScore + rScore;
         let dPct = (dScore / total) * 100;
         return Math.max(15, Math.min(85, dPct + (Math.random()*10 - 5)));
@@ -140,7 +144,7 @@ const app = {
     },
 
     init: function() {
-        console.log("System Start...");
+        console.log("App Initializing...");
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
         
         for(let sCode in this.data.states) {
@@ -167,11 +171,13 @@ const app = {
     generateCountiesForState: function(state, baseG, baseL) {
         let counties = [];
         let numCounties = Math.max(5, Math.floor(state.ev * 1.8)); 
+        
+        // Use numeric IDs or FIPS-like strings if needed, but for fallback we use procedural names
         let safeName = state.name.replace(/ /g, "");
-        // Procedural Fallback data
         counties.push(new County(`c_${safeName}_U`, "Metro City", "Urban", baseG, baseL));
         for(let i=0; i<Math.floor(numCounties * 0.3); i++) counties.push(new County(`c_${safeName}_S${i}`, `Suburb ${i+1}`, "Suburb", baseG, baseL));
         for(let i=0; i<numCounties * 0.7; i++) counties.push(new County(`c_${safeName}_R${i}`, `Rural Dist ${i+1}`, "Rural", baseG, baseL));
+        
         return counties;
     },
 
@@ -198,7 +204,7 @@ const app = {
         document.getElementById(id).classList.add('active');
     },
 
-    /* --- SETUP SCREENS --- */
+    // --- SETUP SCREENS ---
     renderParties: function() {
         const c = document.getElementById('party-cards'); 
         if(!c) return;
@@ -256,8 +262,10 @@ const app = {
     selOppVP: function(id) { this.data.opponentVP = VPS.find(x => x.id === id); this.startGame(); },
     toggleThirdParties: function() { this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked; },
 
+    /* --- START GAME --- */
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
+        this.saveSnapshot();
         this.goToScreen('game-screen');
         const img = document.getElementById('hud-img');
         if(this.data.candidate.img) { img.src = this.data.candidate.img; img.style.display = "block"; }
@@ -276,7 +284,7 @@ const app = {
         this.initMap(); this.updateHUD();
     },
 
-    /* --- MAP SYSTEM (MASTER MAP SPLITTER) --- */
+    /* --- MAP SYSTEM (MASTER MAP) --- */
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -285,52 +293,43 @@ const app = {
         document.getElementById('cv-flag').src = s.flagUrl;
         
         const container = document.getElementById('county-map-container');
-        container.innerHTML = `<p style="color:#aaa;">Loading State Data...</p>`;
+        container.innerHTML = `<p style="color:#aaa;">Loading State Map...</p>`;
         document.getElementById('county-modal').classList.remove('hidden');
         
-        // 1. Check if Master Map is Cached
+        // 1. Try Cache
         if(this.data.masterMapCache) {
             this.extractStateFromMaster(this.data.masterMapCache, s, container);
         } else {
-            // 2. Fetch Master Map
+            // 2. Fetch Master Map (Looking for .svg as per your confirmation)
             fetch('counties/uscountymap.svg')
                 .then(res => { if(!res.ok) throw new Error("No Master Map"); return res.text(); })
                 .then(data => {
-                    this.data.masterMapCache = data; // Cache it
+                    this.data.masterMapCache = data;
                     this.extractStateFromMaster(data, s, container);
                 })
                 .catch(err => {
-                    console.warn("Master map load failed. Using procedural grid.");
+                    console.warn("Master map load failed. Using procedural grid.", err);
                     this.generateFallbackMap(container, s);
                 });
         }
     },
 
     extractStateFromMaster: function(svgData, stateObj, container) {
-        // Create a temporary parser
         let parser = new DOMParser();
         let doc = parser.parseFromString(svgData, "image/svg+xml");
         let allPaths = doc.querySelectorAll('path, polygon, g');
         
-        // FIPS Filter (e.g. "01" for AL)
         let fips = stateObj.fips; 
         let validPaths = [];
         let newCounties = [];
         
-        // Bounds Calculation
-        let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-
         allPaths.forEach(p => {
             let id = p.id;
             // Standard US County Maps use FIPS (e.g. 01001)
             // Filter: Must match State FIPS
             if(id && id.startsWith(fips)) {
-                // Determine bounding box via manual coordinate parsing (simplified)
-                // Note: accurate bbox requires rendering, we will approximate via path string parsing for 'M' or viewbox logic
-                // Actually, simplest way is to clone the node into our new container
                 validPaths.push(p);
-                
-                // Logic: Init Game Data for this county
+                // Create Data if missing
                 let existing = stateObj.counties.find(c => c.id === id);
                 if(!existing) {
                     let baseG = ['CA','OR'].includes(stateObj.name)?4.0:1.0;
@@ -343,23 +342,16 @@ const app = {
         });
 
         if(validPaths.length === 0) {
-            // No FIPS match found (maybe different SVG format) -> Fallback
             this.generateFallbackMap(container, stateObj);
             return;
         }
 
-        // Construct New SVG for just this state
-        // We can't calculate exact viewBox easily without rendering, so we use 100% and CSS scaling
-        // OR better: we render them and then use JS to zoom.
-        // Simplified approach: Render all, hide others? No, performance heavy.
-        // Approach: Inject just these paths into a fresh SVG.
-        
+        // Create State View SVG
         let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        newSvg.setAttribute("viewBox", "0 0 990 600"); // Master dimensions usually
+        newSvg.setAttribute("viewBox", "0 0 990 600"); // Standard US map aspect
         newSvg.style.width = "100%"; newSvg.style.height = "100%";
         
         validPaths.forEach(p => {
-            // Need to deep clone
             let clone = p.cloneNode(true);
             let c = stateObj.counties.find(ct => ct.id === p.id) || newCounties.find(ct => ct.id === p.id);
             
@@ -371,7 +363,6 @@ const app = {
             newSvg.appendChild(clone);
         });
 
-        // Update State Data if new counties found
         if(newCounties.length > 0) {
             stateObj.counties = newCounties;
             this.recalcStatePoll(stateObj);
@@ -380,14 +371,6 @@ const app = {
 
         container.innerHTML = "";
         container.appendChild(newSvg);
-        
-        // Auto-Zoom Hack:
-        // Since we kept original coordinates, we need to calculate bbox of the group
-        // In a real browser, getBBox works once appended.
-        try {
-            let bbox = newSvg.getBBox();
-            if(bbox.width > 0) newSvg.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
-        } catch(e) { /* JSDOM/Non-rendered context issue, ignore */ }
     },
 
     generateFallbackMap: function(container, stateObj) {
@@ -406,7 +389,7 @@ const app = {
             rect.setAttribute("x", x); rect.setAttribute("y", y);
             rect.setAttribute("width", size); rect.setAttribute("height", size);
             
-            rect.onclick = () => this.clickCounty(i);
+            rect.onclick = () => this.clickCounty(i); // Index click
             rect.onmousemove = (e) => this.showCountyTooltip(e, c);
             rect.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
             
@@ -441,20 +424,15 @@ const app = {
                 this.recalcStatePoll(this.data.activeCountyState);
                 this.updateHUD();
                 
-                // Refresh visuals
                 let container = document.getElementById('county-map-container');
                 if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
                 else {
-                    // Refresh SVG via re-extraction or re-color loop
-                    // Simple re-color:
+                    // Re-draw specific path (simplified)
                     let all = container.querySelectorAll('path, rect');
-                    all.forEach((el, i) => {
-                        // Assuming index match for simple fallback, or ID match for SVG
-                        if(el.id === c.id) this.colorCountyPath(el, c);
-                    });
+                    all.forEach(el => { if(el.id === c.id) this.colorCountyPath(el, c); });
                 }
                 this.clickState(this.data.selectedState); 
-                this.showToast(`Rally in ${c.name}!`);
+                this.showToast(`Rally held in ${c.name}!`);
             } else {
                 this.showToast("No Energy!");
             }
@@ -475,14 +453,10 @@ const app = {
         this.data.mapMode = mode;
         if(this.data.activeCountyState) {
             let container = document.getElementById('county-map-container');
-            let paths = container.querySelectorAll('path, rect, polygon');
-            let s = this.data.activeCountyState;
-            
-            if(container.querySelector('rect') && paths.length === s.counties.length) {
-                // Procedural Grid
-                this.generateFallbackMap(container, s);
-            } else {
-                // Real SVG
+            if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
+            else {
+                let paths = container.querySelectorAll('path, rect, polygon');
+                let s = this.data.activeCountyState;
                 paths.forEach(p => {
                     let c = s.counties.find(county => county.id === p.id);
                     if(c) this.colorCountyPath(p, c);
@@ -505,7 +479,7 @@ const app = {
     /* --- MAP UTILS --- */
     getMarginColor: function(info) {
         let m = Math.abs(info.margin);
-        if(m < 0.5) return "#FFFFFF";
+        if (isNaN(m) || m < 0.5) return "#FFFFFF";
         let i = Math.min(m/15, 1);
         if(info.party === 'D') return `rgb(${Math.round(255-(255*i))}, ${Math.round(255-(81*i))}, ${Math.round(255-(12*i))})`;
         else return `rgb(${Math.round(255-(23*i))}, ${Math.round(255-(228*i))}, ${Math.round(255-(220*i))})`;
