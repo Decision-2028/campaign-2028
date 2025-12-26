@@ -44,7 +44,7 @@ const VPS = [
 const INIT_STATES = {
     "AL": { name: "Alabama", ev: 9 }, "AK": { name: "Alaska", ev: 3 }, "AZ": { name: "Arizona", ev: 11 },
     "AR": { name: "Arkansas", ev: 6 }, "CA": { name: "California", ev: 54 }, "CO": { name: "Colorado", ev: 10 },
-    "CT": { name: "Connecticut", ev: 7 }, "DE": { name: "Delaware", ev: 3 }, "DC": { name: "D.C.", ev: 3 },
+    "CT": { name: "Connecticut", ev: 7 }, "DE": { name: "Delaware", ev: 3 }, "DC": { name: "District of Columbia", ev: 3 },
     "FL": { name: "Florida", ev: 30 }, "GA": { name: "Georgia", ev: 16 }, "HI": { name: "Hawaii", ev: 4 },
     "ID": { name: "Idaho", ev: 4 }, "IL": { name: "Illinois", ev: 19 }, "IN": { name: "Indiana", ev: 11 },
     "IA": { name: "Iowa", ev: 6 }, "KS": { name: "Kansas", ev: 6 }, "KY": { name: "Kentucky", ev: 8 },
@@ -63,24 +63,31 @@ const INIT_STATES = {
 
 /* --- CIV & COUNTY ENGINE --- */
 class County {
-    constructor(id, name, stateType, baseG, baseL) {
+    constructor(id, name, stateName, baseG, baseL) {
         this.id = id;
         this.name = name || id;
         
+        // --- 1. DETERMINE TYPE BY NAME HINTS ---
+        // (Procedural fallback if no name match)
+        const n = this.name.toLowerCase();
         const rand = Math.random();
-        // Determine type based on name hints if possible, else random
-        let isUrban = name.includes("Milwaukee") || name.includes("Dane") || name.includes("Cook") || name.includes("Los Angeles");
         
-        if (isUrban) this.type = 'Urban';
-        else if (stateType === 'Urban') this.type = rand > 0.4 ? 'Urban' : 'Suburb';
-        else if (stateType === 'Rural') this.type = rand > 0.9 ? 'Urban' : 'Rural';
-        else this.type = rand > 0.8 ? 'Urban' : (rand > 0.4 ? 'Suburb' : 'Rural');
+        if (n.includes('city') || n.includes('milwaukee') || n.includes('cook') || n.includes('angeles') || n.includes('york')) {
+            this.type = 'Urban';
+        } else if (n.includes('suburb') || rand > 0.7) {
+            this.type = 'Suburb';
+        } else {
+            this.type = 'Rural';
+        }
 
+        // --- 2. POPULATION (Simulation) ---
         let base = this.type === 'Urban' ? 500000 : (this.type === 'Suburb' ? 100000 : 20000);
         this.population = Math.floor(base * (0.8 + Math.random() * 0.4));
 
+        // --- 3. DEMOGRAPHICS (Simulation) ---
         this.demographics = this.generateDemographics(this.type);
         
+        // --- 4. VOTING DATA (Simulation) ---
         let lean = this.calculateLean(); 
         this.pcts = { 
             D: lean, 
@@ -105,9 +112,11 @@ class County {
         let dScore = 0, rScore = 0;
         if(this.type === 'Urban') dScore += 25;
         if(this.type === 'Rural') rScore += 25;
+        // Group Influence
         if(this.demographics.aa) dScore += this.demographics.aa * 0.9;
         if(this.demographics.evang) rScore += this.demographics.evang * 0.8;
         if(this.demographics.youth) dScore += this.demographics.youth * 0.6;
+        
         let total = dScore + rScore;
         let dPct = (dScore / total) * 100;
         return Math.max(10, Math.min(90, dPct + (Math.random()*10 - 5)));
@@ -128,6 +137,7 @@ class County {
     }
 }
 
+/* --- MAIN APP --- */
 const app = {
     data: {
         currentDate: new Date("2028-07-04"), electionDay: new Date("2028-11-07"),
@@ -139,135 +149,30 @@ const app = {
 
     init: function() {
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
+        
         for(let sCode in this.data.states) {
             let s = this.data.states[sCode];
             s.moe = (Math.random()*2 + 1.5).toFixed(1);
             s.donorFatigue = 0;
             s.priorities = {}; ISSUES.forEach(i => s.priorities[i.id] = Math.floor(Math.random()*10)+1);
-            s.counties = []; // Will be populated lazily or procedurally
+            s.counties = []; // Will be populated dynamically by the SVG parser
             
-            // Format for Wikipedia URL
+            // Format Names for Wikipedia URLs (Spaces to Underscores)
             let safeName = s.name.replace(/ /g, "_");
-            s.flagUrl = `https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Flag_of_${safeName}.svg/1200px-Flag_of_${safeName}.svg.png`;
+            
+            // Special:FilePath URL for Flags
+            s.flagUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/Flag_of_${safeName}.svg`;
 
-            // Initial Procedural Data (Placeholder until map load)
-            let baseG = ['CA','OR','VT','WA'].includes(sCode) ? 4.0 : 1.0;
-            let baseL = ['NH','MT','NV','AK'].includes(sCode) ? 4.5 : 1.5;
-            s.counties = this.generateCountiesForState(s, baseG, baseL);
-            this.recalcStatePoll(s);
+            // Initial Pcts (Will be overwritten if counties load, else this is placeholder)
+            s.pcts = { D: 48, R: 48, G: 2, L: 2 };
+            s.totalPop = 0;
         }
+        
         this.renderParties();
         this.initIssues();
     },
 
-    generateCountiesForState: function(state, baseG, baseL) {
-        // Fallback procedural generation
-        let counties = [];
-        let numCounties = Math.max(5, Math.floor(state.ev * 1.8)); 
-        counties.push(new County(`${state.name}_Urban`, "Metro City", "Urban", baseG, baseL));
-        let numSubs = Math.floor(numCounties * 0.3);
-        for(let i=0; i<numSubs; i++) counties.push(new County(`${state.name}_Sub_${i}`, `Suburb ${i+1}`, "Suburb", baseG, baseL));
-        let numRural = numCounties - 1 - numSubs;
-        for(let i=0; i<numRural; i++) counties.push(new County(`${state.name}_Rur_${i}`, `Rural District ${i+1}`, "Rural", baseG, baseL));
-        return counties;
-    },
-
-    recalcStatePoll: function(state) {
-        let totals = { D:0, R:0, G:0, L:0 };
-        let totalPop = 0;
-        state.counties.forEach(c => {
-            let v = c.getVotes();
-            totals.D += v.D; totals.R += v.R; totals.G += v.G; totals.L += v.L;
-            totalPop += (v.D+v.R+v.G+v.L);
-        });
-        state.pcts = {
-            D: (totals.D / totalPop) * 100, R: (totals.R / totalPop) * 100,
-            G: (totals.G / totalPop) * 100, L: (totals.L / totalPop) * 100
-        };
-        state.totalPop = totalPop;
-    },
-
-    goToScreen: function(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    },
-
-    renderParties: function() {
-        const c = document.getElementById('party-cards'); c.innerHTML = "";
-        ['D','R','I'].forEach(k => {
-            const p = PARTIES[k];
-            c.innerHTML += `<div class="card card-party" onclick="app.selParty('${k}')" style="background-image:url('${p.img}'); border-top:5px solid ${p.color}"><div class="party-overlay"><h3>${p.name} Party</h3><div class="party-desc">${p.desc}</div></div></div>`;
-        });
-    },
-    selParty: function(k) { this.data.selectedParty = k; this.renderCands(k); this.goToScreen('candidate-screen'); },
-    renderCands: function(pk) {
-        const c = document.getElementById('candidate-cards'); c.innerHTML = "";
-        CANDIDATES.filter(x => x.party === pk).forEach(cand => {
-            c.innerHTML += `<div class="card" onclick="app.selCand('${cand.id}')"><div class="portrait"><img src="${cand.img}"></div><div class="card-info"><h3>${cand.name}</h3><p>${cand.desc}</p><p class="buff-text">Stamina: ${cand.stamina}</p></div></div>`;
-        });
-    },
-    selCand: function(id) {
-        this.data.candidate = CANDIDATES.find(x => x.id === id);
-        this.data.maxEnergy = this.data.candidate.stamina; this.data.energy = this.data.maxEnergy;
-        this.renderVPs(this.data.candidate.party); this.goToScreen('vp-screen');
-    },
-    renderVPs: function(pk) {
-        const c = document.getElementById('vp-cards'); c.innerHTML = "";
-        const vps = VPS.filter(x => x.party === pk);
-        if(vps.length === 0) { c.innerHTML = `<div class="card" onclick="app.renderOpp()"><div class="card-info"><h3>SKIP VP</h3></div></div>`; return; }
-        vps.forEach(v => {
-            c.innerHTML += `<div class="card" onclick="app.selVP('${v.id}')"><div class="portrait"><img src="${v.img}"></div><div class="card-info"><h3>${v.name}</h3></div></div>`;
-        });
-    },
-    selVP: function(id) { this.data.vp = VPS.find(x => x.id === id); this.renderOpp(); },
-    renderOpp: function() {
-        const maj = document.getElementById('opponent-cards-major');
-        const min = document.getElementById('opponent-cards-minor');
-        maj.innerHTML = ""; min.innerHTML = "";
-        let rival = this.data.selectedParty === 'D' ? 'R' : 'D';
-        if(this.data.selectedParty === 'I') rival = 'D';
-        CANDIDATES.filter(x => x.party === rival).forEach(o => {
-            maj.innerHTML += `<div class="card" onclick="app.selOpp('${o.id}')"><div class="portrait"><img src="${o.img}"></div><div class="card-info"><h3>${o.name}</h3></div></div>`;
-        });
-        CANDIDATES.filter(x => ['G','L'].includes(x.party)).forEach(opp => {
-            min.innerHTML += `<div class="card" style="transform:scale(0.9); border-top:3px solid ${PARTIES[opp.party].color}"><div class="card-info"><h3>${opp.name}</h3></div></div>`;
-        });
-        this.goToScreen('opponent-screen');
-    },
-    selOpp: function(id) { this.data.opponent = CANDIDATES.find(x => x.id === id); this.renderOppVP(); },
-    renderOppVP: function() {
-        const maj = document.getElementById('opponent-cards-major'); maj.innerHTML = "";
-        document.getElementById('opp-section-title').innerText = "SELECT OPPONENT'S VP";
-        const vps = VPS.filter(x => x.party === this.data.opponent.party);
-        if(vps.length === 0) { this.startGame(); return; }
-        vps.forEach(v => {
-            maj.innerHTML += `<div class="card" onclick="app.selOppVP('${v.id}')"><div class="portrait"><img src="${v.img}"></div><div class="card-info"><h3>${v.name}</h3></div></div>`;
-        });
-    },
-    selOppVP: function(id) { this.data.opponentVP = VPS.find(x => x.id === id); this.startGame(); },
-    toggleThirdParties: function() { this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked; },
-
-    startGame: function() {
-        this.data.funds = this.data.candidate.funds;
-        this.goToScreen('game-screen');
-        const img = document.getElementById('hud-img');
-        if(this.data.candidate.img) { img.src = this.data.candidate.img; img.style.display = "block"; }
-        img.className = `hud-border-${this.data.selectedParty}`;
-        document.getElementById('hud-cand-name').innerText = this.data.candidate.name.toUpperCase();
-        document.getElementById('hud-party-name').innerText = PARTIES[this.data.selectedParty].name.toUpperCase();
-        
-        if(!this.data.thirdPartiesEnabled) {
-            for(let s in this.data.states) { this.data.states[s].pcts.G=0; this.data.states[s].pcts.L=0; }
-        }
-        if(this.data.vp && this.data.states[this.data.vp.state]) {
-            let c = this.data.states[this.data.vp.state].counties[0];
-            if(this.data.selectedParty === 'D') c.pcts.D += 10; else c.pcts.R += 10;
-            this.recalcStatePoll(this.data.states[this.data.vp.state]);
-        }
-        this.initMap(); this.updateHUD();
-    },
-
-    /* --- MAP SYSTEM (WEB LOAD + FALLBACK) --- */
+    /* --- MAP SYSTEM (WIKIPEDIA LOADER) --- */
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -276,23 +181,40 @@ const app = {
         document.getElementById('cv-flag').src = s.flagUrl;
         
         const container = document.getElementById('county-map-container');
-        container.innerHTML = `<p style="color:#aaa;">Downloading Satellite Imagery...</p>`;
+        container.innerHTML = `<p style="color:#aaa;">Downloading Map Data from Archives...</p>`;
         document.getElementById('county-modal').classList.remove('hidden');
         
-        // Formatted Wikipedia URL
+        // URL Construction for Presidential Results Map (SVG)
         let safeName = s.name.replace(/ /g, "_");
-        let url = `https://upload.wikimedia.org/wikipedia/commons/0/01/${safeName}_Presidential_Election_Results_2024.svg`;
         
-        // NOTE: fetching directly from Wikipedia often hits CORS. 
-        // If this fetch fails, it gracefully falls back to the grid map.
+        // Using Special:FilePath to handle redirects automatically
+        let url = `https://commons.wikimedia.org/wiki/Special:FilePath/${safeName}_Presidential_Election_Results_2024.svg`;
+        
+        // Note: fetch() to Wikipedia often fails CORS in browser games without a backend proxy.
+        // If this fails, we prompt user or show error.
         fetch(url)
-            .then(res => { if(!res.ok) throw new Error("Fetch Fail"); return res.text(); })
-            .then(data => {
-                container.innerHTML = data;
-                this.parseCountySVG(container.querySelector('svg'), s); 
+            .then(res => { 
+                if(!res.ok) throw new Error("Fetch Failed"); 
+                return res.text(); 
             })
-            .catch(() => {
-                this.generateFallbackMap(container, s);
+            .then(data => {
+                // Sanitize: Check if we actually got SVG or an HTML error page
+                if(data.includes("<svg")) {
+                    container.innerHTML = data;
+                    this.parseCountySVG(container.querySelector('svg'), s); 
+                } else {
+                    throw new Error("Invalid SVG Data");
+                }
+            })
+            .catch(err => {
+                console.warn(err);
+                container.innerHTML = `
+                    <div style="text-align:center; color:#ccc;">
+                        <h3>CONNECTION FAILED</h3>
+                        <p>Could not download map from: <br><a href="${url}" target="_blank" style="color:#00AEF3">${url}</a></p>
+                        <p style="font-size:0.8rem; color:#888;">(CORS policy blocks direct Wikipedia access in this environment)</p>
+                        <p>To play this state, please manually save the SVG to the /counties folder or use a local server.</p>
+                    </div>`;
             });
     },
 
@@ -300,64 +222,64 @@ const app = {
         if(!svg) return;
         svg.style.width="100%"; svg.style.height="100%";
         
-        // Convert paths to game objects
-        let paths = svg.querySelectorAll('path, rect, polygon');
+        // Find paths (counties)
+        // Note: The example provided uses <path id="CountyName">
+        let paths = svg.querySelectorAll('path, g');
         let newCounties = [];
         
         paths.forEach((p, idx) => {
-            let id = p.id || `c_${idx}`;
-            let name = p.getAttribute('name') || p.id || `County ${idx+1}`;
-            
-            // Check if this county already exists in data, else create it
+            let id = p.id;
+            // Filter out non-county paths (borders, etc)
+            // Valid counties usually have names as IDs in these files
+            if(!id || id.length < 2) return; 
+
+            // Initialize Data if not exists
             let existing = stateObj.counties.find(c => c.id === id);
             if(!existing) {
-                // Determine base stats
-                let baseG = ['CA','OR','VT'].includes(stateObj.name) ? 4.0 : 1.0;
-                let baseL = ['NH','MT','AK'].includes(stateObj.name) ? 4.5 : 1.5;
-                let cObj = new County(id, name, "Rural", baseG, baseL); // Default to Rural, will adjust
+                // Determine base 3rd party stats based on region
+                let baseG = ['California','Oregon','Vermont','Washington'].includes(stateObj.name) ? 4.0 : 1.0;
+                let baseL = ['New_Hampshire','Montana','Nevada'].includes(stateObj.name.replace(/ /g,"_")) ? 4.5 : 1.5;
+                
+                let cObj = new County(id, id, "Rural", baseG, baseL); 
                 newCounties.push(cObj);
                 existing = cObj;
             }
             
-            // Add interaction
-            p.onclick = () => this.clickCounty(stateObj.counties.indexOf(existing));
-            p.onmousemove = (e) => this.showCountyTooltip(e, stateObj.counties.indexOf(existing));
+            // Add Interaction
+            p.onclick = (e) => { e.stopPropagation(); this.clickCounty(existing); };
+            p.onmousemove = (e) => this.showCountyTooltip(e, existing);
             p.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
             
+            // Color it
             this.colorCountyPath(p, existing);
         });
         
-        // If we found new counties in the SVG, replace the procedural ones
+        // If we successfully parsed counties, update state aggregation
         if(newCounties.length > 0) {
             stateObj.counties = newCounties;
             this.recalcStatePoll(stateObj);
+            this.clickState(this.data.selectedState); // Refresh sidebar numbers
         }
     },
 
-    generateFallbackMap: function(container, stateObj) {
-        container.innerHTML = "";
-        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("viewBox", "0 0 500 400");
-        svg.style.width="90%"; svg.style.height="90%";
+    recalcStatePoll: function(state) {
+        if(state.counties.length === 0) return;
         
-        let cols = Math.ceil(Math.sqrt(stateObj.counties.length * 1.5));
-        let size = 40; let gap = 5;
-        
-        stateObj.counties.forEach((c, i) => {
-            let x = (i % cols) * (size + gap) + 20;
-            let y = Math.floor(i / cols) * (size + gap) + 20;
-            let rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            rect.setAttribute("x", x); rect.setAttribute("y", y);
-            rect.setAttribute("width", size); rect.setAttribute("height", size);
-            
-            rect.onclick = () => this.clickCounty(i);
-            rect.onmousemove = (e) => this.showCountyTooltip(e, i);
-            rect.onmouseleave = () => document.getElementById('county-tooltip').classList.add('hidden');
-            
-            this.colorCountyPath(rect, c);
-            svg.appendChild(rect);
+        let totals = { D:0, R:0, G:0, L:0 };
+        let totalPop = 0;
+        state.counties.forEach(c => {
+            let v = c.getVotes();
+            totals.D += v.D; totals.R += v.R; totals.G += v.G; totals.L += v.L;
+            totalPop += (v.D+v.R+v.G+v.L);
         });
-        container.appendChild(svg);
+        
+        if (totalPop > 0) {
+            state.pcts = {
+                D: (totals.D / totalPop) * 100, R: (totals.R / totalPop) * 100,
+                G: (totals.G / totalPop) * 100, L: (totals.L / totalPop) * 100
+            };
+            state.totalPop = totalPop;
+        }
     },
 
     colorCountyPath: function(path, c) {
@@ -369,49 +291,95 @@ const app = {
             let intensity = Math.min(c.population / 200000, 1);
             fill = `rgba(74, 222, 128, ${intensity})`;
         } else {
+            // Demographics map mode (simplified)
             fill = `rgba(255, 215, 0, ${c.population/300000})`;
         }
-        path.style.fill = fill; path.style.stroke = "#111";
+        path.style.fill = fill; 
+        path.style.stroke = "#555";
+        path.style.strokeWidth = "0.5px";
+        path.style.cursor = "pointer";
     },
 
-    clickCounty: function(idx) {
-        let c = this.data.activeCountyState.counties[idx];
+    clickCounty: function(c) {
         if(confirm(`Hold Rally in ${c.name}? (1 Energy)`)) {
             if(this.data.energy > 0) {
                 this.data.energy--;
+                // Boost
                 if(this.data.selectedParty==='D') c.enthusiasm.D += 0.2; else c.enthusiasm.R += 0.2;
+                
                 this.recalcStatePoll(this.data.activeCountyState);
                 this.updateHUD();
                 
-                // Refresh view logic depends on if using SVG or Fallback
-                let container = document.getElementById('county-map-container');
-                if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
-                else {
-                    // Update specific path color if using SVG
-                    let p = document.getElementById(c.id);
-                    if(p) this.colorCountyPath(p, c);
-                }
+                // Refresh just this path
+                let p = document.getElementById(c.id);
+                if(p) this.colorCountyPath(p, c);
                 
-                this.clickState(this.data.selectedState); 
+                this.clickState(this.data.selectedState); // Refresh sidebar
+            } else {
+                this.showToast("Not enough Energy!");
             }
         }
     },
 
-    showCountyTooltip: function(e, idx) {
-        let c = this.data.activeCountyState.counties[idx];
+    showCountyTooltip: function(e, c) {
         let tt = document.getElementById('county-tooltip');
-        tt.innerHTML = `<b>${c.name}</b><br>D: ${c.pcts.D.toFixed(1)}%<br>R: ${c.pcts.R.toFixed(1)}%`;
-        tt.style.left = (e.clientX+10)+"px"; tt.style.top = (e.clientY+10)+"px";
+        let m = c.pcts.D - c.pcts.R;
+        let lead = m > 0 ? "D" : "R";
+        let col = m > 0 ? "#00AEF3" : "#E81B23";
+        
+        tt.innerHTML = `
+            <div style="font-size:0.8rem; color:#aaa; margin-bottom:2px;">${c.name} (${c.type})</div>
+            <div class="tooltip-leader" style="color:${col}; font-size:1.2rem;">${lead}+${Math.abs(m).toFixed(1)}</div>
+            <div style="font-size:0.8rem;">
+                D: ${c.pcts.D.toFixed(1)}%<br>
+                R: ${c.pcts.R.toFixed(1)}%
+            </div>
+        `;
+        tt.style.left = (e.clientX+15)+"px"; tt.style.top = (e.clientY+15)+"px";
         tt.classList.remove('hidden');
     },
 
     closeCountyView: function() {
         document.getElementById('county-modal').classList.add('hidden');
         this.data.activeCountyState = null;
-        this.colorMap();
+        this.colorMap(); // Refresh national map
     },
 
-    /* --- MAP UTILS --- */
+    /* --- NATIONAL MAP --- */
+    clickState: function(code) {
+        this.data.selectedState = code;
+        const s = this.data.states[code];
+        document.getElementById('state-panel').classList.remove('hidden');
+        document.getElementById('empty-msg').classList.add('hidden');
+        
+        let m = s.pcts.D - s.pcts.R;
+        let lead = m > 0 ? "D" : "R";
+        let col = m > 0 ? "blue" : "red";
+        if(Math.abs(m)<0.1) { lead="EVEN"; col="gray"; } else { lead = `${lead}+${Math.abs(m).toFixed(1)}`; }
+        
+        document.getElementById('sp-name').innerHTML = `${s.name} <span class="${col}" style="font-size:0.8em; margin-left:10px;">${lead}</span>`;
+        document.getElementById('sp-ev').innerText = s.ev + " EV";
+        
+        // 4-Way Bar
+        let wrap = document.querySelector('.poll-bar-wrap');
+        wrap.innerHTML = `
+            <div style="width:${s.pcts.D}%; background:#00AEF3;"></div>
+            <div style="width:${s.pcts.G}%; background:#198754;"></div>
+            <div style="width:${s.pcts.L}%; background:#fd7e14;"></div>
+            <div style="width:${s.pcts.R}%; background:#E81B23;"></div>
+        `;
+        document.getElementById('poll-dem-val').innerText = s.pcts.D.toFixed(1)+"%";
+        document.getElementById('poll-rep-val').innerText = s.pcts.R.toFixed(1)+"%";
+        
+        const l = document.getElementById('sp-issues-list'); l.innerHTML="";
+        ISSUES.sort((a,b)=>s.priorities[b.id]-s.priorities[a.id]).slice(0,3).forEach(x=>{
+            l.innerHTML+=`<div style="display:flex; justify-content:space-between; padding:2px; border-bottom:1px solid #333"><span>${x.name}</span><span style="color:gold">${s.priorities[x.id]}</span></div>`;
+        });
+    },
+
+    // ... [Keep initMap, colorMap, getMarginColor, updateHUD, updateScore, showTooltip, etc] ...
+    // These functions remain standard from the previous successful version.
+    
     getMarginColor: function(info) {
         let m = Math.abs(info.margin);
         if(m < 0.5) return "#FFFFFF";
@@ -443,36 +411,18 @@ const app = {
         }
         this.updateScore();
     },
-    clickState: function(code) {
-        this.data.selectedState = code;
+    showTooltip: function(e, code) {
+        const tt = document.getElementById('map-tooltip');
         const s = this.data.states[code];
-        document.getElementById('state-panel').classList.remove('hidden');
-        document.getElementById('empty-msg').classList.add('hidden');
-        
         let m = s.pcts.D - s.pcts.R;
-        let lead = m > 0 ? "D" : "R";
-        let col = m > 0 ? "blue" : "red";
-        if(Math.abs(m)<0.1) { lead="EVEN"; col="gray"; } else { lead = `${lead}+${Math.abs(m).toFixed(1)}`; }
-        
-        document.getElementById('sp-name').innerHTML = `${s.name} <span class="${col}" style="font-size:0.8em; margin-left:10px;">${lead}</span>`;
-        document.getElementById('sp-ev').innerText = s.ev + " EV";
-        
-        let wrap = document.querySelector('.poll-bar-wrap');
-        wrap.innerHTML = `
-            <div style="width:${s.pcts.D}%; background:#00AEF3;"></div>
-            <div style="width:${s.pcts.G}%; background:#198754;"></div>
-            <div style="width:${s.pcts.L}%; background:#fd7e14;"></div>
-            <div style="width:${s.pcts.R}%; background:#E81B23;"></div>
-        `;
-        document.getElementById('poll-dem-val').innerText = s.pcts.D.toFixed(1)+"%";
-        document.getElementById('poll-rep-val').innerText = s.pcts.R.toFixed(1)+"%";
-        
-        const l = document.getElementById('sp-issues-list'); l.innerHTML="";
-        ISSUES.sort((a,b)=>s.priorities[b.id]-s.priorities[a.id]).slice(0,3).forEach(x=>{
-            l.innerHTML+=`<div style="display:flex; justify-content:space-between; padding:2px; border-bottom:1px solid #333"><span>${x.name}</span><span style="color:gold">${s.priorities[x.id]}</span></div>`;
-        });
+        let name = m > 0 ? "Harris" : "Trump"; 
+        let col = m > 0 ? "#00AEF3" : "#E81B23";
+        tt.innerHTML = `<span class="tooltip-leader" style="color:${col}">${name} +${Math.abs(m).toFixed(1)}</span>
+                        <div class="tip-row"><span class="blue">DEM ${s.pcts.D.toFixed(1)}%</span> <span class="red">REP ${s.pcts.R.toFixed(1)}%</span></div>`;
+        tt.style.display='block'; tt.style.left=(e.clientX+15)+'px'; tt.style.top=(e.clientY+15)+'px';
     },
     
+    // UI Helpers
     initIssues: function(){ const s=document.getElementById('issue-select'); if(s) ISSUES.forEach(i=>s.innerHTML+=`<option value="${i.id}">${i.name}</option>`); },
     fundraise: function(){ if(this.data.energy<1)return; this.data.energy--; this.data.funds+=0.5; this.updateHUD(); },
     runStateAd: function(){ this.data.funds-=0.5; this.updateHUD(); },
@@ -491,36 +441,29 @@ const app = {
         let dp = (d/538)*100, rp = (r/538)*100;
         document.getElementById('ev-bar').style.background = `linear-gradient(90deg, #00AEF3 ${dp}%, #333 ${dp}%, #333 ${100-rp}%, #E81B23 ${100-rp}%)`;
     },
-    showTooltip: function(e, code) {
-        const tt = document.getElementById('map-tooltip');
-        const s = this.data.states[code];
-        let m = s.pcts.D - s.pcts.R;
-        let name = m > 0 ? "Harris" : "Trump"; 
-        let col = m > 0 ? "#00AEF3" : "#E81B23";
-        tt.innerHTML = `<span class="tooltip-leader" style="color:${col}">${name} +${Math.abs(m).toFixed(1)}</span>
-                        <div class="tip-row"><span class="blue">DEM ${s.pcts.D.toFixed(1)}%</span> <span class="red">REP ${s.pcts.R.toFixed(1)}%</span></div>`;
-        tt.style.display='block'; tt.style.left=(e.clientX+15)+'px'; tt.style.top=(e.clientY+15)+'px';
-    },
     setMapMode: function(mode, isCounty=false) {
         this.data.mapMode = mode;
         if(isCounty && this.data.activeCountyState) {
-            // Need to re-trigger the view refresh to apply color
             let container = document.getElementById('county-map-container');
-            if(container.querySelector('rect')) this.generateFallbackMap(container, this.data.activeCountyState);
-            else {
-                // If using SVG paths, re-color them
-                let s = this.data.activeCountyState;
-                let paths = container.querySelectorAll('path, rect, polygon');
-                paths.forEach((p, idx) => {
-                    // Try to find the associated county object based on how we parsed it
-                    // This is tricky without a direct map reference, but we can iterate state counties
-                    // Ideally we mapped ID->Object.
-                    let c = s.counties[idx]; // Simplified mapping for now
-                    if(c) this.colorCountyPath(p, c);
-                });
-            }
+            // If SVG exists, recolor its paths
+            let paths = container.querySelectorAll('path, rect, g');
+            let s = this.data.activeCountyState;
+            paths.forEach(p => {
+                let c = s.counties.find(county => county.id === p.id);
+                if(c) this.colorCountyPath(p, c);
+            });
         } else {
             this.colorMap();
+        }
+    },
+    showToast: function(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg; t.style.opacity = 1; setTimeout(()=>t.style.opacity=0, 2000);
+    },
+    toggleThirdParties: function() {
+        this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked;
+        if(!this.data.thirdPartiesEnabled) {
+            for(let s in this.data.states) { this.data.states[s].pcts.G=0; this.data.states[s].pcts.L=0; }
         }
     }
 };
