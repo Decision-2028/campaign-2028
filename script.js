@@ -34,7 +34,6 @@ const VPS = [
     { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", img: "images/scenario.jpg", ai_skill: 3 }
 ];
 
-// FULL STATE LIST (Checked for syntax errors)
 const INIT_STATES = {
     "AL": {name:"Alabama",ev:9,fips:"01"}, "AK":{name:"Alaska",ev:3,fips:"02"}, "AZ":{name:"Arizona",ev:11,fips:"04"},
     "AR": {name:"Arkansas",ev:6,fips:"05"}, "CA":{name:"California",ev:54,fips:"06"}, "CO":{name:"Colorado",ev:10,fips:"08"},
@@ -55,7 +54,6 @@ const INIT_STATES = {
     "WV": {name:"West Virginia",ev:4,fips:"54"}, "WI":{name:"Wisconsin",ev:10,fips:"55"}, "WY":{name:"Wyoming",ev:3,fips:"56"}
 };
 
-/* --- COUNTY CLASS --- */
 class County {
     constructor(id, name, stateType, realData=null, baseG=1, baseL=1) {
         this.id = id;
@@ -64,19 +62,11 @@ class County {
         if (realData) {
             this.type = realData.t || "Rural";
             this.population = realData.p || 10000;
-            
-            // SAFETY CHECK: Ensure .v exists
             let v = realData.v || { D:45, R:45 };
-            
             this.pcts = {
-                D: v.D || 45,
-                R: v.R || 45,
-                G: v.G || 0,
-                L: v.L || 0,
-                O: v.O || 0
+                D: v.D || 45, R: v.R || 45, G: v.G || 0, L: v.L || 0, O: v.O || 0
             };
         } else {
-            // PROCEDURAL FALLBACK
             this.type = stateType === 'Urban' ? 'Urban' : 'Rural';
             this.population = 10000;
             this.pcts = { D: 45, R: 45, G: 1, L: 1, O: 8 };
@@ -87,14 +77,11 @@ class County {
     }
 
     normalizePcts() {
-        // Safe Normalization
         if (!app.data.thirdPartiesEnabled) {
             let total = this.pcts.D + this.pcts.R;
-            if(total <= 0) total = 1; // Prevent NaN
+            if(total <= 0) total = 1;
             this.displayPcts = {
-                D: (this.pcts.D / total) * 100,
-                R: (this.pcts.R / total) * 100,
-                G: 0, L: 0, O: 0
+                D: (this.pcts.D / total) * 100, R: (this.pcts.R / total) * 100, G: 0, L: 0, O: 0
             };
         } else {
             this.displayPcts = { ...this.pcts };
@@ -113,7 +100,6 @@ class County {
     }
 }
 
-/* --- APP CORE --- */
 const app = {
     data: {
         currentDate: new Date("2028-07-04"), electionDay: new Date("2028-11-07"),
@@ -130,10 +116,9 @@ const app = {
         try {
             const res = await fetch('counties/county_data.json');
             if (res.ok) this.data.realCountyData = await res.json();
-        } catch(e) { console.warn("County data missing or malformed, using procedural generation."); }
+        } catch(e) { console.log("Procedural fallback"); }
 
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
-        
         for(let sCode in this.data.states) {
             let s = this.data.states[sCode];
             s.moe = (Math.random()*2 + 1.5).toFixed(1);
@@ -143,7 +128,6 @@ const app = {
             this.recalcStatePoll(s);
         }
         
-        // Ensure render happens after data load
         this.renderParties();
         console.log("App Ready");
     },
@@ -158,7 +142,6 @@ const app = {
                 }
             }
         }
-        // Fallback if no data found for state
         if (counties.length === 0) {
             let num = Math.max(5, state.ev * 1.5);
             for(let i=0; i<num; i++) counties.push(new County(`c_${state.fips}_${i}`, `County ${i+1}`, "Rural"));
@@ -178,13 +161,11 @@ const app = {
         if(pop > 0) {
             let divisor = this.data.thirdPartiesEnabled ? pop : (t.D + t.R);
             if(divisor<=0) divisor=1;
-            
             state.pcts = {
                 D: (t.D / divisor) * 100, R: (t.R / divisor) * 100,
                 G: (t.G / divisor) * 100, L: (t.L / divisor) * 100, O: (t.O / divisor) * 100
             };
         } else {
-            // Safety default
             state.pcts = { D:50, R:50, G:0, L:0, O:0 };
         }
     },
@@ -266,6 +247,7 @@ const app = {
         if (isCounty) {
             stateObj.counties.forEach(c => c.normalizePcts());
             this.recalcStatePoll(stateObj);
+            // Recolor
             let container = document.getElementById('county-map-container');
             let paths = container.querySelectorAll('path, rect');
             paths.forEach(p => {
@@ -317,6 +299,7 @@ const app = {
         this.initMap(); this.updateHUD();
     },
 
+    /* --- MAP --- */
     initMap: function() {
         for(let code in this.data.states) {
             let p = document.getElementById(code);
@@ -345,6 +328,7 @@ const app = {
         this.updateScore();
     },
     
+    // --- COUNTY VIEW ---
     enterStateView: function() {
         const s = this.data.states[this.data.selectedState];
         if(!s) return;
@@ -356,6 +340,7 @@ const app = {
         document.getElementById('btn-entercountymap').classList.add('hidden');
         document.getElementById('btn-returnmap').classList.remove('hidden');
         
+        // MARGIN IN HEADER
         let m = s.pcts.D - s.pcts.R;
         let leadStr = Math.abs(m) < 0.1 ? "EVEN" : `${m>0?"D":"R"}+${Math.abs(m).toFixed(1)}`;
         document.getElementById('cv-title').innerText = `${s.name.toUpperCase()} (${leadStr})`;
@@ -372,10 +357,12 @@ const app = {
         this.data.viewMode = 'national';
         this.data.activeCountyState = null;
         this.data.selectedCounty = null;
+        
         document.getElementById('county-view-wrapper').classList.add('hidden');
         document.getElementById('us-map-svg').classList.remove('hidden');
         document.getElementById('btn-entercountymap').classList.remove('hidden');
         document.getElementById('btn-returnmap').classList.add('hidden');
+        
         this.clickState(this.data.selectedState);
         this.colorMap();
     },
@@ -408,6 +395,7 @@ const app = {
         container.innerHTML = ""; container.appendChild(newSvg);
     },
 
+    /* --- HELPERS --- */
     updateSidebar: function(obj, type) {
         document.getElementById('state-panel').classList.remove('hidden');
         document.getElementById('empty-msg').classList.add('hidden');
@@ -423,8 +411,8 @@ const app = {
     
     getMarginColor: function(margin) {
         let abs = Math.abs(margin);
-        if (abs < 0.5) return "#d1d1d1"; // Tossup Gray
-        // FIX: Ensure no black states by returning specific colors
+        if (abs < 0.5) return "#d1d1d1";
+        // Prevent Black States if data missing
         if (isNaN(abs)) return "#d1d1d1";
         
         if (margin > 0) { // DEM
@@ -486,7 +474,7 @@ const app = {
             fill = this.getMarginColor(m);
         }
         path.style.fill = fill; 
-        path.style.stroke = "#111"; 
+        path.style.stroke = "#fff"; // WHITE BORDER
         path.style.strokeWidth = "0.15px";
     }
 };
