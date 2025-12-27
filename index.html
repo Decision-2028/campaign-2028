@@ -171,77 +171,34 @@
                 </svg>
                 
                 <div id="county-view-wrapper" class="hidden">
-                    <div id="county-view-header" style="height: 40px; background: #222; display: flex; align-items: center; justify-content: center; padding: 0 10px; border-bottom: 1px solid #444;">
-                        <span id="cv-title" style="font-weight:bold; font-family:'Merriweather', serif;">STATE</span>
+                    <div id="county-view-header" style="height:40px; background:#222; display:flex; align-items:center; justify-content:center; border-bottom:1px solid #444;">
+                        <span id="cv-title" style="font-weight:bold; font-family:'Merriweather',serif;">STATE</span>
                     </div>
-                    <div id="county-map-container" style="flex:1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center;"></div>
+                    <div id="county-map-container" style="flex:1; display:flex; justify-content:center; align-items:center;"></div>
                 </div>
             </div>
 
             <aside id="sidebar">
                 <div id="state-panel" class="hidden">
-                    <div class="state-header-box">
-                        <h2 id="sp-name">STATE</h2>
-                        <span class="ev-badge" id="sp-ev">0 EV</span>
-                    </div>
-                    
+                    <div class="state-header-box"><h2 id="sp-name">STATE</h2><span class="ev-badge" id="sp-ev">0 EV</span></div>
                     <div class="poll-vis">
                         <div class="poll-bar-wrap"></div>
-                        <div class="poll-numbers">
-                            <span class="blue" id="poll-dem-val">50%</span>
-                            <span class="gray">vs</span>
-                            <span class="red" id="poll-rep-val">50%</span>
-                        </div>
-                        <div class="poll-moe" id="sp-moe">MOE: ±3.4%</div>
+                        <div class="poll-numbers"><span class="blue" id="poll-dem-val">50%</span><span class="gray">vs</span><span class="red" id="poll-rep-val">50%</span></div>
                     </div>
-
                     <div class="action-menu">
                         <h4 id="action-menu-title">CAMPAIGN STRATEGY</h4>
                         <div class="action-grid">
-                            <button class="act-btn" id="btn-entercountymap" onclick="app.enterStateView()">
-                                <span class="act-icon">🗺️</span>
-                                <span>COUNTY MAP</span>
-                                <span class="act-cost">VIEW & TARGET</span>
-                            </button>
-                            <button class="act-btn hidden" id="btn-returnmap" onclick="app.closeCountyView()">
-                                <span class="act-icon">🌎</span>
-                                <span>RETURN TO MAP</span>
-                                <span class="act-cost">EXIT VIEW</span>
-                            </button>
-
-                            <button class="act-btn" onclick="app.handleAction('fundraise')">
-                                <span class="act-icon">💰</span>
-                                <span>FUNDRAISE</span>
-                                <span class="act-cost">1 ENG</span>
-                            </button>
-                            <button class="act-btn" onclick="app.handleAction('ad')">
-                                <span class="act-icon">📺</span>
-                                <span>AD BLITZ</span>
-                                <span class="act-cost">0 ENG / $500K</span>
-                            </button>
-                            <button class="act-btn" onclick="app.handleAction('rally')">
-                                <span class="act-icon">🎤</span>
-                                <span>RALLY</span>
-                                <span class="act-cost">1 ENG</span>
-                            </button>
+                            <button class="act-btn" id="btn-entercountymap" onclick="app.enterStateView()"><span>🗺️</span><span>COUNTY MAP</span></button>
+                            <button class="act-btn hidden" id="btn-returnmap" onclick="app.closeCountyView()"><span>🌎</span><span>RETURN TO MAP</span></button>
+                            <button class="act-btn" onclick="app.handleAction('fundraise')"><span>💰</span><span>FUNDRAISE</span></button>
+                            <button class="act-btn" onclick="app.handleAction('ad')"><span>📺</span><span>AD BLITZ</span></button>
+                            <button class="act-btn" onclick="app.handleAction('rally')"><span>🎤</span><span>RALLY</span></button>
                         </div>
                     </div>
-
-                    <div class="issues-list">
-                        <h4>TOP ISSUES</h4>
-                        <div id="sp-issues-list"></div>
-                    </div>
+                    <div class="issues-list"><h4>TOP ISSUES</h4><div id="sp-issues-list"></div></div>
                 </div>
-                
-                <div id="empty-msg">
-                    <div class="empty-icon">Select a State</div>
-                    <p>Double-click a state to view county map.</p>
-                </div>
-                
-                <div id="log-feed">
-                    <h4>CAMPAIGN LOG</h4>
-                    <div id="log-content"></div>
-                </div>
+                <div id="empty-msg"><div class="empty-icon">Select a State</div><p>Double-click to view counties.</p></div>
+                <div id="log-feed"><h4>CAMPAIGN LOG</h4><div id="log-content"></div></div>
             </aside>
         </div>
     </section>
