@@ -21,7 +21,7 @@ body {
 .blue { color: var(--dem-blue); }
 .red { color: var(--rep-red); }
 
-/* --- HOMESCREEN (REVERTED TO CLEAN DARK) --- */
+/* --- HOMESCREEN (CLEAN DARK) --- */
 #intro-screen {
     display: flex; 
     flex-direction: column;
