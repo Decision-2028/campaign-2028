@@ -16,22 +16,22 @@ const ISSUES = [
 ];
 
 const CANDIDATES = [
-    { id: "harris", name: "Kamala Harris", party: "D", funds: 60, img: "images/harris.jpg", stamina: 8, ai_skill: 8, lastName: "Harris" },
-    { id: "newsom", name: "Gavin Newsom", party: "D", funds: 75, img: "images/newsom.jpg", stamina: 9, ai_skill: 9, lastName: "Newsom" },
-    { id: "whitmer", name: "Gretchen Whitmer", party: "D", funds: 55, img: "images/whitmer.jpg", stamina: 8, ai_skill: 9, lastName: "Whitmer" },
-    { id: "desantis", name: "Ron DeSantis", party: "R", funds: 65, img: "images/desantis.jpg", stamina: 9, ai_skill: 9, lastName: "DeSantis" },
-    { id: "vance", name: "JD Vance", party: "R", funds: 50, img: "images/vance.jpg", stamina: 8, ai_skill: 7, lastName: "Vance" },
-    { id: "ramaswamy", name: "Vivek Ramaswamy", party: "R", funds: 70, img: "images/ramaswamy.jpg", stamina: 10, ai_skill: 6, lastName: "Ramaswamy" },
-    { id: "yang", name: "Andrew Yang", party: "I", funds: 40, img: "images/yang.jpg", stamina: 8, ai_skill: 5, lastName: "Yang" },
-    { id: "stein", name: "Jill Stein", party: "G", funds: 10, img: "images/scenario.jpg", stamina: 6, ai_skill: 3, lastName: "Stein" },
-    { id: "oliver", name: "Chase Oliver", party: "L", funds: 12, img: "images/scenario.jpg", stamina: 7, ai_skill: 3, lastName: "Oliver" }
+    { id: "harris", name: "Kamala Harris", party: "D", funds: 60, img: "images/harris.jpg", stamina: 8, ai_skill: 8, lastName: "Harris", desc: "The incumbent Vice President running on the administration's record.", buff: "Incumbency" },
+    { id: "newsom", name: "Gavin Newsom", party: "D", funds: 75, img: "images/newsom.jpg", stamina: 9, ai_skill: 9, lastName: "Newsom", desc: "California Governor known for aggressive campaigning and fundraising.", buff: "War Chest" },
+    { id: "whitmer", name: "Gretchen Whitmer", party: "D", funds: 55, img: "images/whitmer.jpg", stamina: 8, ai_skill: 9, lastName: "Whitmer", desc: "Popular Michigan Governor with strong Rust Belt appeal.", buff: "Midwest Appeal" },
+    { id: "desantis", name: "Ron DeSantis", party: "R", funds: 65, img: "images/desantis.jpg", stamina: 9, ai_skill: 9, lastName: "DeSantis", desc: "Florida Governor running on a 'anti-woke' platform.", buff: "Base turnout" },
+    { id: "vance", name: "JD Vance", party: "R", funds: 50, img: "images/vance.jpg", stamina: 8, ai_skill: 7, lastName: "Vance", desc: "Ohio Senator and populist voice for the working class.", buff: "Populism" },
+    { id: "ramaswamy", name: "Vivek Ramaswamy", party: "R", funds: 70, img: "images/ramaswamy.jpg", stamina: 10, ai_skill: 6, lastName: "Ramaswamy", desc: "Biotech entrepreneur focused on dismantling bureaucracy.", buff: "Outsider" },
+    { id: "yang", name: "Andrew Yang", party: "I", funds: 40, img: "images/yang.jpg", stamina: 8, ai_skill: 5, lastName: "Yang", desc: "Forward Party founder promoting Universal Basic Income.", buff: "Innovation" },
+    { id: "stein", name: "Jill Stein", party: "G", funds: 10, img: "images/scenario.jpg", stamina: 6, ai_skill: 3, lastName: "Stein", desc: "Perennial Green Party candidate focused on ecology.", buff: "Protest Vote" },
+    { id: "oliver", name: "Chase Oliver", party: "L", funds: 12, img: "images/scenario.jpg", stamina: 7, ai_skill: 3, lastName: "Oliver", desc: "Libertarian activist fighting for individual rights.", buff: "Liberty" }
 ];
 
 const VPS = [
-    { id: "shapiro", name: "Josh Shapiro", party: "D", state: "PA", img: "images/shapiro.jpg", ai_skill: 5 },
-    { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", img: "images/scenario.jpg", ai_skill: 4 },
-    { id: "rubio", name: "Marco Rubio", party: "R", state: "FL", img: "images/scenario.jpg", ai_skill: 4 },
-    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", img: "images/scenario.jpg", ai_skill: 3 }
+    { id: "shapiro", name: "Josh Shapiro", party: "D", state: "PA", img: "images/shapiro.jpg", ai_skill: 5, desc: "Governor of Pennsylvania." },
+    { id: "kelly", name: "Mark Kelly", party: "D", state: "AZ", img: "images/kelly.jpg", ai_skill: 4, desc: "Senator from Arizona." },
+    { id: "rubio", name: "Marco Rubio", party: "R", state: "FL", img: "images/scenario.jpg", ai_skill: 4, desc: "Senator from Florida." },
+    { id: "stefanik", name: "Elise Stefanik", party: "R", state: "NY", img: "images/scenario.jpg", ai_skill: 3, desc: "Congresswoman from NY." }
 ];
 
 const INIT_STATES = {
@@ -120,7 +120,7 @@ const app = {
         states: {}, selectedState: null, activeCountyState: null,
         mapMode: 'political', masterMapCache: null, realCountyData: null,
         selectedCounty: null, aiDifficulty: 0, viewMode: 'national',
-        historyStack: [], logs: []
+        historyStack: []
     },
 
     init: async function() {
@@ -136,7 +136,7 @@ const app = {
             let s = this.data.states[sCode];
             s.moe = (Math.random()*2 + 1.5).toFixed(1);
             
-            // RESTORED: Priorities/Issues Logic
+            // Priorities/Issues Logic
             s.priorities = {};
             ISSUES.forEach(i => s.priorities[i.id] = Math.floor(Math.random()*10)+1);
 
@@ -303,21 +303,42 @@ const app = {
     goToScreen: function(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); },
     
     renderParties: function() { 
-        const c=document.getElementById('party-cards'); if(c) { c.innerHTML=""; ['D','R','I'].forEach(k=>{ c.innerHTML+=`<div class="card card-party" onclick="app.selParty('${k}')" style="background-image:url('${PARTIES[k].img}'); border-top:5px solid ${PARTIES[k].color}"><div class="party-overlay"><h3>${PARTIES[k].name}</h3></div></div>`; }); }
+        const c=document.getElementById('party-cards'); if(c) { c.innerHTML=""; ['D','R','I'].forEach(k=>{ c.innerHTML+=`<div class="card card-party" onclick="app.selParty('${k}')" style="background-image:url('${PARTIES[k].img}'); border-top:5px solid ${PARTIES[k].color}"><div class="party-overlay"><h3>${PARTIES[k].name}</h3><div class="party-desc">${PARTIES[k].name} Platform</div></div></div>`; }); }
     },
     selParty: function(k){ this.data.selectedParty=k; this.renderCands(k); this.goToScreen('candidate-screen'); },
-    renderCands: function(pk){ const c=document.getElementById('candidate-cards'); c.innerHTML=""; CANDIDATES.filter(x=>x.party===pk).forEach(x=>{ c.innerHTML+=`<div class="card" onclick="app.selCand('${x.id}')"><div class="portrait"><img src="${x.img}"></div><div class="card-info"><h3>${x.id.toUpperCase()}</h3></div></div>`; }); },
+    renderCands: function(pk){ 
+        const c=document.getElementById('candidate-cards'); c.innerHTML=""; 
+        CANDIDATES.filter(x=>x.party===pk).forEach(x=>{ 
+            c.innerHTML+=`<div class="card" onclick="app.selCand('${x.id}')"><div class="portrait"><img src="${x.img}"></div><div class="card-info"><h3>${x.name}</h3><p>${x.desc || ''}</p><p class="buff-text">${x.buff || ''}</p></div></div>`; 
+        }); 
+    },
     selCand: function(id){ this.data.candidate=CANDIDATES.find(x=>x.id===id); this.data.maxEnergy=this.data.candidate.stamina; this.data.energy=this.data.maxEnergy; this.renderVPs(this.data.candidate.party); this.goToScreen('vp-screen'); },
-    renderVPs: function(pk){ const c=document.getElementById('vp-cards'); c.innerHTML=""; VPS.filter(x=>x.party===pk).forEach(x=>{ c.innerHTML+=`<div class="card" onclick="app.selVP('${x.id}')"><div class="portrait"><img src="${x.img}"></div><div class="card-info"><h3>${x.name}</h3></div></div>`; }); },
+    renderVPs: function(pk){ 
+        const c=document.getElementById('vp-cards'); c.innerHTML=""; 
+        VPS.filter(x=>x.party===pk).forEach(x=>{ 
+            c.innerHTML+=`<div class="card" onclick="app.selVP('${x.id}')"><div class="portrait"><img src="${x.img}"></div><div class="card-info"><h3>${x.name}</h3><p>${x.desc || ''}</p></div></div>`; 
+        }); 
+    },
     selVP: function(id){ this.data.vp=VPS.find(x=>x.id===id); this.renderOpp(); },
-    renderOpp: function(){ const c=document.getElementById('opponent-cards-major'); c.innerHTML=""; let rival=this.data.selectedParty==='D'?'R':'D'; CANDIDATES.filter(x=>x.party===rival).forEach(x=>{ c.innerHTML+=`<div class="card" onclick="app.selOpp('${x.id}')"><div class="portrait"><img src="${x.img}"></div><div class="card-info"><h3>${x.id.toUpperCase()}</h3></div></div>`;}); this.goToScreen('opponent-screen'); },
+    renderOpp: function(){ 
+        const c=document.getElementById('opponent-cards-major'); c.innerHTML=""; 
+        let rival=this.data.selectedParty==='D'?'R':'D'; 
+        CANDIDATES.filter(x=>x.party===rival).forEach(x=>{ 
+            c.innerHTML+=`<div class="card" onclick="app.selOpp('${x.id}')"><div class="portrait"><img src="${x.img}"></div><div class="card-info"><h3>${x.name}</h3><p>${x.desc || ''}</p></div></div>`;
+        });
+        const min=document.getElementById('opponent-cards-minor'); if(min) {
+            min.innerHTML="";
+            CANDIDATES.filter(x=>['G','L'].includes(x.party)).forEach(x=>{
+                min.innerHTML+=`<div class="card" style="transform:scale(0.9); border-top:3px solid ${PARTIES[x.party].color}"><div class="card-info"><h3>${x.name}</h3></div></div>`;
+            });
+        }
+        this.goToScreen('opponent-screen'); 
+    },
     selOpp: function(id){ this.data.opponent=CANDIDATES.find(x=>x.id===id); this.startGame(); },
     toggleThirdParties: function() { this.data.thirdPartiesEnabled = document.getElementById('third-party-toggle').checked; },
 
     startGame: function() {
         this.data.funds = this.data.candidate.funds;
-        
-        // RESTORED: Full AI Difficulty Calculation
         let oppSkill = this.data.opponent.ai_skill || 5;
         let vpSkill = this.data.opponentVP ? (this.data.opponentVP.ai_skill || 3) : 0;
         this.data.aiDifficulty = oppSkill + vpSkill;
@@ -414,7 +435,10 @@ const app = {
         }
 
         let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        // Improved ViewBox logic to zoom closer to content
         newSvg.setAttribute("viewBox", "0 0 990 627");
+        newSvg.style.width = "100%"; newSvg.style.height = "100%";
+        
         validPaths.forEach(p => {
             let clone = p.cloneNode(true);
             let c = state.counties.find(ct => ct.id === p.id);
@@ -427,6 +451,14 @@ const app = {
             newSvg.appendChild(clone);
         });
         container.innerHTML = ""; container.appendChild(newSvg);
+        
+        // Auto-Zoom logic
+        setTimeout(() => {
+            try {
+                let bbox = newSvg.getBBox();
+                if(bbox.width > 0) newSvg.setAttribute("viewBox", `${bbox.x-10} ${bbox.y-10} ${bbox.width+20} ${bbox.height+20}`);
+            } catch(e) {}
+        }, 50);
     },
 
     /* --- HELPERS --- */
@@ -442,27 +474,29 @@ const app = {
         document.querySelector('.poll-bar-wrap').innerHTML = `<div style="width:${obj.pcts.D}%; background:#00AEF3"></div><div style="width:${obj.pcts.R}%; background:#E81B23"></div>`;
         document.getElementById('action-menu-title').innerText = type==='state'?"STATE STRATEGY":"COUNTY ACTIONS";
         
-        // RESTORED: Populate Issues List
+        // Populate Issues List
         let iList = document.getElementById('sp-issues-list');
-        iList.innerHTML = "";
-        if(obj.priorities) {
-            let sorted = Object.entries(obj.priorities).sort((a,b)=>b[1]-a[1]).slice(0,3);
-            sorted.forEach(([k,v]) => {
-                let iName = ISSUES.find(x=>x.id===k).name;
-                iList.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;"><span>${iName}</span><span style="color:#aaa">lvl ${v}</span></div>`;
-            });
+        if(iList) {
+            iList.innerHTML = "";
+            if(obj.priorities) {
+                let sorted = Object.entries(obj.priorities).sort((a,b)=>b[1]-a[1]).slice(0,3);
+                sorted.forEach(([k,v]) => {
+                    let iName = ISSUES.find(x=>x.id===k).name;
+                    iList.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;"><span>${iName}</span><span style="color:#aaa">lvl ${v}</span></div>`;
+                });
+            }
         }
     },
     
-    // RESTORED: Open State Bio
+    // Open State Bio
     openStateBio: function() {
         let s = this.data.states[this.data.selectedState];
         if(!s) return;
         document.getElementById('bio-title').innerText = s.name.toUpperCase();
         document.getElementById('bio-content').innerHTML = `
             <p><strong>Electoral Votes:</strong> ${s.ev}</p>
-            <p><strong>Region:</strong> N/A</p>
-            <p style="margin-top:10px;">${s.name} is a key battleground with diverse demographics...</p>
+            <p><strong>Status:</strong> ${Math.abs(s.pcts.D - s.pcts.R) < 5 ? "Swing State" : "Safe State"}</p>
+            <p style="margin-top:10px;">${s.name} is a key battleground with diverse demographics and critical electoral votes.</p>
         `;
         document.getElementById('bio-modal').classList.remove('hidden');
     },
