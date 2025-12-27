@@ -1,9 +1,9 @@
 /* --- CONFIGURATION --- */
 const PARTIES = {
-    D: { name: "Democratic", color: "#00AEF3", img: "images/harrison.jpg" },
-    R: { name: "Republican", color: "#E81B23", img: "images/whatley.jpg" },
-    G: { name: "Green", color: "#198754" },
-    L: { name: "Libertarian", color: "#fd7e14" },
+    D: { name: "Democratic Party", color: "#00AEF3", img: "images/harrison.jpg" },
+    R: { name: "Republican Party", color: "#E81B23", img: "images/whatley.jpg" },
+    G: { name: "Green Party", color: "#198754" },
+    L: { name: "Libertarian Party", color: "#fd7e14" },
     O: { name: "Independent", color: "#F2C75C" }
 };
 
@@ -54,34 +54,36 @@ const INIT_STATES = {
     "WV": {name:"West Virginia",ev:4,fips:"54"}, "WI":{name:"Wisconsin",ev:10,fips:"55"}, "WY":{name:"Wyoming",ev:3,fips:"56"}
 };
 
-/* --- COUNTY CLASS --- */
+/* --- COUNTY CLASS (Turnout & Robust Data) --- */
 class County {
     constructor(id, name, stateType, realData=null, baseG=1, baseL=1) {
         this.id = id;
         this.name = name || id;
         
+        // Turnout Logic
+        this.turnout = 0.60; // Base 60%
+        this.baseEnthusiasm = { D: 1.0, R: 1.0 }; 
+
         if (realData) {
             this.type = realData.t || "Rural";
             this.population = realData.p || 10000;
             
-            // Check if .v exists to prevent crash
-            let v = realData.v || { D:45, R:45, G:0, L:0, O:0 };
-            
+            // ROBUST DATA LOADING (Fixes Black Maps)
+            let v = realData.v || {};
             this.pcts = {
-                D: v.D || 45,
-                R: v.R || 45,
-                G: v.G || 0,
-                L: v.L || 0,
-                O: v.O || 0
+                D: v.D !== undefined ? v.D : 45,
+                R: v.R !== undefined ? v.R : 45,
+                G: v.G !== undefined ? v.G : 0,
+                L: v.L !== undefined ? v.L : 0,
+                O: v.O !== undefined ? v.O : 0
             };
         } else {
-            // PROCEDURAL FALLBACK
+            // Procedural Fallback
             this.type = stateType === 'Urban' ? 'Urban' : 'Rural';
             this.population = 10000;
             this.pcts = { D: 45, R: 45, G: 1, L: 1, O: 8 };
         }
         
-        this.enthusiasm = { D: 1.0, R: 1.0 };
         this.normalizePcts();
     }
 
@@ -99,12 +101,15 @@ class County {
         }
     }
 
-    getVotes() {
-        let d = this.population * (this.pcts.D/100) * this.enthusiasm.D;
-        let r = this.population * (this.pcts.R/100) * this.enthusiasm.R;
-        let g = this.population * (this.pcts.G/100);
-        let l = this.population * (this.pcts.L/100);
-        let o = this.population * (this.pcts.O/100);
+    // RETURNS RAW VOTES (Turnout Based)
+    getRawVotes() {
+        let activeVoters = this.population * this.turnout;
+        
+        let d = activeVoters * (this.pcts.D/100) * this.baseEnthusiasm.D;
+        let r = activeVoters * (this.pcts.R/100) * this.baseEnthusiasm.R;
+        let g = activeVoters * (this.pcts.G/100);
+        let l = activeVoters * (this.pcts.L/100);
+        let o = activeVoters * (this.pcts.O/100);
         
         if (!app.data.thirdPartiesEnabled) { g=0; l=0; o=0; }
         return { D:d, R:r, G:g, L:l, O:o };
@@ -120,7 +125,7 @@ const app = {
         states: {}, selectedState: null, activeCountyState: null,
         mapMode: 'political', masterMapCache: null, realCountyData: null,
         selectedCounty: null, aiDifficulty: 0, viewMode: 'national',
-        historyStack: []
+        historyStack: [], logs: []
     },
 
     init: async function() {
@@ -128,15 +133,13 @@ const app = {
         try {
             const res = await fetch('counties/county_data.json');
             if (res.ok) this.data.realCountyData = await res.json();
-        } catch(e) { console.warn("County data missing or malformed, using procedural generation."); }
+        } catch(e) { console.warn("County data missing, using procedural."); }
 
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
         
         for(let sCode in this.data.states) {
             let s = this.data.states[sCode];
             s.moe = (Math.random()*2 + 1.5).toFixed(1);
-            
-            // Priorities/Issues Logic
             s.priorities = {};
             ISSUES.forEach(i => s.priorities[i.id] = Math.floor(Math.random()*10)+1);
 
@@ -167,22 +170,24 @@ const app = {
         return counties;
     },
 
+    // RECALC USING RAW VOTES (Fixes Vermont/Delaware)
     recalcStatePoll: function(state) {
         let t = {D:0,R:0,G:0,L:0,O:0};
-        let pop = 0;
+        let totalStateVotes = 0;
+        
         state.counties.forEach(c => {
-            let v = c.getVotes();
+            let v = c.getRawVotes(); // Use updated Turnout function
             t.D += v.D; t.R += v.R; t.G += v.G; t.L += v.L; t.O += v.O;
-            pop += (v.D+v.R+v.G+v.L+v.O);
+            totalStateVotes += (v.D+v.R+v.G+v.L+v.O);
         });
         
-        if(pop > 0) {
-            let divisor = this.data.thirdPartiesEnabled ? pop : (t.D + t.R);
-            if(divisor<=0) divisor=1;
-            
+        if(totalStateVotes > 0) {
             state.pcts = {
-                D: (t.D / divisor) * 100, R: (t.R / divisor) * 100,
-                G: (t.G / divisor) * 100, L: (t.L / divisor) * 100, O: (t.O / divisor) * 100
+                D: (t.D / totalStateVotes) * 100,
+                R: (t.R / totalStateVotes) * 100,
+                G: (t.G / totalStateVotes) * 100,
+                L: (t.L / totalStateVotes) * 100,
+                O: (t.O / totalStateVotes) * 100
             };
         } else {
             state.pcts = { D:50, R:50, G:0, L:0, O:0 };
@@ -217,6 +222,7 @@ const app = {
                 c.enthusiasm = sPrev.counties[i].enthusiasm;
                 c.normalizePcts();
             });
+            this.recalcStatePoll(sCurr); // Recalc state totals
         }
         
         this.updateHUD();
@@ -225,29 +231,30 @@ const app = {
         this.showToast("Undo Successful");
     },
 
-    /* --- ACTIONS --- */
+    /* --- ACTIONS (With Turnout Boost) --- */
     handleAction: function(type) {
         this.saveState();
         let target = this.data.viewMode==='state' && this.data.selectedCounty ? this.data.selectedCounty : this.data.states[this.data.selectedState];
         let stateObj = this.data.viewMode==='state' ? this.data.activeCountyState : target;
         let isCounty = this.data.viewMode==='state' && this.data.selectedCounty;
 
-        let boost = 0, ripple = 0, costF = 0, costE = 0;
+        let boost = 0, turnoutBoost = 0;
+        let costE = 0, costF = 0;
         let actionName = "";
 
         if (type === 'rally') {
             costE = isCounty ? 1 : 2;
             if(this.data.energy < costE) return this.showToast("No Energy");
             this.data.energy -= costE;
-            boost = isCounty ? 1.5 : 0.5; // NERFED
-            ripple = isCounty ? 0.2 : 0;
+            boost = 1.0; 
+            turnoutBoost = 0.03; // +3% Turnout
             actionName = "Rally";
         } else if (type === 'ad') {
             costF = isCounty ? 0.5 : 2.0;
             if(this.data.funds < costF) return this.showToast("No Funds");
             this.data.funds -= costF;
-            boost = isCounty ? 2.5 : 1.0; // NERFED
-            ripple = isCounty ? 0.5 : 0;
+            boost = 2.0; 
+            turnoutBoost = 0.01; // +1% Turnout
             actionName = "Ad Blitz";
         } else if (type === 'fundraise') {
             if(this.data.energy < 1) return this.showToast("No Energy");
@@ -259,15 +266,15 @@ const app = {
             return;
         }
 
-        if(this.data.selectedParty === 'D') {
-            target.pcts.D += boost; target.enthusiasm.D += 0.1;
-            if(ripple > 0) stateObj.counties.forEach(n => { if(n !== target) n.pcts.D += ripple; });
+        // Apply Boosts
+        if (isCounty) {
+            this.applyBoost(target, boost, turnoutBoost);
         } else {
-            target.pcts.R += boost; target.enthusiasm.R += 0.1;
-            if(ripple > 0) stateObj.counties.forEach(n => { if(n !== target) n.pcts.R += ripple; });
+            target.counties.forEach(c => this.applyBoost(c, boost, turnoutBoost));
         }
 
-        if (isCounty) {
+        // Recalc
+        if(isCounty) {
             stateObj.counties.forEach(c => c.normalizePcts());
             this.recalcStatePoll(stateObj);
             let container = document.getElementById('county-map-container');
@@ -277,10 +284,6 @@ const app = {
                 if(c) this.colorCountyPath(p, c);
             });
         } else {
-            target.counties.forEach(c => {
-                if(this.data.selectedParty==='D') c.pcts.D += boost; else c.pcts.R += boost;
-                c.normalizePcts();
-            });
             this.recalcStatePoll(target);
         }
 
@@ -288,6 +291,21 @@ const app = {
         this.updateHUD();
         this.showToast("Action Complete");
         this.logAction(actionName, target.name);
+    },
+
+    applyBoost: function(county, prefBoost, turnoutBoost) {
+        // Boost Turnout (Max 100%)
+        county.turnout = Math.min(1.0, county.turnout + turnoutBoost);
+        
+        // Boost Preference
+        if(this.data.selectedParty === 'D') {
+            county.pcts.D += prefBoost;
+            county.baseEnthusiasm.D += 0.05;
+        } else {
+            county.pcts.R += prefBoost;
+            county.baseEnthusiasm.R += 0.05;
+        }
+        county.normalizePcts();
     },
 
     logAction: function(action, location) {
@@ -345,15 +363,18 @@ const app = {
         
         this.goToScreen('game-screen');
         
+        // Initial Calculation
         for(let s in this.data.states) {
             let state = this.data.states[s];
             state.counties.forEach(c => c.normalizePcts());
             this.recalcStatePoll(state);
         }
         
+        // Update Header
         document.getElementById('hud-img').src = this.data.candidate.img;
-        document.getElementById('hud-cand-name').innerText = this.data.candidate.lastName;
-        document.getElementById('hud-party-name').innerText = PARTIES[this.data.selectedParty].name;
+        document.getElementById('hud-cand-name').innerText = this.data.candidate.name; // Full Name
+        document.getElementById('hud-party-name').innerText = PARTIES[this.data.selectedParty].name.toUpperCase();
+        
         this.initMap(); this.updateHUD();
     },
 
@@ -435,7 +456,6 @@ const app = {
         }
 
         let newSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        // Improved ViewBox logic to zoom closer to content
         newSvg.setAttribute("viewBox", "0 0 990 627");
         newSvg.style.width = "100%"; newSvg.style.height = "100%";
         
@@ -452,7 +472,6 @@ const app = {
         });
         container.innerHTML = ""; container.appendChild(newSvg);
         
-        // Auto-Zoom logic
         setTimeout(() => {
             try {
                 let bbox = newSvg.getBBox();
@@ -474,7 +493,6 @@ const app = {
         document.querySelector('.poll-bar-wrap').innerHTML = `<div style="width:${obj.pcts.D}%; background:#00AEF3"></div><div style="width:${obj.pcts.R}%; background:#E81B23"></div>`;
         document.getElementById('action-menu-title').innerText = type==='state'?"STATE STRATEGY":"COUNTY ACTIONS";
         
-        // Populate Issues List
         let iList = document.getElementById('sp-issues-list');
         if(iList) {
             iList.innerHTML = "";
@@ -488,7 +506,6 @@ const app = {
         }
     },
     
-    // Open State Bio
     openStateBio: function() {
         let s = this.data.states[this.data.selectedState];
         if(!s) return;
