@@ -1,31 +1,47 @@
+/* ============================================
+   DECISION 2028 - CAMPAIGN SIMULATOR
+   Complete Stylesheet
+   ============================================ */
+
 /* --- GLOBAL VARIABLES & RESET --- */
 :root {
     --bg-dark: #121212;
     --panel-bg: #1e1e1e;
     --dem-blue: #00AEF3;
     --rep-red: #E81B23;
-    --gold: #ffd700;
+    --forward-gold: #F2C75C;
+    --green-party: #198754;
+    --libertarian-orange: #fd7e14;
+    --gold:  #ffd700;
     --text-white: #ffffff;
     --green-success: #198754;
     --gray-hover: #333333;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
-    background: var(--bg-dark);
+    background:  var(--bg-dark);
     color: var(--text-white);
-    overflow: hidden;
+    overflow:  hidden;
     height: 100vh;
     user-select: none;
 }
 
 /* UTILITIES */
-.hidden { display: none !important; }
-.blue { color: var(--dem-blue); }
+.hidden { display: none ! important; }
+. blue { color: var(--dem-blue); }
 .red { color: var(--rep-red); }
+.gray { color: #888; }
+.gold { color: var(--forward-gold); }
+.green { color: var(--green-party); }
+.orange { color: var(--libertarian-orange); }
 
-/* --- SCREENS (Transitions from style 1) --- */
+/* --- SCREENS --- */
 .screen {
     display: none;
     height: 100vh;
@@ -34,18 +50,26 @@ body {
 }
 
 .screen.active {
-    display: flex;
+    display:  flex;
     animation: fadeEnt 0.5s ease forwards;
 }
 
-@keyframes fadeEnt { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeEnt { 
+    from { opacity:  0; } 
+    to { opacity: 1; } 
+}
 
-/* --- INTRO SCREEN (Clean Dark) --- */
+/* --- INTRO SCREEN --- */
 #intro-screen {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background: #111;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+}
+
+.intro-content {
+    max-width: 800px;
+    padding:  40px;
 }
 
 .breaking-banner {
@@ -58,19 +82,32 @@ body {
     margin-bottom: 25px;
     text-transform: uppercase;
     box-shadow: 0 4px 15px rgba(232, 27, 35, 0.4);
+    animation: pulse 2s infinite;
 }
 
-.main-title {
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 15px rgba(232, 27, 35, 0.4); }
+    50% { box-shadow: 0 4px 25px rgba(232, 27, 35, 0.7); }
+}
+
+. main-title {
     font-family: 'Merriweather', serif;
-    font-size: 6rem;
-    margin: 0 0 40px 0;
-    text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    font-size: 5rem;
+    margin: 0 0 20px 0;
+    text-shadow:  0 4px 10px rgba(0,0,0,0.8);
+    line-height: 1.1;
+}
+
+.subtitle {
+    font-size: 1.4rem;
+    color: #aaa;
+    margin-bottom: 40px;
 }
 
 .highlight { color: var(--dem-blue); }
 
-.start-btn {
-    padding: 15px 50px;
+. start-btn {
+    padding: 18px 60px;
     font-size: 1.4rem;
     background: var(--dem-blue);
     color: white;
@@ -78,44 +115,46 @@ body {
     font-weight: 700;
     cursor: pointer;
     text-transform: uppercase;
-    transition: all 0.2s ease;
-    letter-spacing: 1px;
-}
-.start-btn:hover {
-    background: white;
-    color: var(--dem-blue);
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    letter-spacing:  2px;
 }
 
-/* --- HEADERS (Setup Screens) --- */
+.start-btn:hover {
+    background: white;
+    color:  var(--dem-blue);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255,255,255,0.3);
+}
+
+/* --- HEADERS --- */
 .news-header {
-    background: #1a1a1a;
+    background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
     color: white;
     padding: 15px 30px;
-    border-bottom: 1px solid #333;
+    border-bottom: 2px solid #333;
     display: flex;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     z-index: 50;
 }
 
-.logo {
+. logo {
     font-family: 'Merriweather', serif;
     font-weight: 900;
     font-size: 1.8rem;
-    letter-spacing: -1px;
+    letter-spacing:  -1px;
 }
+
 .red-text { color: var(--rep-red); }
 
-/* --- PANELS & CARDS (Preserved Rich Styling) --- */
+/* --- PANELS & CARDS --- */
 .panel-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding:  40px 20px;
     text-align: center;
     overflow-y: auto;
-    height: 100%;
+    flex: 1;
 }
 
 .section-title {
@@ -125,11 +164,67 @@ body {
     margin-bottom: 40px;
     font-family: 'Merriweather', serif;
     font-size: 2rem;
-    color: #ccc;
+    color:  #ccc;
 }
 
-.cards-row {
+/* --- PARTY SELECTION GRID --- */
+.party-grid {
     display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+.major-parties {
+    display:  flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.minor-parties {
+    display:  flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 1px solid #333;
+    width: 100%;
+    max-width: 900px;
+}
+
+.card-major {
+    width: 320px ! important;
+    height: 380px !important;
+}
+
+.card-minor {
+    width:  200px !important;
+    height: 200px !important;
+}
+
+.card-minor . party-overlay h3 {
+    font-size: 1rem;
+}
+
+.party-desc-minor {
+    font-size: 0.75rem ! important;
+}
+
+.debuff-tag {
+    display: inline-block;
+    background: rgba(255, 100, 100, 0.2);
+    color: #ff6b6b;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* --- CANDIDATE CARDS --- */
+.cards-row {
+    display:  flex;
     gap: 25px;
     justify-content: center;
     flex-wrap: wrap;
@@ -138,7 +233,7 @@ body {
 
 .card {
     background: #2a2a2a;
-    border: 1px solid #444;
+    border:  1px solid #444;
     width: 240px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -157,96 +252,179 @@ body {
     box-shadow: 0 12px 24px rgba(0,0,0,0.5);
 }
 
+.card.selected {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
 .card-party {
     height: 280px;
     background-size: cover;
     background-position: center;
+    background-color: #333;
 }
+
 .party-overlay {
-    position: absolute;
-    bottom: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.2));
+    position:  absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:  linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 100%);
     transition: 0.3s;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    padding: 20px; box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    box-sizing: border-box;
 }
-.card-party:hover .party-overlay {
-    background: rgba(0,0,0,0.85);
+
+.card-party: hover .party-overlay {
+    background:  rgba(0,0,0,0.9);
     justify-content: center;
     align-items: center;
 }
-.party-desc {
-    display: none;
-    font-size: 0.9rem;
-    color: #ddd;
-    margin-top: 10px;
-    text-align: center;
+
+.party-overlay h3 {
+    font-family: 'Merriweather', serif;
+    font-size: 1.3rem;
+    margin:  0 0 10px 0;
 }
-.card-party:hover .party-desc { display: block; }
+
+.party-desc {
+    font-size: 0.85rem;
+    color: #bbb;
+    margin:  0;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+. card-party:hover .party-desc {
+    opacity: 1;
+}
 
 .portrait {
     height: 200px;
     background: #000;
     width: 100%;
+    overflow: hidden;
 }
+
 .portrait img {
-    width: 100%;
+    width:  100%;
     height: 100%;
     object-fit: cover;
     object-position: top;
 }
+
 .card-info {
     padding: 15px;
-    flex: 1;
+    flex:  1;
     background: #2a2a2a;
 }
+
 .card h3 {
     margin: 0 0 5px 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #fff;
 }
-.card p {
+
+. card p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #aaa;
     line-height: 1.4;
 }
-.buff-text {
-    color: #4ade80 !important;
-    font-size: 0.8rem;
-    margin-top: 8px !important;
+
+. buff-text {
+    color:  #4ade80 !important;
+    font-size: 0.75rem;
+    margin-top: 8px ! important;
     font-weight: bold;
+}
+
+. debuff-text {
+    color: #f87171 !important;
+    font-size: 0.75rem;
+    margin-top: 4px !important;
+    font-weight:  bold;
+}
+
+/* Opponent Selection */
+.opponent-card {
+    position: relative;
+}
+
+.selected-check {
+    position:  absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--gold);
+    color: #000;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.card-minor-opp {
+    width: 160px ! important;
+}
+
+.card-minor-opp .portrait {
+    display: none;
+}
+
+.opponent-section {
+    margin-bottom: 30px;
+}
+
+.opponent-section h3 {
+    color: #888;
+    font-size: 0.9rem;
     text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
 }
 
 .back-btn {
-    background: transparent;
-    border: 1px solid #666;
-    padding: 10px 30px;
+    background:  transparent;
+    border:  1px solid #666;
+    padding: 12px 30px;
     color: #aaa;
     cursor: pointer;
     font-weight: bold;
     text-transform: uppercase;
     transition: 0.2s;
+    margin-top: 20px;
 }
+
 .back-btn:hover {
     border-color: white;
-    color: white;
+    color:  white;
     background: rgba(255,255,255,0.1);
 }
 
 /* --- HUD (Game Header) --- */
 .hud-header {
     height: 90px;
-    background: #1a1a1a;
+    background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 25px;
+    padding:  0 25px;
     border-bottom: 2px solid #333;
     z-index: 100;
     box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.hud-left {
+    flex: 1;
 }
 
 .candidate-badge {
@@ -254,136 +432,197 @@ body {
     align-items: center;
     gap: 15px;
     background: rgba(255,255,255,0.05);
-    padding: 5px 15px 5px 5px;
+    padding: 8px 20px 8px 8px;
     border-radius: 50px;
     border: 1px solid #444;
+    display: inline-flex;
 }
+
 #hud-img {
-    width: 60px; height: 60px;
+    width:  55px;
+    height: 55px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
-.hud-border-D { border-color: var(--dem-blue) !important; }
-.hud-border-R { border-color: var(--rep-red) !important; }
 
-.hud-text-col { display: flex; flex-direction: column; justify-content: center; }
-.cand-name { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; color: #fff; letter-spacing: 0.5px; line-height: 1.1; }
-.cand-party { font-family: 'Roboto', sans-serif; font-size: 0.75rem; color: #bbb; letter-spacing: 1px; font-weight: 500; text-transform: uppercase; }
-
-.hud-center { text-align: center; }
-.ev-display {
+.hud-text-col {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 900;
-    font-size: 1.5rem;
-    margin-bottom: 8px;
-    width: 500px;
+    flex-direction: column;
+    justify-content: center;
 }
-.dem-score { color: var(--dem-blue); text-shadow: 0 0 10px rgba(0, 174, 243, 0.4); }
-.rep-score { color: var(--rep-red); text-shadow: 0 0 10px rgba(232, 27, 35, 0.4); }
 
-.divider {
-    font-size: 0.8rem;
+.cand-name {
+    font-weight: 900;
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: #fff;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+}
+
+.cand-party {
+    font-size: 0.7rem;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.hud-center {
+    text-align: center;
+    flex:  2;
+}
+
+. ev-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    font-weight: 900;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+.dem-score {
+    color:  var(--dem-blue);
+    text-shadow: 0 0 15px rgba(0, 174, 243, 0.5);
+    min-width: 60px;
+    text-align: right;
+}
+
+. rep-score {
+    color: var(--rep-red);
+    text-shadow: 0 0 15px rgba(232, 27, 35, 0.5);
+    min-width: 60px;
+    text-align: left;
+}
+
+. divider {
+    font-size: 0.75rem;
     color: #111;
-    background: #ffd700;
-    padding: 2px 10px;
+    background: var(--gold);
+    padding: 4px 14px;
     border-radius: 12px;
     font-weight: 700;
     letter-spacing: 1px;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-    text-shadow: none;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
 .progress-bar-bg {
-    height: 12px;
+    height:  10px;
     background: #222;
-    width: 500px;
-    border: 1px solid #444;
+    width: 400px;
+    margin: 0 auto;
+    border:  1px solid #444;
+    border-radius: 5px;
     overflow: hidden;
-    border-radius: 2px;
 }
+
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--dem-blue) 50%, var(--rep-red) 50%);
     transition: background 0.5s ease-in-out;
 }
 
-.hud-right { display: flex; gap: 20px; align-items: center; }
-.stat-group { text-align: right; }
-.stat-group label { font-size: 0.65rem; color: #666; display: block; letter-spacing: 1px; margin-bottom: 2px; }
-.money { color: #4ade80; font-weight: bold; font-size: 1.1rem; font-family: monospace; }
-.date-display { font-weight: bold; font-size: 1.1rem; color: #ddd; }
+.hud-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex:  1;
+    justify-content: flex-end;
+}
 
-.energy-container { display: flex; gap: 3px; }
+.stat-group {
+    text-align: center;
+}
+
+.stat-group label {
+    font-size: 0.6rem;
+    color: #666;
+    display: block;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+}
+
+.money {
+    color: #4ade80;
+    font-weight: bold;
+    font-size: 1.1rem;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.date-display {
+    font-weight: bold;
+    font-size: 1rem;
+    color:  #ddd;
+}
+
+.energy-container {
+    display:  flex;
+    gap: 3px;
+    justify-content: center;
+}
+
 .energy-pip {
-    width: 8px; height: 16px;
+    width:  8px;
+    height: 18px;
     background: #333;
-    border: 1px solid #555;
+    border:  1px solid #555;
     transform: skewX(-15deg);
     transition: 0.3s;
 }
-.energy-pip.active {
+
+.energy-pip. active {
     background: var(--gold);
     box-shadow: 0 0 8px var(--gold);
     border-color: #fff;
 }
 
-/* --- BUTTONS (Corrected) --- */
+/* Buttons */
 .next-turn-btn {
-    padding: 10px 25px;
+    padding: 12px 28px;
     background: var(--green-success);
     color: white;
-    border: 1px solid #146c43;
+    border: none;
     font-weight: 800;
-    cursor: pointer;
+    cursor:  pointer;
     text-transform: uppercase;
     letter-spacing: 1px;
     border-radius: 4px;
     transition: 0.2s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-.next-turn-btn:hover {
-    background: #157347;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-.undo-btn {
-    padding: 8px 15px;
-    background: #444;
-    color: #ccc;
-    border: 1px solid #555;
-    font-size: 0.8rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 4px;
-    margin-right: 15px;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+.next-turn-btn:hover {
+    background: #157347;
+    transform:  translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
 }
+
+. undo-btn {
+    padding: 8px 16px;
+    background: #333;
+    color:  #aaa;
+    border: 1px solid #555;
+    font-size: 0.85rem;
+    font-weight: bold;
+    cursor:  pointer;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
 .undo-btn:hover {
-    background: #555;
+    background: #444;
     color: white;
     border-color: #777;
 }
 
-/* --- MAP AREA (Strict White Borders) --- */
+/* --- GAME AREA --- */
 .game-area {
     display: flex;
-    height: calc(100vh - 90px);
-    position: relative;
+    flex:  1;
     overflow: hidden;
-}
-
-.map-controls {
-    position: absolute;
-    top: 20px; left: 20px;
-    z-index: 100;
+    position: relative;
 }
 
 #map-container {
@@ -394,59 +633,164 @@ body {
     justify-content: center;
     overflow: hidden;
     position: relative;
-    padding: 0;
 }
 
-svg {
+#us-map-wrapper {
     width: 100%;
     height: 100%;
-    /* No max-height to ensure fill */
-    filter: drop-shadow(0 0 15px rgba(0,0,0,0.6));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-path, rect {
+#us-map-wrapper svg {
+    max-width: 100%;
+    max-height: 100%;
+    filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+}
+
+#us-map-svg path {
     transition: fill 0.2s ease;
-    cursor: pointer;
-    stroke: #ffffff !important; /* STRICT WHITE BORDER */
-    stroke-width: 0.5px !important;
+    stroke: #ffffff;
+    stroke-width: 0.8px;
 }
 
 #us-map-svg path:hover {
     stroke: var(--gold) !important;
-    stroke-width: 2px !important;
-    z-index: 100;
+    stroke-width: 2px ! important;
     filter: brightness(1.2);
 }
 
-#county-map-container {
+#us-map-svg path.selected {
+    stroke:  var(--gold) !important;
+    stroke-width:  2.5px !important;
+}
+
+. loading-map, .error-map {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+/* --- COUNTY VIEW (ENLARGED) --- */
+#county-view-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    background:  var(--bg-dark);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    z-index: 10;
+}
+
+#county-view-header {
+    height: 50px;
+    background: #1a1a1a;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding:  0 20px;
+    border-bottom: 1px solid #444;
 }
+
+.county-back-btn {
+    background: #333;
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.county-back-btn:hover {
+    background: #444;
+    color:  white;
+}
+
+#cv-title {
+    font-family: 'Merriweather', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+#cv-stats {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+#county-map-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    overflow:  hidden;
+}
+
+#county-map-container svg,
+#county-svg {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
 #county-map-container path {
-    stroke: #ffffff !important;
-    stroke-width: 0.2px !important;
-    vector-effect: non-scaling-stroke;
+    stroke: #ffffff;
+    stroke-width: 0.3px;
+    transition: fill 0.2s;
+    cursor: pointer;
 }
+
 #county-map-container path:hover {
     stroke: var(--gold) !important;
-    stroke-width: 1.5px !important;
-    z-index: 1000;
-    filter: brightness(1.3);
+    stroke-width:  1. 5px !important;
+    filter: brightness(1.2);
+}
+
+/* Procedural county grid */
+. procedural-county-grid {
+    display:  grid;
+    gap: 4px;
+    padding: 40px;
+    width: 100%;
+    max-width:  900px;
+}
+
+.procedural-county {
+    aspect-ratio: 1. 5;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    padding: 5px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.procedural-county: hover {
+    transform: scale(1.05);
+    border-color: var(--gold);
+    z-index: 10;
 }
 
 /* --- SIDEBAR --- */
 #sidebar {
-    width: 380px;
+    width:  380px;
     background: var(--panel-bg);
     border-left: 1px solid #333;
     display: flex;
     flex-direction: column;
     box-shadow: -5px 0 20px rgba(0,0,0,0.5);
     z-index: 200;
-    height: 100%;
 }
 
 #state-panel, #empty-msg {
@@ -463,36 +807,40 @@ path, rect {
     color: #555;
     text-align: center;
 }
-.empty-icon {
+
+. empty-icon {
     font-size: 4rem;
     margin-bottom: 20px;
-    opacity: 0.3;
+    opacity: 0.5;
 }
 
-.state-header-box {
-    display: flex;
+. state-header-box {
+    display:  flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid #333;
     padding-bottom: 15px;
     margin-bottom: 20px;
 }
+
 .state-header-box h2 {
     margin: 0;
     font-family: 'Merriweather', serif;
-    font-size: 1.1rem; /* Shrunk as requested */
+    font-size: 1rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 260px;
+    max-width: 240px;
 }
+
 .ev-badge {
     background: #333;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-weight: bold;
-    border: 1px solid #555;
-    font-size: 0.9rem;
+    border:  1px solid #555;
+    font-size: 0.85rem;
     border-radius: 4px;
+    white-space: nowrap;
 }
 
 /* Poll Bar */
@@ -503,125 +851,200 @@ path, rect {
     border: 1px solid #333;
     margin-bottom: 25px;
 }
+
 .poll-bar-wrap {
-    display: flex;
-    height: 24px;
+    display:  flex;
+    height: 28px;
     background: #333;
     margin-bottom: 10px;
-    border: 1px solid #555;
+    border:  1px solid #555;
     overflow: hidden;
-    border-radius: 3px;
+    border-radius: 4px;
 }
-.poll-bar-wrap div { height: 100%; transition: width 0.4s ease-out; }
-.poll-numbers { display: flex; justify-content: space-between; font-weight: bold; font-size: 1.1rem; }
-.poll-moe { text-align: center; font-size: 0.75rem; color: #666; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+.poll-bar-wrap div {
+    height: 100%;
+    transition: width 0.4s ease-out;
+}
+
+. poll-numbers {
+    display:  flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 1. 1rem;
+}
 
 /* Actions */
 .action-menu h4, .issues-list h4, #log-feed h4 {
     border-bottom: 1px solid #333;
-    padding-bottom: 5px;
+    padding-bottom: 8px;
     margin-bottom: 15px;
     color: #888;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .action-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 30px;
+    display:  grid;
+    grid-template-columns:  1fr 1fr;
+    gap:  10px;
+    margin-bottom: 25px;
 }
+
 .act-btn {
-    padding: 20px 10px;
+    padding: 18px 10px;
     border: 1px solid #444;
-    background: #2a2a2a;
-    color: white;
+    background:  #2a2a2a;
+    color:  white;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     transition: 0.2s;
     border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
 }
-.act-btn:hover {
-    background: #333;
-    border-color: #666;
+
+. act-btn:hover {
+    background:  #333;
+    border-color: var(--dem-blue);
     transform: translateY(-2px);
 }
-.act-icon { font-size: 1.8rem; }
-.act-cost { font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; margin-top: 2px; }
 
-.issues-list { margin-bottom: 20px; }
+.act-btn span: first-child {
+    font-size:  1.5rem;
+}
+
+.issues-list {
+    margin-bottom: 20px;
+}
 
 /* Log Feed */
 #log-feed {
-    height: 150px;
+    height: 140px;
     border-top: 1px solid #333;
     background: #151515;
-    padding: 15px;
+    padding:  15px;
     overflow-y: auto;
-    font-size: 0.85rem;
-    color: #aaa;
+}
+
+#log-content {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+#log-content p {
+    margin:  4px 0;
+    padding: 4px 0;
+    border-bottom: 1px solid #222;
 }
 
 /* --- TOGGLE SWITCH --- */
 .toggle-wrapper {
-    display: flex;
+    display:  flex;
     align-items: center;
     justify-content: space-between;
     background: #222;
-    padding: 15px 20px;
-    border: 1px solid #444;
+    padding:  15px 20px;
+    border:  1px solid #444;
     border-radius: 6px;
 }
-.toggle-label { font-weight: bold; color: #ccc; font-size: 0.9rem; }
-.switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--dem-blue); }
-input:checked + .slider:before { transform: translateX(24px); }
+
+.toggle-label {
+    font-weight: bold;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.switch {
+    position:  relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+. slider {
+    position:  absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #555;
+    transition:  .4s;
+    border-radius:  34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--dem-blue);
+}
+
+input:checked + .slider:before {
+    transform: translateX(24px);
+}
 
 /* --- TOOLTIPS --- */
 #map-tooltip {
     position: fixed;
-    background: rgba(0,0,0,0.95);
+    background:  rgba(0,0,0,0.95);
     color: white;
-    padding: 15px;
-    border: 1px solid #555;
-    border-radius: 4px;
+    padding: 15px 20px;
+    border:  1px solid #555;
+    border-radius: 6px;
     pointer-events: none;
     display: none;
     z-index: 9999;
-    font-size: 0.95rem;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.6);
-    min-width: 200px;
+    font-size: 0.9rem;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.7);
+    min-width: 180px;
     text-align: center;
 }
 
-.tooltip-title {
+. tooltip-title {
     font-family: 'Merriweather', serif;
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size:  1.1rem;
     display: block;
     margin-bottom: 8px;
     color: #fff;
-    text-transform: uppercase;
 }
 
-.tooltip-divider {
-    border-bottom: 1px solid #555;
-    margin: 8px 0;
-    width: 100%;
+. tooltip-divider {
+    border-bottom: 1px solid #444;
+    margin:  8px 0;
 }
 
 .tooltip-leader {
     font-weight: 900;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     display: block;
-    margin-bottom: 5px;
+}
+
+.tooltip-stats {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 5px;
 }
 
 /* --- TOAST --- */
@@ -635,36 +1058,757 @@ input:checked + .slider:before { transform: translateX(24px); }
     padding: 15px 40px;
     border-radius: 50px;
     opacity: 0;
-    transition: opacity 0.5s;
+    transition: opacity 0.4s;
     font-weight: bold;
-    z-index: 7000;
+    z-index: 9000;
     border: 1px solid #555;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    font-size: 1.1rem;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
 }
 
-/* --- MODALS (Bio/Intel) --- */
+/* --- MODALS --- */
 #bio-modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
+    position: fixed;
+    top: 0;
+    left:  0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
     z-index: 5000;
-    display: flex; justify-content: center; align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 .modal-box {
-    background: #222;
+    background:  #222;
     border: 1px solid #555;
     padding: 30px;
-    max-width: 700px;
+    max-width: 600px;
     width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-height:  80vh;
+    overflow-y:  auto;
     border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-    text-align: left;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.8);
 }
+
 .modal-box h2 {
     margin-top: 0;
     border-bottom: 1px solid #444;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
     font-family: 'Merriweather', serif;
+}
+
+.modal-box button {
+    margin-top: 20px;
+    padding:  12px 30px;
+    background: #444;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.modal-box button:hover {
+    background: #555;
+}
+
+/* ============================================
+   ELECTION NIGHT STYLES
+   ============================================ */
+
+#election-screen {
+    background: #0a0a0a;
+}
+
+/* Election Header */
+.election-header {
+    height: 80px;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+    display: flex;
+    align-items:  center;
+    justify-content: space-between;
+    padding: 0 30px;
+    border-bottom: 3px solid var(--rep-red);
+}
+
+.election-header-left {
+    display:  flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.network-bug {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.bug-text {
+    font-family: 'Merriweather', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.bug-year {
+    font-family: 'Merriweather', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color:  var(--rep-red);
+}
+
+.election-banner {
+    background:  var(--rep-red);
+    color: white;
+    padding: 8px 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    animation: pulse 2s infinite;
+}
+
+. election-header-center {
+    text-align: center;
+}
+
+.election-time-display {
+    font-size: 2rem;
+    font-weight: 900;
+    font-family: 'Roboto Mono', monospace;
+}
+
+#election-time {
+    color: #fff;
+}
+
+#election-timezone {
+    color:  #888;
+    font-size: 1rem;
+    margin-left: 5px;
+}
+
+.time-controls {
+    display:  flex;
+    gap: 5px;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+. time-btn {
+    background:  #333;
+    border: 1px solid #555;
+    color: #aaa;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 3px;
+    transition: 0.2s;
+}
+
+.time-btn:hover {
+    background: #444;
+    color:  white;
+}
+
+. time-btn. active {
+    background: var(--dem-blue);
+    border-color: var(--dem-blue);
+    color: white;
+}
+
+. election-header-right {
+    display: flex;
+    align-items: center;
+}
+
+.map-mode-toggle {
+    display: flex;
+    gap: 2px;
+    background: #222;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.mode-btn {
+    background:  transparent;
+    border:  none;
+    color:  #888;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 3px;
+    transition: 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mode-btn:hover {
+    color: #ccc;
+}
+
+.mode-btn. active {
+    background: #444;
+    color:  white;
+}
+
+/* Election Main Area */
+.election-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* EV Banner */
+.election-ev-banner {
+    height: 100px;
+    background: linear-gradient(180deg, #151515 0%, #1a1a1a 100%);
+    display: flex;
+    align-items: center;
+    justify-content:  center;
+    padding: 0 40px;
+    border-bottom: 1px solid #333;
+}
+
+. ev-candidate {
+    display:  flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 250px;
+}
+
+.ev-candidate img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit:  cover;
+    border: 3px solid;
+}
+
+.ev-dem img {
+    border-color: var(--dem-blue);
+}
+
+.ev-rep img {
+    border-color:  var(--rep-red);
+}
+
+.ev-dem {
+    justify-content: flex-end;
+}
+
+.ev-rep {
+    justify-content: flex-start;
+}
+
+.ev-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ev-dem . ev-info {
+    text-align: right;
+}
+
+. ev-name {
+    font-size: 0.9rem;
+    font-weight:  bold;
+    color:  #ccc;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ev-count {
+    font-size: 2. 5rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+. ev-dem .ev-count {
+    color: var(--dem-blue);
+}
+
+.ev-rep .ev-count {
+    color: var(--rep-red);
+}
+
+.ev-progress-wrapper {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 40px;
+}
+
+.ev-progress-bar {
+    height:  30px;
+    background: #333;
+    border-radius:  4px;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #555;
+}
+
+. ev-fill {
+    height:  100%;
+    transition: width 0.5s ease-out;
+}
+
+.ev-fill-dem {
+    background:  linear-gradient(90deg, var(--dem-blue), #0088cc);
+}
+
+.ev-fill-rep {
+    background: linear-gradient(90deg, #cc0000, var(--rep-red));
+    margin-left: auto;
+}
+
+. ev-marker {
+    position:  absolute;
+    left: 50%;
+    top: 50%;
+    transform:  translate(-50%, -50%);
+    background: var(--gold);
+    color: #000;
+    padding:  2px 8px;
+    font-weight: 900;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    z-index: 10;
+}
+
+.ev-labels {
+    display:  flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Election Content */
+.election-content {
+    flex: 1;
+    display: flex;
+    overflow:  hidden;
+}
+
+#election-map-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding:  20px;
+    position: relative;
+}
+
+#election-map-wrapper {
+    width:  100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content:  center;
+}
+
+#election-map-wrapper svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#election-county-wrapper {
+    position:  absolute;
+    top: 0;
+    left: 0;
+    width:  100%;
+    height: 100%;
+    background: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Election Sidebar */
+#election-sidebar {
+    width: 380px;
+    background: var(--panel-bg);
+    border-left: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    overflow:  hidden;
+}
+
+#election-state-info {
+    padding:  20px;
+    border-bottom: 1px solid #333;
+}
+
+.elec-state-header {
+    display:  flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.elec-state-header h2 {
+    margin:  0;
+    font-family: 'Merriweather', serif;
+    font-size: 1.2rem;
+}
+
+.elec-ev-badge {
+    background:  #333;
+    padding: 5px 12px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    border-radius:  4px;
+}
+
+.elec-reporting {
+    text-align: center;
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+#elec-pct-reporting {
+    color: var(--gold);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.elec-results-bar {
+    height:  35px;
+    background: #333;
+    border-radius:  4px;
+    display: flex;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.elec-bar-dem, .elec-bar-rep {
+    height: 100%;
+    transition: width 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.elec-bar-dem {
+    background: var(--dem-blue);
+}
+
+.elec-bar-rep {
+    background: var(--rep-red);
+}
+
+.elec-vote-counts {
+    margin-bottom: 15px;
+}
+
+.elec-vote-row {
+    display:  flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom:  1px solid #333;
+}
+
+.elec-cand-name {
+    font-weight:  bold;
+    flex:  1;
+}
+
+.elec-votes {
+    font-family: 'Roboto Mono', monospace;
+    margin-right: 15px;
+    color: #aaa;
+}
+
+.elec-pct {
+    font-weight: bold;
+    min-width: 50px;
+    text-align: right;
+}
+
+.third-party-row {
+    opacity: 0.7;
+}
+
+. elec-projection {
+    text-align: center;
+    padding: 15px;
+    background: #252525;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.proj-status {
+    font-weight: bold;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.proj-status.called-dem {
+    color:  var(--dem-blue);
+}
+
+.proj-status. called-rep {
+    color: var(--rep-red);
+}
+
+.elec-county-btn {
+    width: 100%;
+    padding: 12px;
+    background: #333;
+    border: 1px solid #555;
+    color:  #ccc;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.elec-county-btn:hover {
+    background:  #444;
+    color: white;
+}
+
+/* Election Feed */
+#election-feed {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    border-bottom: 1px solid #333;
+}
+
+#election-feed h4 {
+    margin:  0 0 15px 0;
+    color: var(--rep-red);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+#election-feed-content {
+    font-size: 0.85rem;
+}
+
+.feed-item {
+    padding: 10px;
+    background: #252525;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border-left: 3px solid #555;
+}
+
+. feed-item.call-dem {
+    border-left-color: var(--dem-blue);
+}
+
+.feed-item.call-rep {
+    border-left-color: var(--rep-red);
+}
+
+.feed-time {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.feed-text {
+    color: #ddd;
+}
+
+/* Race Calls */
+#race-calls {
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#race-calls h4 {
+    margin: 0 0 10px 0;
+    color: #888;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+#race-calls-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.race-call-chip {
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.race-call-chip.dem {
+    background:  var(--dem-blue);
+    color: white;
+}
+
+.race-call-chip.rep {
+    background:  var(--rep-red);
+    color: white;
+}
+
+/* Winner Overlay */
+#winner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:  rgba(0,0,0,0.95);
+    z-index: 9000;
+    display:  flex;
+    align-items: center;
+    justify-content: center;
+}
+
+. winner-content {
+    text-align: center;
+    animation: winnerZoom 0.5s ease-out;
+}
+
+@keyframes winnerZoom {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+. winner-banner {
+    background:  var(--gold);
+    color: #000;
+    padding: 10px 40px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    display: inline-block;
+    margin-bottom: 30px;
+    font-size: 1.2rem;
+}
+
+#winner-img {
+    width:  200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit:  cover;
+    border: 5px solid var(--gold);
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+    margin-bottom: 30px;
+}
+
+#winner-name {
+    font-family: 'Merriweather', serif;
+    font-size: 3rem;
+    margin:  0 0 10px 0;
+}
+
+#winner-party {
+    font-size: 1.2rem;
+    color: #888;
+    margin:  0 0 30px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+. winner-ev {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+#winner-ev-count {
+    font-size: 5rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+}
+
+. winner-ev span: last-child {
+    font-size: 1rem;
+    color: #888;
+    letter-spacing: 2px;
+}
+
+.winner-close-btn {
+    background: transparent;
+    border:  2px solid #555;
+    color:  #aaa;
+    padding: 15px 40px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.2s;
+}
+
+.winner-close-btn:hover {
+    border-color: white;
+    color: white;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1200px) {
+    #sidebar, #election-sidebar {
+        width: 320px;
+    }
+    
+    . ev-display {
+        font-size: 1.5rem;
+    }
+    
+    .progress-bar-bg {
+        width: 300px;
+    }
+}
+
+@media (max-width: 900px) {
+    . hud-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding:  15px;
+        gap: 15px;
+    }
+    
+    . hud-left, .hud-center, .hud-right {
+        flex:  none;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    #sidebar, #election-sidebar {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        height: 100%;
+        transition: right 0.3s;
+        z-index: 500;
+    }
+    
+    #sidebar. open, #election-sidebar. open {
+        right: 0;
+    }
+    
+    .major-parties {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    . card-major {
+        width: 280px ! important;
+        height: 320px !important;
+    }
 }
