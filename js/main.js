@@ -1,18 +1,16 @@
 /* ============================================
    DECISION 2028 - MAIN ENTRY POINT
-   App initialization and global event handlers
    ============================================ */
 
-// Initialize game state
 function initGameData() {
-    for (let code in STATES) {
+    for (var code in STATES) {
         gameData.states[code] = {
             name: STATES[code].name,
             ev: STATES[code].ev,
             lean: STATES[code].lean,
             code: code,
             margin: STATES[code].lean + (Math.random() - 0.5) * 10,
-            visited:  false,
+            visited: false,
             adSpent: 0,
             rallies: 0,
             reportedPct: 0,
@@ -24,9 +22,8 @@ function initGameData() {
     console.log("🗳️ Decision 2028 Initialized");
 }
 
-// Start game after opponent selection
 function startGame() {
-    const isThirdParty = Utils.isThirdParty(gameData. selectedParty);
+    var isThirdParty = Utils.isThirdParty(gameData. selectedParty);
     
     if (isThirdParty) {
         if (! gameData.demTicket. pres || !gameData.demTicket.vp || 
@@ -39,9 +36,9 @@ function startGame() {
             Utils. showToast("Please select the Republican ticket");
             return;
         }
-    } else {
-        if (!gameData.demTicket.pres || !gameData. demTicket.vp) {
-            Utils. showToast("Please select the Democratic ticket");
+    } else if (gameData.selectedParty === 'R') {
+        if (!gameData. demTicket.pres || !gameData.demTicket. vp) {
+            Utils.showToast("Please select the Democratic ticket");
             return;
         }
     }
@@ -58,28 +55,25 @@ function startGame() {
     Utils.addLog("Campaign begins!  Good luck, " + gameData.candidate.name + "!");
 }
 
-// Global app object for HTML onclick handlers
-const app = {
-    goToScreen: (id) => Screens.goTo(id),
-    selParty: (code) => Screens.selectParty(code),
-    selCandidate: (id) => Screens.selectCandidate(id),
-    selVP: (id) => Screens.selectVP(id),
-    selectOpponentCard: (el, party, type) => Screens.selectOpponentCard(el, party, type),
-    startGame: () => startGame(),
-    handleAction: (action) => Campaign.handleAction(action),
-    openStateBio: () => Campaign.openStateBio(),
-    nextWeek: () => Campaign.nextWeek(),
-    undoLastAction: () => Campaign.undoLastAction(),
-    closeCountyView:  () => Campaign.closeCountyView(),
+var app = {
+    goToScreen: function(id) { Screens.goTo(id); },
+    selParty: function(code) { Screens.selectParty(code); },
+    selCandidate: function(id) { Screens.selectCandidate(id); },
+    selVP: function(id) { Screens.selectVP(id); },
+    startGame: function() { startGame(); },
+    handleAction: function(action) { Campaign.handleAction(action); },
+    openStateBio: function() { Campaign.openStateBio(); },
+    nextWeek: function() { Campaign.nextWeek(); },
+    undoLastAction: function() { Campaign.undoLastAction(); },
+    closeCountyView: function() { Campaign.closeCountyView(); },
     election: {
-        togglePause: () => Election.togglePause(),
-        setSpeed: (s) => Election.setSpeed(s),
-        setMapMode:  (m) => Election.setMapMode(m),
-        closeWinnerOverlay:  () => Election.closeWinnerOverlay()
+        togglePause: function() { Election.togglePause(); },
+        setSpeed: function(s) { Election.setSpeed(s); },
+        setMapMode: function(m) { Election.setMapMode(m); },
+        closeWinnerOverlay: function() { Election.closeWinnerOverlay(); }
     }
 };
 
-// Initialize on page load
-document. addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     initGameData();
 });
