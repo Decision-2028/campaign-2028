@@ -12,7 +12,7 @@ var Campaign = {
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 var parser = new DOMParser();
-                var svgDoc = parser. parseFromString(xhr.responseText, 'image/svg+xml');
+                var svgDoc = parser.parseFromString(xhr.responseText, 'image/svg+xml');
                 var svg = svgDoc.querySelector('svg');
                 
                 if (svg) {
@@ -31,11 +31,11 @@ var Campaign = {
                         }
                     }
                     wrapper.innerHTML = '';
-                    wrapper. appendChild(svg);
+                    wrapper.appendChild(svg);
                     Campaign.colorMap();
                 }
             } else if (xhr.readyState === 4) {
-                wrapper. innerHTML = '<div class="error-map">Failed to load map.  Make sure map.svg exists.</div>';
+                wrapper.innerHTML = '<div class="error-map">Failed to load map.  Make sure map.svg exists.</div>';
             }
         };
         xhr.send();
@@ -45,27 +45,27 @@ var Campaign = {
         var tooltip = document.getElementById('map-tooltip');
         var marginText = Math.abs(state.margin).toFixed(1);
         var leaning;
-        if (Math.abs(state. margin) < 1) {
+        if (Math.abs(state.margin) < 1) {
             leaning = 'TOSS-UP';
         } else {
             leaning = (state.margin > 0 ? 'D+' : 'R+') + marginText;
         }
         
-        tooltip. innerHTML = 
-            '<span class="tooltip-title">' + state. name + '</span>' +
+        tooltip.innerHTML = 
+            '<span class="tooltip-title">' + state.name + '</span>' +
             '<div class="tooltip-divider"></div>' +
             '<span class="tooltip-leader" style="color: ' + (state.margin > 0 ? '#00AEF3' : '#E81B23') + '">' + leaning + '</span>' +
-            '<span class="tooltip-stats">' + state. ev + ' Electoral Votes</span>';
+            '<span class="tooltip-stats">' + state.ev + ' Electoral Votes</span>';
         tooltip.style.display = 'block';
-        tooltip.style. left = (e.clientX + 15) + 'px';
-        tooltip. style.top = (e.clientY + 15) + 'px';
+        tooltip.style.left = (e.clientX + 15) + 'px';
+        tooltip.style.top = (e.clientY + 15) + 'px';
     },
 
     clickState: function(code) {
         gameData.selectedState = code;
         var paths = document.querySelectorAll('#us-map-svg path');
         for (var i = 0; i < paths.length; i++) {
-            paths[i].classList. remove('selected');
+            paths[i].classList.remove('selected');
         }
         var path = document.getElementById(code);
         if (path) path.classList.add('selected');
@@ -75,17 +75,17 @@ var Campaign = {
         
         var s = gameData.states[code];
         document.getElementById('sp-name').innerText = s.name;
-        document. getElementById('sp-ev').innerText = s.ev + ' EV';
+        document.getElementById('sp-ev').innerText = s.ev + ' EV';
         
         var demPct = 50 + s.margin / 2;
         var repPct = 50 - s.margin / 2;
-        demPct = Math. max(0, Math.min(100, demPct));
+        demPct = Math.max(0, Math.min(100, demPct));
         repPct = Math.max(0, Math.min(100, repPct));
         
         document.getElementById('poll-bar-wrap').innerHTML = 
             '<div style="width: ' + demPct + '%; background:  #00AEF3;"></div>' +
             '<div style="width: ' + repPct + '%; background: #E81B23;"></div>';
-        document.getElementById('poll-dem-val').innerText = demPct. toFixed(1) + '%';
+        document.getElementById('poll-dem-val').innerText = demPct.toFixed(1) + '%';
         document.getElementById('poll-rep-val').innerText = repPct.toFixed(1) + '%';
         
         var issuesList = document.getElementById('sp-issues-list');
@@ -98,10 +98,10 @@ var Campaign = {
 
     colorMap: function() {
         for (var code in gameData.states) {
-            var s = gameData. states[code];
+            var s = gameData.states[code];
             var path = document.getElementById(code);
             if (path) {
-                path.style. fill = Utils.getMarginColor(s.margin);
+                path.style.fill = Utils.getMarginColor(s.margin);
             }
         }
         this.updateScore();
@@ -113,7 +113,7 @@ var Campaign = {
         for (var code in gameData.states) {
             var s = gameData.states[code];
             if (s.margin > 0) {
-                demEV += s. ev;
+                demEV += s.ev;
             } else {
                 repEV += s.ev;
             }
@@ -127,16 +127,16 @@ var Campaign = {
 
     updateHUD: function() {
         document.getElementById('hud-img').src = gameData.candidate.img;
-        document.getElementById('hud-cand-name').innerText = gameData. candidate.name;
-        document.getElementById('hud-party-name').innerText = PARTIES[gameData. selectedParty].name. toUpperCase();
-        document.getElementById('hud-funds').innerText = '$' + gameData. funds. toFixed(1) + 'M';
+        document.getElementById('hud-cand-name').innerText = gameData.candidate.name;
+        document.getElementById('hud-party-name').innerText = PARTIES[gameData.selectedParty].name.toUpperCase();
+        document.getElementById('hud-funds').innerText = '$' + gameData.funds.toFixed(1) + 'M';
         document.getElementById('hud-date').innerText = Utils.formatDate(gameData.currentDate);
         
         var energyHtml = '';
         for (var i = 0; i < gameData.maxEnergy; i++) {
             energyHtml += '<div class="energy-pip ' + (i < gameData.energy ? 'active' : '') + '"></div>';
         }
-        document. getElementById('hud-energy').innerHTML = energyHtml;
+        document.getElementById('hud-energy').innerHTML = energyHtml;
     },
 
     handleAction: function(action) {
@@ -153,7 +153,7 @@ var Campaign = {
             if (gameData.energy < 1) return Utils.showToast("Not enough energy!");
             var raised = 2 + Math.random() * 3;
             gameData.funds += raised;
-            message = 'Raised $' + raised. toFixed(1) + 'M in ' + s.name;
+            message = 'Raised $' + raised.toFixed(1) + 'M in ' + s.name;
             cost.energy = 1;
         } else if (action === 'rally') {
             if (gameData.energy < 2) return Utils.showToast("Need 2 energy for rally!");
@@ -169,13 +169,13 @@ var Campaign = {
             effect = 0.5 + Math.random() * 1.5;
             cost.funds = 3;
             cost.energy = 0;
-            s. adSpent = (s.adSpent || 0) + 3;
-            message = 'Ad blitz in ' + s. name + '! +' + effect.toFixed(1) + ' points';
+            s.adSpent = (s.adSpent || 0) + 3;
+            message = 'Ad blitz in ' + s.name + '! +' + effect.toFixed(1) + ' points';
         }
         
         this.saveState();
         gameData.energy -= cost.energy;
-        gameData. funds -= cost.funds;
+        gameData.funds -= cost.funds;
         
         if (gameData.selectedParty === 'D') {
             s.margin += effect;
@@ -194,7 +194,7 @@ var Campaign = {
 
     openStateBio: function() {
         if (! gameData.selectedState) return;
-        var s = gameData. states[gameData. selectedState];
+        var s = gameData.states[gameData.selectedState];
         
         var marginText = Math.abs(s.margin).toFixed(1);
         var leaning;
@@ -205,7 +205,7 @@ var Campaign = {
         }
         
         document.getElementById('bio-title').innerText = s.name + ' - Intelligence Report';
-        document. getElementById('bio-content').innerHTML = 
+        document.getElementById('bio-content').innerHTML = 
             '<div class="bio-stat"><strong>Electoral Votes:</strong> ' + s.ev + '</div>' +
             '<div class="bio-stat"><strong>Current Polling:</strong> <span style="color: ' + (s.margin > 0 ?  '#00AEF3' : '#E81B23') + '">' + leaning + '</span></div>' +
             '<div class="bio-stat"><strong>Campaign Visits:</strong> ' + (s.visited ? 'Yes' : 'Not yet') + '</div>' +
@@ -216,7 +216,7 @@ var Campaign = {
 
     nextWeek: function() {
         this.saveState();
-        gameData.currentDate. setDate(gameData.currentDate.getDate() + 7);
+        gameData.currentDate.setDate(gameData.currentDate.getDate() + 7);
         gameData.energy = gameData.maxEnergy;
         
         this.opponentTurn();
@@ -229,7 +229,7 @@ var Campaign = {
         }
         
         this.updateHUD();
-        Utils.addLog("Week advanced - " + gameData. currentDate.toLocaleDateString());
+        Utils.addLog("Week advanced - " + gameData.currentDate.toLocaleDateString());
         Utils.showToast("Week advanced!");
     },
 
@@ -242,11 +242,11 @@ var Campaign = {
         
         for (var i = 0; i < numActions; i++) {
             var randomState = stateCodes[Math.floor(Math.random() * stateCodes.length)];
-            var s = gameData. states[randomState];
+            var s = gameData.states[randomState];
             var effect = 0.5 + Math.random() * 1.5;
             
             if (gameData.selectedParty === 'D') {
-                s. margin -= effect;
+                s.margin -= effect;
             } else if (gameData.selectedParty === 'R') {
                 s.margin += effect;
             } else {
@@ -273,33 +273,33 @@ var Campaign = {
             snapshot.states[code] = {
                 margin: gameData.states[code].margin,
                 visited: gameData.states[code].visited,
-                adSpent: gameData.states[code]. adSpent || 0,
+                adSpent: gameData.states[code].adSpent || 0,
                 rallies:  gameData.states[code].rallies || 0
             };
         }
         
-        gameData. historyStack.push(snapshot);
+        gameData.historyStack.push(snapshot);
         if (gameData.historyStack.length > 20) gameData.historyStack.shift();
     },
 
     undoLastAction: function() {
-        if (gameData.historyStack. length === 0) {
+        if (gameData.historyStack.length === 0) {
             return Utils.showToast("Nothing to undo!");
         }
         
         var prev = gameData.historyStack.pop();
-        gameData. funds = prev.funds;
-        gameData.energy = prev. energy;
-        gameData.currentDate = new Date(prev. date);
+        gameData.funds = prev.funds;
+        gameData.energy = prev.energy;
+        gameData.currentDate = new Date(prev.date);
         
         for (var code in prev.states) {
             gameData.states[code].margin = prev.states[code].margin;
-            gameData.states[code].visited = prev.states[code]. visited;
+            gameData.states[code].visited = prev.states[code].visited;
             gameData.states[code].adSpent = prev.states[code].adSpent;
-            gameData. states[code].rallies = prev.states[code].rallies;
+            gameData.states[code].rallies = prev.states[code].rallies;
         }
         
-        this. updateHUD();
+        this.updateHUD();
         this.colorMap();
         if (gameData.selectedState) this.clickState(gameData.selectedState);
         Utils.showToast("Action undone!");

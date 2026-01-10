@@ -5,7 +5,7 @@
 var Screens = {
     goTo: function(screenId) {
         var screens = document.querySelectorAll('.screen');
-        for (var i = 0; i < screens. length; i++) {
+        for (var i = 0; i < screens.length; i++) {
             screens[i].classList.remove('active');
         }
         document.getElementById(screenId).classList.add('active');
@@ -25,18 +25,18 @@ var Screens = {
             var c = CANDIDATES[i];
             if (c.party === partyCode) {
                 var card = document.createElement('div');
-                card. className = 'card';
-                card. setAttribute('data-id', c.id);
+                card.className = 'card';
+                card.setAttribute('data-id', c.id);
                 card.onclick = (function(id) {
                     return function() { Screens.selectCandidate(id); };
                 })(c.id);
                 
                 card.innerHTML = 
-                    '<div class="portrait"><img src="' + c.img + '" onerror="this. src=\'images/scenario. jpg\'"></div>' +
+                    '<div class="portrait"><img src="' + c.img + '" onerror="this.src=\'images/scenario.jpg\'"></div>' +
                     '<div class="card-info">' +
-                        '<h3>' + c. name + '</h3>' +
+                        '<h3>' + c.name + '</h3>' +
                         '<p>' + (c.desc || '') + '</p>' +
-                        '<p class="buff-text">✦ ' + c. buff + '</p>' +
+                        '<p class="buff-text">✦ ' + c.buff + '</p>' +
                         (c.debuff ? '<p class="debuff-text">⚠ ' + c.debuff + '</p>' : '') +
                     '</div>';
                 container.appendChild(card);
@@ -54,12 +54,12 @@ var Screens = {
         gameData.maxEnergy = gameData.candidate.stamina;
         gameData.energy = gameData.maxEnergy;
         gameData.funds = gameData.candidate.funds;
-        this.renderVPs(gameData.candidate. party);
+        this.renderVPs(gameData.candidate.party);
         this.goTo('vp-screen');
     },
 
     renderVPs: function(partyCode) {
-        var container = document. getElementById('vp-cards');
+        var container = document.getElementById('vp-cards');
         container.innerHTML = "";
         
         for (var i = 0; i < VPS.length; i++) {
@@ -77,7 +77,7 @@ var Screens = {
                     '<div class="card-info">' +
                         '<h3>' + v.name + '</h3>' +
                         '<p>' + (v.desc || '') + '</p>' +
-                        '<p style="color: #888888; font-size: 0.8rem;">Home State: ' + v. state + '</p>' +
+                        '<p style="color: #888888; font-size: 0.8rem;">Home State: ' + v.state + '</p>' +
                     '</div>';
                 container.appendChild(card);
             }
@@ -86,8 +86,8 @@ var Screens = {
 
     selectVP: function(id) {
         for (var i = 0; i < VPS.length; i++) {
-            if (VPS[i]. id === id) {
-                gameData. vp = VPS[i];
+            if (VPS[i].id === id) {
+                gameData.vp = VPS[i];
                 break;
             }
         }
@@ -106,11 +106,11 @@ var Screens = {
         var container = document.getElementById('opponent-selection-container');
         container.innerHTML = '';
         
-        var isThirdParty = Utils.isThirdParty(gameData. selectedParty);
+        var isThirdParty = Utils.isThirdParty(gameData.selectedParty);
         var instructions = document.getElementById('opponent-instructions');
         
         if (isThirdParty) {
-            instructions. innerText = 'As a third party candidate, you must select both the Democratic AND Republican tickets.';
+            instructions.innerText = 'As a third party candidate, you must select both the Democratic AND Republican tickets.';
             
             container.innerHTML = 
                 '<div class="opponent-section">' +
@@ -131,22 +131,22 @@ var Screens = {
             this.renderTicketCards('D', 'dem');
             this.renderTicketCards('R', 'rep');
         } else {
-            var rivalParty = gameData. selectedParty === 'D' ?  'R' :  'D';
+            var rivalParty = gameData.selectedParty === 'D' ?  'R' :  'D';
             var rivalName = rivalParty === 'D' ? 'Democratic' : 'Republican';
             var rivalColor = rivalParty === 'D' ?  '#00AEF3' : '#E81B23';
             
-            instructions. innerText = 'Select the ' + rivalName + ' ticket you will face in the general election.';
+            instructions.innerText = 'Select the ' + rivalName + ' ticket you will face in the general election.';
             
             container.innerHTML = 
                 '<div class="opponent-section">' +
                     '<h3 style="color:  ' + rivalColor + ';">Select ' + rivalName + ' Ticket</h3>' +
                     '<div class="ticket-selection">' +
-                        '<div class="ticket-column"><h4>Presidential Nominee</h4><div class="cards-row" id="' + rivalParty. toLowerCase() + '-pres-cards"></div></div>' +
-                        '<div class="ticket-column"><h4>Running Mate</h4><div class="cards-row" id="' + rivalParty. toLowerCase() + '-vp-cards"></div></div>' +
+                        '<div class="ticket-column"><h4>Presidential Nominee</h4><div class="cards-row" id="' + rivalParty.toLowerCase() + '-pres-cards"></div></div>' +
+                        '<div class="ticket-column"><h4>Running Mate</h4><div class="cards-row" id="' + rivalParty.toLowerCase() + '-vp-cards"></div></div>' +
                     '</div>' +
                 '</div>';
             
-            this.renderTicketCards(rivalParty, rivalParty. toLowerCase());
+            this.renderTicketCards(rivalParty, rivalParty.toLowerCase());
         }
         
         this.updateStartButton();
@@ -159,16 +159,16 @@ var Screens = {
         if (! presContainer || !vpContainer) return;
         
         presContainer.innerHTML = '';
-        vpContainer. innerHTML = '';
+        vpContainer.innerHTML = '';
         
         var partyColor = PARTIES[party].color;
         
         for (var i = 0; i < CANDIDATES.length; i++) {
             var c = CANDIDATES[i];
-            if (c. party === party) {
+            if (c.party === party) {
                 var card = document.createElement('div');
-                card. className = 'card opponent-card';
-                card.setAttribute('data-id', c. id);
+                card.className = 'card opponent-card';
+                card.setAttribute('data-id', c.id);
                 card.setAttribute('data-type', 'pres');
                 card.setAttribute('data-party', party);
                 card.style.borderColor = 'transparent';
@@ -177,7 +177,7 @@ var Screens = {
                 })(card, party);
                 
                 card.innerHTML = 
-                    '<div class="portrait"><img src="' + c.img + '" onerror="this.src=\'images/scenario. jpg\'"></div>' +
+                    '<div class="portrait"><img src="' + c.img + '" onerror="this.src=\'images/scenario.jpg\'"></div>' +
                     '<div class="card-info"><h3>' + c.name + '</h3><p>' + (c.desc || '') + '</p></div>';
                 presContainer.appendChild(card);
             }
@@ -188,11 +188,11 @@ var Screens = {
             if (v.party === party) {
                 var vpCard = document.createElement('div');
                 vpCard.className = 'card opponent-card';
-                vpCard.setAttribute('data-id', v. id);
+                vpCard.setAttribute('data-id', v.id);
                 vpCard.setAttribute('data-type', 'vp');
                 vpCard.setAttribute('data-party', party);
                 vpCard.style.borderColor = 'transparent';
-                vpCard. onclick = (function(cardEl, p) {
+                vpCard.onclick = (function(cardEl, p) {
                     return function() { Screens.selectOpponentCard(cardEl, p, 'vp'); };
                 })(vpCard, party);
                 
@@ -206,7 +206,7 @@ var Screens = {
 
     selectOpponentCard: function(cardElement, party, type) {
         var partyColor = PARTIES[party].color;
-        var prefix = party. toLowerCase();
+        var prefix = party.toLowerCase();
         var containerId = prefix + '-' + type + '-cards';
         
         var container = document.getElementById(containerId);
@@ -226,14 +226,14 @@ var Screens = {
             if (type === 'pres') {
                 for (var j = 0; j < CANDIDATES.length; j++) {
                     if (CANDIDATES[j].id === id) {
-                        gameData.demTicket. pres = CANDIDATES[j];
+                        gameData.demTicket.pres = CANDIDATES[j];
                         break;
                     }
                 }
             } else {
                 for (var k = 0; k < VPS.length; k++) {
                     if (VPS[k].id === id) {
-                        gameData. demTicket.vp = VPS[k];
+                        gameData.demTicket.vp = VPS[k];
                         break;
                     }
                 }
@@ -242,14 +242,14 @@ var Screens = {
             if (type === 'pres') {
                 for (var m = 0; m < CANDIDATES.length; m++) {
                     if (CANDIDATES[m].id === id) {
-                        gameData. repTicket.pres = CANDIDATES[m];
+                        gameData.repTicket.pres = CANDIDATES[m];
                         break;
                     }
                 }
             } else {
                 for (var n = 0; n < VPS.length; n++) {
                     if (VPS[n].id === id) {
-                        gameData. repTicket.vp = VPS[n];
+                        gameData.repTicket.vp = VPS[n];
                         break;
                     }
                 }
@@ -261,7 +261,7 @@ var Screens = {
 
     updateStartButton: function() {
         var btn = document.getElementById('start-campaign-btn');
-        var isThirdParty = Utils.isThirdParty(gameData. selectedParty);
+        var isThirdParty = Utils.isThirdParty(gameData.selectedParty);
         
         var canStart = false;
         
@@ -271,7 +271,7 @@ var Screens = {
         } else if (gameData.selectedParty === 'D') {
             canStart = gameData.repTicket.pres && gameData.repTicket.vp;
         } else if (gameData.selectedParty === 'R') {
-            canStart = gameData.demTicket. pres && gameData.demTicket. vp;
+            canStart = gameData.demTicket.pres && gameData.demTicket.vp;
         }
         
         btn.disabled = ! canStart;
