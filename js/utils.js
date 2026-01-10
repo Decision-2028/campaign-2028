@@ -1,31 +1,31 @@
 /* ============================================
    DECISION 2028 - UTILITY FUNCTIONS
-   Helper functions used across modules
    ============================================ */
 
-const Utils = {
-    // Show toast notification
-    showToast:  function(msg) {
-        const toast = document.getElementById('toast');
+var Utils = {
+    showToast: function(msg) {
+        var toast = document.getElementById('toast');
         if (toast) {
             toast.innerText = msg;
-            toast. style.opacity = 1;
-            setTimeout(() => { toast.style.opacity = 0; }, 2500);
+            toast.style.opacity = 1;
+            setTimeout(function() { toast.style.opacity = 0; }, 2500);
         }
     },
 
-    // Add to campaign log
     addLog: function(message) {
         gameData.logs.unshift(message);
         if (gameData.logs.length > 50) gameData.logs.pop();
         
-        const container = document. getElementById('log-content');
+        var container = document.getElementById('log-content');
         if (container) {
-            container. innerHTML = gameData. logs.map(l => '<p>' + l + '</p>').join('');
+            var html = '';
+            for (var i = 0; i < gameData. logs.length; i++) {
+                html += '<p>' + gameData. logs[i] + '</p>';
+            }
+            container. innerHTML = html;
         }
     },
 
-    // Get margin-based color for map
     getMarginColor: function(margin) {
         if (margin > 20) return "#004080";
         if (margin > 10) return "#0066cc";
@@ -37,34 +37,32 @@ const Utils = {
         return "#800000";
     },
 
-    // Format date for display
     formatDate: function(date) {
-        const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+        var months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
         return months[date.getMonth()] + ' ' + date.getDate();
     },
 
-    // Format time for election night
     formatTime: function(timeValue) {
-        let hours = Math.floor(timeValue);
-        let minutes = Math.floor((timeValue - hours) * 60);
-        let ampm = hours >= 12 ?  'PM' :  'AM';
-        let displayHours = hours > 12 ? hours - 12 :  hours;
+        var hours = Math.floor(timeValue);
+        var minutes = Math.floor((timeValue - hours) * 60);
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        var displayHours = hours > 12 ? hours - 12 : hours;
         if (displayHours === 0) displayHours = 12;
-        return displayHours + ': ' + minutes.toString().padStart(2, '0') + ' ' + ampm;
+        return displayHours + ':' + (minutes < 10 ? '0' :  '') + minutes + ' ' + ampm;
     },
 
-    // Check if party is third party
     isThirdParty: function(partyCode) {
-        return ['F', 'G', 'L'].includes(partyCode);
+        return partyCode === 'F' || partyCode === 'G' || partyCode === 'L';
     },
 
-    // Deep clone an object
-    deepClone: function(obj) {
-        return JSON.parse(JSON.stringify(obj));
-    },
-
-    // Shuffle array
     shuffleArray: function(array) {
-        return array.slice().sort(() => Math.random() - 0.5);
+        var result = array.slice();
+        for (var i = result.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = result[i];
+            result[i] = result[j];
+            result[j] = temp;
+        }
+        return result;
     }
 };
