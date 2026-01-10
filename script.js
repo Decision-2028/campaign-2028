@@ -133,13 +133,15 @@ const app = {
         try {
             const res = await fetch('counties/county_data.json');
             if (res.ok) this.data.realCountyData = await res.json();
-        } catch(e) { console.warn("County data missing, using procedural."); }
+        } catch(e) { console.warn("County data missing or malformed, using procedural generation."); }
 
         this.data.states = JSON.parse(JSON.stringify(INIT_STATES));
         
         for(let sCode in this.data.states) {
             let s = this.data.states[sCode];
             s.moe = (Math.random()*2 + 1.5).toFixed(1);
+            
+            // Priorities/Issues Logic
             s.priorities = {};
             ISSUES.forEach(i => s.priorities[i.id] = Math.floor(Math.random()*10)+1);
 
@@ -582,7 +584,7 @@ const app = {
             fill = this.getMarginColor(m);
         }
         path.style.fill = fill; 
-        path.style.stroke = "#fff"; // WHITE BORDER
+        path.style.stroke = "#fff"; 
         path.style.strokeWidth = "0.15px";
     }
 };
