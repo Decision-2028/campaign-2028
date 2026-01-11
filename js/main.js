@@ -23,21 +23,21 @@ function initGameData() {
 }
 
 function startGame() {
-    var isThirdParty = Utils.isThirdParty(gameData. selectedParty);
+    var isThirdParty = Utils.isThirdParty(gameData.selectedParty);
     
     if (isThirdParty) {
-        if (! gameData.demTicket. pres || !gameData.demTicket.vp || 
-            !gameData.repTicket. pres || !gameData.repTicket.vp) {
+        if (!gameData.demTicket.pres || !gameData.demTicket.vp || 
+            !gameData.repTicket.pres || !gameData.repTicket.vp) {
             Utils.showToast("Please select both Democratic and Republican tickets");
             return;
         }
     } else if (gameData.selectedParty === 'D') {
-        if (!gameData. repTicket.pres || !gameData. repTicket.vp) {
-            Utils. showToast("Please select the Republican ticket");
+        if (!gameData.repTicket.pres || !gameData.repTicket.vp) {
+            Utils.showToast("Please select the Republican ticket");
             return;
         }
     } else if (gameData.selectedParty === 'R') {
-        if (!gameData. demTicket.pres || !gameData.demTicket. vp) {
+        if (!gameData.demTicket.pres || !gameData.demTicket.vp) {
             Utils.showToast("Please select the Democratic ticket");
             return;
         }
@@ -45,7 +45,7 @@ function startGame() {
     
     if (isThirdParty) {
         gameData.funds = Math.floor(gameData.funds * 0.5);
-        gameData.maxEnergy = Math. max(4, gameData.maxEnergy - 2);
+        gameData.maxEnergy = Math.max(4, gameData.maxEnergy - 2);
         gameData.energy = gameData.maxEnergy;
     }
     

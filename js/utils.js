@@ -19,10 +19,10 @@ var Utils = {
         var container = document.getElementById('log-content');
         if (container) {
             var html = '';
-            for (var i = 0; i < gameData. logs.length; i++) {
-                html += '<p>' + gameData. logs[i] + '</p>';
+            for (var i = 0; i < gameData.logs.length; i++) {
+                html += '<p>' + gameData.logs[i] + '</p>';
             }
-            container. innerHTML = html;
+            container.innerHTML = html;
         }
     },
 
