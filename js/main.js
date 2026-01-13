@@ -1,5 +1,6 @@
 /* ============================================
    DECISION 2028 - MAIN ENTRY POINT
+   (modified: openIssuesPanel now opens IssuesPanel)
    ============================================ */
 
 function initGameData() {
@@ -79,8 +80,18 @@ var app = {
         }
     },
     openIssuesPanel: function() {
-        // Placeholder for issues panel
-        Utils.showToast("Issues panel coming soon!");
+        if (typeof IssuesPanel !== 'undefined') {
+            IssuesPanel.open();
+        } else {
+            Utils.showToast("Issues panel coming soon!");
+        }
+    },
+    openNationalOverview: function() {
+        if (typeof NationalOverview !== 'undefined') {
+            NationalOverview.open();
+        } else {
+            Utils.showToast("National Overview coming soon!");
+        }
     },
     election: {
         togglePause: function() { Election.togglePause(); },
