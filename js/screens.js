@@ -278,4 +278,12 @@ var Screens = {
         btn.style.opacity = canStart ? '1' :  '0.5';
         btn.style.cursor = canStart ? 'pointer' : 'not-allowed';
     }
+},
+   openIssuesPanel: function() {
+        if (typeof IssuesPanel !== 'undefined') IssuesPanel.open();
+    },
+
+    openNationalOverview: function() {
+        if (typeof NationalOverview !== 'undefined') NationalOverview.open();
+    }
 };
