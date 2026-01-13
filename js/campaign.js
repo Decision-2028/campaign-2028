@@ -1,5 +1,6 @@
 /* ============================================
-   DECISION 2028 - CAMPAIGN GAMEPLAY
+   DECISION 2028 - CAMPAIGN GAMEPLAY (enhanced)
+   Adds: giveSpeech, shiftIssue, PAC hooks, county rally integration
    ============================================ */
 
 var Campaign = {
@@ -154,6 +155,16 @@ var Campaign = {
     },
 
     handleAction: function(action) {
+        // If it's a string 'speech', open issues panel to pick issue
+        if (action === 'speech') {
+            if (typeof IssuesPanel !== 'undefined') {
+                IssuesPanel.open();
+            } else {
+                Utils.showToast("Issues panel coming soon!");
+            }
+            return;
+        }
+
         if (! gameData.selectedState) {
             return Utils.showToast("Select a state first!");
         }
@@ -166,7 +177,7 @@ var Campaign = {
         if (action === 'fundraise') {
             if (gameData.energy < 1) return Utils.showToast("Not enough energy!");
             
-            // Advanced fundraising formula
+            // Advanced fundraising formula with interest-group modifiers
             var baseAmount = STATE_FUNDRAISING_POTENTIAL[gameData.selectedState] || 2.0;
             
             // Party alignment bonus
@@ -179,14 +190,15 @@ var Campaign = {
                 alignmentBonus = 0.7; // Fundraising in hostile state
             }
             
-            // Candidate charisma modifier
+            // Candidate charisma modifier + interest groups effect
             var charismaModifier = gameData.candidate.funds ? (gameData.candidate.funds / 60) : 1.0;
+            var igModifier = (typeof InterestGroups !== 'undefined') ? InterestGroups.getStateFundraisingModifier(gameData.selectedState, gameData.candidate.id) : 1.0;
             
             // Fatigue penalty
             var fatiguePenalty = Math.max(0.5, 1.0 - ((s.fundraisingVisits || 0) * 0.1));
             
             // Calculate final amount with randomness
-            var raised = baseAmount * alignmentBonus * charismaModifier * fatiguePenalty;
+            var raised = baseAmount * alignmentBonus * charismaModifier * fatiguePenalty * igModifier;
             raised *= (0.8 + Math.random() * 0.4); // ±20% variance
             
             gameData.funds += raised;
@@ -201,6 +213,17 @@ var Campaign = {
             cost.funds = 1;
             s.rallies = (s.rallies || 0) + 1;
             s.visited = true;
+
+            // Apply county-level rally if viewing county
+            if (gameData.openCountyId && typeof Counties !== 'undefined') {
+                Counties.rallyCounty(gameData.openCountyId, gameData.selectedParty, effect);
+            } else {
+                // State-level effect applied to margin and turnout
+                if (typeof Turnout !== 'undefined' && Turnout.applyRallyBoost) {
+                    Turnout.applyRallyBoost(gameData.selectedState, effect);
+                }
+            }
+
             message = 'Rally in ' + s.name + '! +' + effect.toFixed(1) + ' points';
         } else if (action === 'ad') {
             if (gameData.funds < 3) return Utils.showToast("Need $3M for ad blitz!");
@@ -228,6 +251,133 @@ var Campaign = {
         this.colorMap();
         this.clickState(gameData.selectedState);
         Utils.showToast(message);
+    },
+
+    // Give a campaign speech on a specific issue (invoked by IssuesPanel)
+    giveSpeech: function(issueId) {
+        if (!gameData.selectedState) return Utils.showToast("Select a state first for a speech.");
+        if (gameData.energy < 1) return Utils.showToast("Not enough energy for a speech (1 energy).");
+        if (gameData.funds < 0.5) return Utils.showToast("Need at least $0.5M to give a speech.");
+
+        var s = gameData.states[gameData.selectedState];
+
+        // Determine candidate and state positions
+        var candId = (gameData.candidate && gameData.candidate.id) ? gameData.candidate.id : null;
+        var candPos = (candId && CANDIDATE_POSITIONS[candId] && typeof CANDIDATE_POSITIONS[candId][issueId] !== 'undefined') ? CANDIDATE_POSITIONS[candId][issueId] : 0;
+        var statePos = (STATE_ISSUE_POSITIONS[gameData.selectedState] && typeof STATE_ISSUE_POSITIONS[gameData.selectedState][issueId] !== 'undefined') ? STATE_ISSUE_POSITIONS[gameData.selectedState][issueId] : 0;
+        var salience = (ISSUE_SALIENCE[gameData.selectedState] && ISSUE_SALIENCE[gameData.selectedState][issueId]) || ISSUE_SALIENCE['default'][issueId] || 5;
+
+        // Compute alignment: 1 = perfect alignment, 0 = 10-point mismatch
+        var diff = Math.abs(candPos - statePos);
+        var alignment = Math.max(0, (10 - diff) / 10);
+
+        // Effects scale with alignment and salience; randomness added
+        var randomFactor = (0.8 + Math.random() * 0.6); // 0.8 - 1.4
+        var baseMultiplier = 2.5; // tuned baseline
+        var rawEffect = alignment * (salience / 10) * randomFactor * baseMultiplier;
+
+        // Costs
+        var energyCost = 1;
+        var fundsCost = 0.5;
+
+        this.saveState();
+        gameData.energy -= energyCost;
+        gameData.funds -= fundsCost;
+
+        var effect = rawEffect;
+
+        // Interest group modifier (if any)
+        var igMod = (typeof InterestGroups !== 'undefined') ? InterestGroups.getIssueSpeechModifier(gameData.selectedState, issueId, gameData.candidate.id) : 1.0;
+        effect *= igMod;
+
+        // Apply to margin depending on player's party alignment
+        if (gameData.selectedParty === 'D') {
+            s.margin += effect;
+        } else if (gameData.selectedParty === 'R') {
+            s.margin -= effect;
+        } else {
+            s.margin += effect * 0.3;
+        }
+
+        // Apply turnout boost using Turnout system if present
+        if (typeof Turnout !== 'undefined' && Turnout.applySpeechBoost) {
+            Turnout.applySpeechBoost(gameData.selectedState, effect * (alignment + 0.2));
+        }
+
+        var message = 'Delivered speech on ' + issueId + ' in ' + s.name + ' (alignment:' + (alignment.toFixed(2)) + ') +' + effect.toFixed(2) + ' pts';
+        Utils.addLog(message);
+        this.updateHUD();
+        this.colorMap();
+        this.clickState(gameData.selectedState);
+        Utils.showToast(message);
+    },
+
+    /**
+     * Shift candidate position on a given issue, with costs and penalties.
+     * issueId: string
+     * shiftAmount: integer between -10 and 10 (interpreted as delta to candidate's current position)
+     */
+    shiftIssue: function(issueId, shiftAmount) {
+        if (!gameData.candidate || !gameData.candidate.id) return Utils.showToast("Select a candidate first.");
+        var candId = gameData.candidate.id;
+        if (!CANDIDATE_POSITIONS[candId]) CANDIDATE_POSITIONS[candId] = {};
+        var curr = (typeof CANDIDATE_POSITIONS[candId][issueId] !== 'undefined') ? CANDIDATE_POSITIONS[candId][issueId] : 0;
+        var desired = Math.max(-10, Math.min(10, curr + shiftAmount));
+        var delta = desired - curr;
+        if (delta === 0) return Utils.showToast("No change detected.");
+
+        // PAC lock verification (gameData.pacLocks)
+        if (gameData.pacLocks && gameData.pacLocks[issueId] && gameData.pacLocks[issueId].locked) {
+            var lockedBy = gameData.pacLocks[issueId].lockedBy || null;
+            if (lockedBy && lockedBy !== gameData.selectedParty) {
+                return Utils.showToast("This issue is locked by a PAC endorsement. You cannot shift it.");
+            }
+        }
+
+        // Costs
+        var energyCost = 2;
+        var baseFunds = 0.5; // base $0.5M
+        var extraPerTwoPoints = 0.25; // $0.25M per 2 points shifted
+        var fundsCost = baseFunds + (Math.ceil(Math.abs(delta) / 2) * extraPerTwoPoints);
+
+        if (gameData.energy < energyCost) return Utils.showToast("Not enough energy to shift positions (requires " + energyCost + ").");
+        if (gameData.funds < fundsCost) return Utils.showToast("Not enough funds to shift positions (requires $" + fundsCost.toFixed(2) + "M).");
+
+        // Save snapshot for undo
+        this.saveState();
+
+        // Apply costs
+        gameData.energy -= energyCost;
+        gameData.funds -= fundsCost;
+
+        // Apply the shift
+        CANDIDATE_POSITIONS[candId][issueId] = desired;
+
+        // Credibility penalty (temporary) and turnout/margin backlash
+        var credibilityPenalty = Math.abs(delta) * 0.12; // 0.12 per point (tunable)
+        gameData.credibility = (gameData.credibility || 1.0) - credibilityPenalty;
+        if (gameData.credibility < 0.35) gameData.credibility = 0.35; // floor
+
+        // If a state is selected, apply small immediate margin movement for backlash (opposite direction)
+        if (gameData.selectedState) {
+            var s = gameData.states[gameData.selectedState];
+            var backlash = Math.sign(delta) * (Math.abs(delta) * 0.3); // more noticeable effect
+            // Backlash reduces margin toward opponent
+            if (gameData.selectedParty === 'D') {
+                s.margin -= backlash;
+            } else if (gameData.selectedParty === 'R') {
+                s.margin += backlash;
+            } else {
+                s.margin -= backlash * 0.3;
+            }
+        }
+
+        var msg = 'Shifted position on ' + issueId + ' by ' + delta.toFixed(1) + ' points. Credibility -' + (credibilityPenalty).toFixed(2);
+        Utils.addLog(msg);
+        this.updateHUD();
+        this.colorMap();
+        if (gameData.selectedState) this.clickState(gameData.selectedState);
+        Utils.showToast(msg);
     },
 
     openStateBio: function() {
@@ -259,6 +409,19 @@ var Campaign = {
         
         this.opponentTurn();
         
+        // decrement pac lock timers
+        if (gameData.pacLocks) {
+            for (var key in gameData.pacLocks) {
+                if (gameData.pacLocks[key].remainingWeeks) {
+                    gameData.pacLocks[key].remainingWeeks -= 1;
+                    if (gameData.pacLocks[key].remainingWeeks <= 0) {
+                        delete gameData.pacLocks[key];
+                        Utils.addLog('PAC lock on ' + key + ' expired.');
+                    }
+                }
+            }
+        }
+
         if (gameData.currentDate >= gameData.electionDay) {
             Utils.addLog("Election Day has arrived!");
             Screens.goTo('election-screen');
